@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from '../axiosConfig'; // Import the axios instance
 
 const DegreeCreation = ({ closeForm, addDegree }) => {
   const [degreeName, setDegreeName] = useState('');
@@ -17,30 +18,20 @@ const DegreeCreation = ({ closeForm, addDegree }) => {
       console.log('Payload being sent to API:', newDegree); // Debugging log
 
       try {
-        const response = await fetch('http://localhost:8081/api/department/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(newDegree),
-        });
+        // Use axios instance to send the request with automatic token handling
+        const response = await axios.post('/department/create', newDegree); 
+        closeForm();
+        window.location.reload();
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(`Failed to add degree: ${errorData.message || 'Unknown error'}`);
-        }
+        console.log('Response from API:', response.data); // Log the full response
 
-        const responseData = await response.json();
-
-        console.log('Response from API:', responseData); // Log the full response
-
-        if (!responseData.departmentName || !responseData.departmentCode) {
+        if (!response.data.departmentName || !response.data.departmentCode) {
           throw new Error('Failed to add degree: Invalid response from server');
         }
 
         // Update the UI with the newly added degree
-        addDegree(responseData);
-        closeForm();
+        addDegree(response.data);
+        
       } catch (error) {
         console.error('Error adding degree:', error);
         setError('Failed to add degree. Please try again.');

@@ -8,7 +8,7 @@ import edit from '../assets/img/edit.svg';
 import deleteIcon from '../assets/img/delete.svg';
 import axios from '../axiosConfig'; // Use axios for API requests
 
-const Departments = () => {
+const StudentDepartment = () => {
   const [departments, setDepartments] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editFormOpen, setEditFormOpen] = useState(false);
@@ -134,7 +134,7 @@ const Departments = () => {
       <Header />
       <Breadcrumb />
       <div className="mr-[20%] ml-[10%] px-8 font-poppins">
-        <div className="py-8 flex items-center justify-between">
+        {/* <div className="py-8 flex items-center justify-between">
           <input
             type="text"
             placeholder="Search"
@@ -150,7 +150,7 @@ const Departments = () => {
             </button>
             {formOpen && <DegreeProgramCreation closeForm={closeForm} addDepartment={addDepartment} />}
           </div>
-        </div>
+        </div> */}
 
         <div className="mt-[80px]">
           {error && <div className="text-center text-red-500 mb-4">{error}</div>}
@@ -166,7 +166,7 @@ const Departments = () => {
                     {department.departmentName}
                   </div>
                 </Link>
-                <div className="flex space-x-2">
+                {/* <div className="flex space-x-2">
                   <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
                     <button
                       onClick={() => openEditForm(department)}
@@ -186,7 +186,7 @@ const Departments = () => {
                       <img src={deleteIcon} alt="delete" />
                     </button>
                   </div>
-                </div>
+                </div> */}
               </div>
             ))
           ) : (
@@ -200,4 +200,4 @@ const Departments = () => {
   );
 };
 
-export default Departments;
+export default StudentDepartment;

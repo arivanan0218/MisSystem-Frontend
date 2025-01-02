@@ -11,6 +11,7 @@ import Semesters from './Pages/Semesters.jsx'
 import Login from './Pages/Login.jsx'
 import AddStudents from './Pages/AddStudents.jsx'
 import { UserRoleProvider } from './Context/UserRoleContext.jsx'
+import StudentDepartment from './student/StudentDepartment.jsx'
 
 
 function App() {
@@ -32,12 +33,13 @@ function App() {
                 <Route path='/createModule' element={<ModuleCreation />} />
                 <Route path='/module/:id' element={<ModuleDetail />} />
                 <Route path='/departments' element={<Departments />} />
+                <Route path='/studentDepartments' element={<StudentDepartment />} />
                 <Route path='/departments/:degreename/intakes' element={<Intakes />} />
                 <Route path='/students' element={<AddStudents />} />
-
                 <Route path='/students/addStudents' element={<AddStudents />} />
                 <Route path='/semesters' element={<Semesters />} />
                 <Route path='/departments/:degreename/intakes/semesters' element={<Semesters />} />
+
               </Routes>
             </Sidebar>
           }
