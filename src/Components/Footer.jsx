@@ -33,11 +33,11 @@ const Footer = ({ noMargin }) => {
             <div>
                 <p className='font-bold text-xs mb-2' >Info</p>
                 <div className='text-xs'>
-                    <a href="https://www.ruh.ac.lk/index.php/en/" class=" hover:ext-blue-900 underline">University of Ruhuna</a><br/>
-                    <a href="https://www.eng.ruh.ac.lk/" class=" hover:ext-blue-900 underline">Faculty of Engineering</a><br/>
-                    <a href="https://paravi.ruh.ac.lk/foenmis/index.php" class=" hover:ext-blue-900 underline">ENG-MIS</a><br/>
-                    <a href="https://www.lib.ruh.ac.lk/" class=" hover:ext-blue-900 underline">Library</a>
-                    <a href="https://iesl.lk/index.php?lang=en" class=" hover:ext-blue-900 underline">IESL</a><br/>
+                    <a href="https://www.ruh.ac.lk/index.php/en/" className=" hover:ext-blue-900 underline">University of Ruhuna</a><br/>
+                    <a href="https://www.eng.ruh.ac.lk/" className=" hover:ext-blue-900 underline">Faculty of Engineering</a><br/>
+                    <a href="https://paravi.ruh.ac.lk/foenmis/index.php" className=" hover:ext-blue-900 underline">ENG-MIS</a><br/>
+                    <a href="https://www.lib.ruh.ac.lk/" className=" hover:ext-blue-900 underline">Library</a>
+                    <a href="https://iesl.lk/index.php?lang=en" className=" hover:ext-blue-900 underline">IESL</a><br/>
                 </div>
             </div>                                                              
         </div>
