@@ -21,47 +21,32 @@ function App() {
           {/* Routes without Sidebar */}
           <Route path="/" element={<Login />} />
 
-          {/* Routes with Sidebar */}
-          <Route
-            path="*"
-            element={
-              <Sidebar>
-                <Routes>
-                  <Route
-                    path="/departments/:degreename/intakes/semesters"
-                    element={<Semesters />}
-                  />
-                  <Route
-                    path="/departments/:degreename/intakes/semesters/modules"
-                    element={<Modules />}
-                  />
-                  <Route path="/createModule" element={<ModuleCreation />} />
-                  <Route path="/module/:id" element={<ModuleDetail />} />
-                  <Route path="/departments" element={<Departments />} />
-                  <Route
-                    path="/studentDepartments"
-                    element={<StudentDepartment />}
-                  />
-                  <Route
-                    path="/departments/:degreename/intakes"
-                    element={<Intakes />}
-                  />
-                  <Route path="/students" element={<AddStudents />} />
-                  <Route
-                    path="/students/addStudents"
-                    element={<AddStudents />}
-                  />
-                  <Route path="/semesters" element={<Semesters />} />
-                  <Route
-                    path="/departments/:degreename/intakes/semesters"
-                    element={<Semesters />}
-                  />
-                </Routes>
-              </Sidebar>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
+
+        {/* Routes with Sidebar */}
+        <Route
+          path="*"
+          element={
+            <Sidebar>
+              <Routes>
+                <Route path='/departments/:degreename/intakes/:intakename/semesters' element={<Semesters />} />
+                <Route path='/departments/:degreename/intakes/semesters/modules' element={<Modules />} />
+                <Route path='/createModule' element={<ModuleCreation />} />
+                <Route path='/module/:id' element={<ModuleDetail />} />
+                <Route path='/departments' element={<Departments />} />
+                <Route path='/studentDepartments' element={<StudentDepartment />} />
+                <Route path='/departments/:degreename/intakes' element={<Intakes />} />
+                <Route path='/students' element={<AddStudents />} />
+                <Route path='/students/addStudents' element={<AddStudents />} />
+                <Route path='/semesters' element={<Semesters />} />
+                <Route path='/departments/:degreename/intakes/semesters' element={<Semesters />} />
+
+              </Routes>
+            </Sidebar>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+
     </UserRoleProvider>
   );
 }
