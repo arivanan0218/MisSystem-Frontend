@@ -111,6 +111,7 @@ const Sidebar = ({ children, setBreadcrumb }) => {
     // Clear the token from localStorage
     localStorage.removeItem('auth-token');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('departmentId'); // Clear the departmentId
 
     // Redirect to the login page
     navigate('/'); // Adjust URL if necessary

@@ -28,7 +28,7 @@ function App() {
           element={
             <Sidebar>
               <Routes>
-                <Route path='/departments/:degreename/intakes/semesters' element={<Semesters />} />
+                <Route path='/departments/:degreename/intakes/:intakename/semesters' element={<Semesters />} />
                 <Route path='/departments/:degreename/intakes/semesters/modules' element={<Modules />} />
                 <Route path='/createModule' element={<ModuleCreation />} />
                 <Route path='/module/:id' element={<ModuleDetail />} />
