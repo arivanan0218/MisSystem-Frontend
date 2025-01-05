@@ -20,6 +20,9 @@ const Intakes = () => {
   // Get departmentId from local storage
   const departmentId = localStorage.getItem('departmentId');  // Assuming departmentId is stored with key 'departmentId'
 
+  // Get the user role from localStorage
+  const userRole = localStorage.getItem('userRole');
+
   // Check if departmentId exists in localStorage
   if (!departmentId) {
     console.error('Department ID not found in localStorage');
@@ -138,7 +141,8 @@ const Intakes = () => {
             placeholder="Search"
             className="bg-gray-200 rounded-full w-full max-w-[471px] h-[41px] px-3 cursor-pointer text-md"
           />
-          <div>
+          {userRole === 'ROLE_AR' && (
+            <div>
             <button
               onClick={openForm}
               className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-[144px] h-[41px] ml-4"
@@ -148,6 +152,8 @@ const Intakes = () => {
             </button>
             {formOpen && <IntakeCreation closeForm={closeForm} addIntake={addIntake} />}
           </div>
+          )}
+          
         </div>
 
         <div className="mt-[80px]">
@@ -163,7 +169,8 @@ const Intakes = () => {
                     {intake.intakeYear} - {intake.batch}
                   </div>
                 </Link>
-                <div className="flex space-x-2">
+                {userRole === 'ROLE_AR' && (
+                  <div className="flex space-x-2">
                   <div>
                     <button
                       onClick={() => openEditForm(intake)}
@@ -184,6 +191,8 @@ const Intakes = () => {
                     </button>
                   </div>
                 </div>
+                )}
+                
               </div>
             ))
           ) : (
