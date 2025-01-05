@@ -12,6 +12,8 @@ import Login from './Pages/Login.jsx'
 import AddStudents from './Pages/AddStudents.jsx'
 import { UserRoleProvider } from './Context/UserRoleContext.jsx'
 import StudentDepartment from './student/StudentDepartment.jsx'
+import ModuleMarks from './Pages/ModuleMarks.jsx'
+import EndExamResults from './Pages/EndExamResults.jsx'
 
 
 function App() {
@@ -37,6 +39,8 @@ function App() {
                 <Route path='/departments/:degreename/intakes' element={<Intakes />} />
                 <Route path='/students' element={<AddStudents />} />
                 <Route path='/students/addStudents' element={<AddStudents />} />
+                <Route path='/module/endExam' element={<EndExamResults />} />
+                <Route path='/module/moduleMarks' element={<ModuleMarks/>} />
                 <Route path='/semesters' element={<Semesters />} />
                 <Route path='/departments/:degreename/intakes/semesters' element={<Semesters />} />
 
