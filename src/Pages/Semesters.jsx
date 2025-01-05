@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Header from '../Components/Header';
 import Breadcrumb from '../Components/Breadcrumb';
 import Footer from '../Components/Footer';
 import SemesterCreation from '../Components/SemesterCreation';
+import axios from '../axiosConfig'; // Import axios for HTTP requests
 
 const Semesters = () => {
   const [semesters, setSemesters] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [error, setError] = useState(null);
-  const { degreename } = useParams(); // Get degree name from URL
+
+  const token = localStorage.getItem('auth-token');
+  const intakeId = localStorage.getItem('intakeId'); // Get intakeId from localStorage
 
   const openForm = () => setFormOpen(true);
   const closeForm = () => setFormOpen(false);
@@ -23,21 +26,26 @@ const Semesters = () => {
   useEffect(() => {
     const fetchSemesters = async () => {
       try {
-        const response = await fetch('https://localhost:7276/api/Semester');
-        if (!response.ok) {
-          throw new Error('Failed to fetch semesters');
+        const response = await axios.get(`/semester/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status !== 200) {
+          throw new Error(`Failed to fetch semesters: ${response.statusText}`);
         }
-        const data = await response.json();
 
-        // Log the API response for debugging
-        console.log('API Response:', data);
+        const data = response.data;
+        console.log('Fetched semesters:', data); // Log fetched data for debugging
 
-        // Check if the response contains the semesters in the `result` field
-        if (data.success && Array.isArray(data.result)) {
-          console.log('Fetched semesters:', data.result); // Log fetched data for debugging
+        // Filter semesters to match the current intakeId
+        const filteredSemesters = data.filter(
+          (semester) => semester.intakeId === parseInt(intakeId, 10)
+        );
 
-          // No filtering is necessary here based on degreeName, adjust according to the API structure
-          setSemesters(data.result);
+        if (Array.isArray(filteredSemesters)) {
+          setSemesters(filteredSemesters); // Set filtered semesters
         } else {
           throw new Error('Invalid data structure from API');
         }
@@ -47,8 +55,12 @@ const Semesters = () => {
       }
     };
 
-    fetchSemesters();
-  }, []);
+    if (intakeId) {
+      fetchSemesters();
+    } else {
+      setError('No intake ID found in localStorage.');
+    }
+  }, [intakeId]); // Run when intakeId changes
 
   return (
     <div>
@@ -79,9 +91,8 @@ const Semesters = () => {
           )}
           {semesters.length > 0 ? (
             semesters.map((semester) => (
-              <Link to={`/departments/${semester.semesterId}/intakes/semesters/modules`} key={semester.semesterId}>
+              <Link to={`/departments/${semester.id}/intakes/semesters/modules`} key={semester.id}>
                 <div className='bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-full p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer'>
-                  {/* Handle cases where semesterName might be null */}
                   <div>{semester.semesterName || 'Unnamed Semester'}</div>
                 </div>
               </Link>
