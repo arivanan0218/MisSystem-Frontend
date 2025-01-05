@@ -91,7 +91,10 @@ const Semesters = () => {
           )}
           {semesters.length > 0 ? (
             semesters.map((semester) => (
-              <Link to={`/departments/${semester.id}/intakes/semesters/modules`} key={semester.id}>
+              <Link 
+              to={`/departments/${semester.id}/intakes/semesters/modules`} 
+              key={semester.id}
+              onClick={() => localStorage.setItem('semesterId', semester.id)}>
                 <div className='bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-full p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer'>
                   <div>{semester.semesterName || 'Unnamed Semester'}</div>
                 </div>
