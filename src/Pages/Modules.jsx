@@ -13,9 +13,9 @@ const Modules = () => {
 
   // Get IDs from localStorage
   const token = localStorage.getItem('auth-token');
-  const departmentId = localStorage.getItem('departmentId');
-  const intakeId = localStorage.getItem('intakeId');
-  const semesterId = localStorage.getItem('semesterId');
+  // const departmentId = localStorage.getItem('departmentId');
+  // const intakeId = localStorage.getItem('intakeId');
+  // const semesterId = localStorage.getItem('semesterId');
 
   const openForm = () => setFormOpen(true);
   const closeForm = () => setFormOpen(false);

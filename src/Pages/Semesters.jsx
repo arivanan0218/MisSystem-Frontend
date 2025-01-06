@@ -12,8 +12,8 @@ const Semesters = () => {
   const [error, setError] = useState(null);
 
   const token = localStorage.getItem('auth-token');
-  const intakeId = localStorage.getItem('intakeId');
-  const departmentId = localStorage.getItem('departmentId'); // Get departmentId from localStorage
+  // const intakeId = localStorage.getItem('intakeId');
+  // const departmentId = localStorage.getItem('departmentId'); 
 
   const openForm = () => setFormOpen(true);
   const closeForm = () => setFormOpen(false);
