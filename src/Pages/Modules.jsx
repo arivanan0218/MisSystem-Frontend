@@ -5,12 +5,19 @@ import Breadcrumb from '../Components/Breadcrumb';
 import Footer from '../Components/Footer';
 import ModuleCreation from '../Components/ModuleCreation';
 import axios from '../axiosConfig'; // Import axios for HTTP requests
+import edit from '../assets/img/edit.svg';
+import deleteIcon from '../assets/img/delete.svg';
 
 const Modules = () => {
   const [modules, setModules] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [error, setError] = useState(null);
+  const [editFormOpen, setEditFormOpen] = useState(false);
+  const [editingModule, setEditingModule] = useState(null);
 
+
+  // Get the user role from localStorage
+  const userRole = localStorage.getItem('userRole');
 
   // Get IDs from localStorage
   const token = localStorage.getItem('auth-token');
@@ -31,6 +38,95 @@ const Modules = () => {
       return Array.isArray(prevModules) ? [...prevModules, newModule] : [newModule];
     });
   };
+
+  const openEditForm = (module) => {
+    setEditingModule(module);
+    setEditFormOpen(true);
+  };
+  const closeEditForm = () => {
+    setEditingModule(null);
+    setEditFormOpen(false);
+  };
+
+  const handleDelete = async (moduleId) => {
+    try {
+      const token = localStorage.getItem('auth-token'); // Retrieve auth-token
+      if (!token) {
+        console.error('No token found. Redirecting to login.');
+        window.location.href = '/login';
+        return;
+      }
+
+      const response = await axios.delete(`/module/${moduleId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        setModules((prevModules) =>
+          prevModules.filter((module) => module.id !== moduleId)
+        );
+      } else {
+        throw new Error('Failed to delete module');
+      }
+    } catch (err) {
+      console.error('Error deleting module:', err);
+      setError('Could not delete module. Please try again later.');
+    }
+  };
+
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    const { moduleName, moduleCode, credit, GPA_Status, moduleCoordinator } = editingModule;
+
+    if (
+      moduleName.trim() &&
+      moduleCode.trim() && 
+      String(credit).trim() && 
+      GPA_Status.trim() && 
+      moduleCoordinator.trim()) {
+      try {
+        const token = localStorage.getItem('auth-token'); // Retrieve auth-token
+        if (!token) {
+          console.error('No token found. Redirecting to login.');
+          window.location.href = '/login';
+          return;
+        }
+
+        const response = await axios.put(
+          `/module/${editingModule.id}`, 
+          {
+            moduleName,
+            moduleCode,
+            credit,
+            GPA_Status,
+            moduleCoordinator,
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const updatedModule = response.data;
+
+        setModules((prevModules) =>
+          prevModules.map((module) =>
+            module.id === updatedModule.id ? updatedModule : module
+          )
+        );
+
+        closeEditForm();
+      } catch (error) {
+        console.error('Error updating module:', error);
+        setError('Failed to update module. Please try again.');
+      }
+    } else {
+      setError('Please fill out all fields.');
+    }
+  };
+
+
 
   useEffect(() => {
     const fetchModules = async () => {
@@ -87,7 +183,8 @@ const Modules = () => {
             placeholder='Search'
             className='bg-gray-200 rounded-full w-full max-w-[471px] h-[41px] px-3 cursor-pointer text-md'
           />
-          <div>
+          {userRole === 'ROLE_AR' &&(
+            <div>
             <button 
               onClick={openForm} 
               className='bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-[144px] h-[41px] ml-4'
@@ -97,30 +194,162 @@ const Modules = () => {
             </button>
             {formOpen && <ModuleCreation closeForm={closeForm} addModule={addModule} />}
           </div>
+          )}
+          
         </div>
 
-        <div className='mt-[80px]'>
-          {error && (
-            <div className='text-center text-red-500 mb-4'>{error}</div>
-          )}
+        <div className="mt-[80px]">
+          {error && <div className="text-center text-red-500 mb-4">{error}</div>}
           {modules.length > 0 ? (
             modules.map((module) => (
-              <Link 
-                to={`/departments/${module.id}/intakes/semesters/modules/assignments`} 
-                key={module.id}
-                onClick={() => localStorage.setItem('moduleId', module.id)}>
-                <div className='bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-full p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer'>
-                  <div>{module.moduleName || 'Unnamed Module'}</div>
+              <div key={module.id} className="bg-white flex justify-between items-center">
+                <Link
+                  to={`/departments/${module.id}/intakes/semesters/modules/assignments`}
+                  className="flex-1"
+                  onClick={() => localStorage.setItem('moduleId', module.id)} // Save departmentId to localStorage
+                >
+                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-[95%] p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
+                    {module.moduleName}
+                  </div>
+                </Link>
+
+                {userRole === 'ROLE_AR' && (
+                  <div className="flex space-x-2">
+                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
+                    <button
+                      onClick={() => openEditForm(module)}
+                      className="text-yellow-500 hover:text-yellow-700"
+                      aria-label="Edit Module"
+                    >
+                      <img src={edit} alt="edit" />
+                    </button>
+                  </div>
+
+                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
+                    <button
+                      onClick={() => handleDelete(module.id)}
+                      className="text-red-500 hover:text-red-700"
+                      aria-label="Delete module"
+                    >
+                      <img src={deleteIcon} alt="delete" />
+                    </button>
+                  </div>
                 </div>
-              </Link>
+                )}
+                
+              </div>
             ))
           ) : (
-            <div className='text-center text-gray-500'>
-              No modules available.
-            </div>
+            <div className="text-center text-gray-500">No Modules available.</div>
           )}
         </div>
       </div>
+
+      {editFormOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          onClick={closeEditForm}
+        >
+          <div
+            className="w-[75%] p-8 rounded-md shadow-md bg-white border-[3px] border-blue-950"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h1 className="text-blue-950 text-2xl font-semibold">Edit Module</h1>
+            <form onSubmit={handleEdit}>
+              {error && <div className="mb-4 text-red-500">{error}</div>}
+              <div className="mb-6">
+                <label htmlFor="moduleName" className="block mb-2 text-blue-950 text-lg font-semibold">
+                  Moduke Name
+                </label>
+                <input
+                  type="text"
+                  id="moduleName"
+                  value={editingModule?.moduleName || ''}
+                  onChange={(e) =>
+                    setEditingModule({ ...editingModule, moduleName: e.target.value })
+                  }
+                  className="border border-blue-950 p-2 rounded w-full"
+                />
+              </div>
+              <div className="mb-6">
+                <label htmlFor="moduleCode" className="block mb-2 text-blue-950 text-lg font-semibold">
+                  Module Code
+                </label>
+                <input
+                  type="text"
+                  id="moduleCode"
+                  value={editingModule?.moduleCode || ''}
+                  onChange={(e) =>
+                    setEditingModule({ ...editingModule, moduleCode: e.target.value })
+                  }
+                  className="border border-blue-950 p-2 rounded w-full"
+                />
+              </div>
+              <div className="mb-6">
+                <label htmlFor="credit" className="block mb-2 text-blue-950 text-lg font-semibold">
+                Credit
+                </label>
+                <input
+                  type="text"
+                  id="credit"
+                  value={editingModule?.credit || ''}
+                  onChange={(e) =>
+                    setEditingModule({ ...editingModule, credit: e.target.value })
+                  }
+                  className="border border-blue-950 p-2 rounded w-full"
+                />
+              </div>
+              <div className="mb-6">
+                <label htmlFor="GPA_Status" className="block mb-2 text-blue-950 text-lg font-semibold">
+                GPA_Status
+                </label>
+                <input
+                  type="text"
+                  id="GPA_Status"
+                  value={editingModule?.GPA_Status || ''}
+                  onChange={(e) =>
+                    setEditingModule({ ...editingModule, GPA_Status: e.target.value })
+                  }
+                  className="border border-blue-950 p-2 rounded w-full"
+                />
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="moduleCoordinator" className="block mb-2 text-blue-950 text-lg font-semibold">
+                Module Coordinator
+                </label>
+                <input
+                  type="text"
+                  id="moduleCoordinator"
+                  value={editingModule?.moduleCoordinator || ''}
+                  onChange={(e) =>
+                    setEditingModule({ ...editingModule, moduleCoordinator: e.target.value })
+                  }
+                  className="border border-blue-950 p-2 rounded w-full"
+                />
+              </div>
+              
+              <div className="flex justify-end">
+                <button
+                  onClick={closeEditForm}
+                  type="button"
+                  className="lg:w-[155px] md:w-[75px] mr-2 text-center px-4 py-2 rounded-lg bg-white font-semibold text-blue-950 border-[2px] border-blue-950"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="lg:w-[155px] md:w-[75px] py-2 px-4 bg-blue-950 text-white rounded-lg"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+
       <Footer />
     </div>
   );
