@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Header from '../Components/Header';
 import Breadcrumb from '../Components/Breadcrumb';
 import Footer from '../Components/Footer';
@@ -10,9 +10,18 @@ const Modules = () => {
   const [modules, setModules] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [error, setError] = useState(null);
+
+
+  // Get IDs from localStorage
+  const token = localStorage.getItem('auth-token');
+  // const departmentId = localStorage.getItem('departmentId');
+  // const intakeId = localStorage.getItem('intakeId');
+  // const semesterId = localStorage.getItem('semesterId');
+
   const semesterId = localStorage.getItem('semesterId'); 
   const departmentId = localStorage.getItem('departmentId'); 
   const intakeId = localStorage.getItem('intakeId'); // Get intakeId from localStorage
+
 
   const openForm = () => setFormOpen(true);
   const closeForm = () => setFormOpen(false);
@@ -26,12 +35,19 @@ const Modules = () => {
   useEffect(() => {
     const fetchModules = async () => {
       try {
-        const token = localStorage.getItem('auth-token'); // Get the auth token
-        const response = await axios.get(`/module/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        if (!departmentId || !intakeId || !semesterId) {
+          setError('Required data missing from localStorage.');
+          return;
+        }
+
+        const response = await axios.get(
+          `/module/semester/${departmentId}?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (response.status !== 200) {
           throw new Error(`Failed to fetch modules: ${response.statusText}`);
@@ -51,12 +67,8 @@ const Modules = () => {
       }
     };
 
-    if (semesterId) {
-      fetchModules();
-    } else {
-      setError('No semester ID found.');
-    }
-  }, [semesterId]);
+    fetchModules();
+  }, [departmentId, intakeId, semesterId, token]);
 
   return (
     <div>
@@ -93,7 +105,10 @@ const Modules = () => {
           )}
           {modules.length > 0 ? (
             modules.map((module) => (
-              <Link to={`/modules/${module.moduleId}`} key={module.moduleId}>
+              <Link 
+                to={`/departments/${module.id}/intakes/semesters/modules/assignments`} 
+                key={module.id}
+                onClick={() => localStorage.setItem('moduleId', module.id)}>
                 <div className='bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-full p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer'>
                   <div>{module.moduleName || 'Unnamed Module'}</div>
                 </div>

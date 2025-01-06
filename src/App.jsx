@@ -14,6 +14,7 @@ import { UserRoleProvider } from './Context/UserRoleContext.jsx'
 import StudentDepartment from './student/StudentDepartment.jsx'
 import ModuleMarks from './Pages/ModuleMarks.jsx'
 import EndExamResults from './Pages/EndExamResults.jsx'
+import Assignments from './Pages/Assignments.jsx'
 
 
 function App() {
@@ -36,7 +37,9 @@ function App() {
                     path="/departments/:degreename/intakes/semesters/modules"
                     element={<Modules />}
                   />
-                  <Route path="/createModule" element={<ModuleCreation />} />
+                  <Route path="/createModule" 
+                    element={<ModuleCreation />} 
+                    />
                   <Route path="/module/:id" element={<ModuleDetail />} />
                   <Route path="/departments" element={<Departments />} />
                   <Route
@@ -47,15 +50,29 @@ function App() {
                     path="/departments/:degreename/intakes"
                     element={<Intakes />}
                   />
-                  <Route path="/students" element={<AddStudents />} />
+                  <Route 
+                  path="/students" 
+                  element={<AddStudents />} 
+                  />
                   <Route
                     path="/students/addStudents"
                     element={<AddStudents />}
                   />
-                  <Route path="/semesters" element={<Semesters />} />
+                  <Route 
+                  path="/semesters" 
+                  element={<Semesters />}
+                  />
                   <Route
                     path="/departments/:degreename/intakes/semesters"
                     element={<Semesters />}
+                  />
+                  <Route
+                    path="/departments/:degreename/intakes/semesters/modules/assignments"
+                    element={<Assignments />}
+                  />
+                  <Route 
+                  path="/assignments" 
+                  element={<Assignments />}
                   />
                 </Routes>
               </Sidebar>
