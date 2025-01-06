@@ -11,6 +11,8 @@ const Modules = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [error, setError] = useState(null);
   const semesterId = localStorage.getItem('semesterId'); 
+  const departmentId = localStorage.getItem('departmentId'); 
+  const intakeId = localStorage.getItem('intakeId'); // Get intakeId from localStorage
 
   const openForm = () => setFormOpen(true);
   const closeForm = () => setFormOpen(false);
@@ -59,7 +61,13 @@ const Modules = () => {
   return (
     <div>
       <Header />
-      <Breadcrumb />
+      <Breadcrumb breadcrumb={[
+         { label: 'Home', link: '/departments' },
+         { label: 'Degree Programs', link: `/departments` },
+         { label: 'Intakes', link: `/departments/${departmentId}/intakes` },// Correct path with intakeName
+        { label: 'Semesters', link: `/departments/${departmentId}/intakes/${intakeId}/semesters` }, // Correct path with intakeName
+        { label: 'Modules', link: `/departments/${departmentId}/intakes/semesters/modules` }
+      ]} />
       <div className='mr-[20%] ml-[10%] px-8 font-poppins'>
         <div className='py-8 flex items-center justify-between'>
           <input
