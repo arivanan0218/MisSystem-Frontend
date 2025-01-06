@@ -12,7 +12,8 @@ const Semesters = () => {
   const [error, setError] = useState(null);
 
   const token = localStorage.getItem('auth-token');
-  const intakeId = localStorage.getItem('intakeId'); // Get intakeId from localStorage
+  const intakeId = localStorage.getItem('intakeId');
+  const departmentId = localStorage.getItem('departmentId'); // Get departmentId from localStorage
 
   const openForm = () => setFormOpen(true);
   const closeForm = () => setFormOpen(false);
@@ -26,11 +27,19 @@ const Semesters = () => {
   useEffect(() => {
     const fetchSemesters = async () => {
       try {
-        const response = await axios.get(`/semester/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        if (!intakeId || !departmentId) {
+          setError('Required data missing from localStorage.');
+          return;
+        }
+
+        const response = await axios.get(
+          `/semester/intake/${departmentId}?departmentId=${departmentId}&intakeId=${intakeId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (response.status !== 200) {
           throw new Error(`Failed to fetch semesters: ${response.statusText}`);
@@ -39,13 +48,8 @@ const Semesters = () => {
         const data = response.data;
         console.log('Fetched semesters:', data); // Log fetched data for debugging
 
-        // Filter semesters to match the current intakeId
-        const filteredSemesters = data.filter(
-          (semester) => semester.intakeId === parseInt(intakeId, 10)
-        );
-
-        if (Array.isArray(filteredSemesters)) {
-          setSemesters(filteredSemesters); // Set filtered semesters
+        if (Array.isArray(data)) {
+          setSemesters(data); // Set the semesters directly
         } else {
           throw new Error('Invalid data structure from API');
         }
@@ -55,12 +59,8 @@ const Semesters = () => {
       }
     };
 
-    if (intakeId) {
-      fetchSemesters();
-    } else {
-      setError('No intake ID found in localStorage.');
-    }
-  }, [intakeId]); // Run when intakeId changes
+    fetchSemesters();
+  }, [intakeId, departmentId, token]); // Run when intakeId, departmentId, or token changes
 
   return (
     <div>
@@ -92,9 +92,9 @@ const Semesters = () => {
           {semesters.length > 0 ? (
             semesters.map((semester) => (
               <Link 
-              to={`/departments/${semester.id}/intakes/semesters/modules`} 
-              key={semester.id}
-              onClick={() => localStorage.setItem('semesterId', semester.id)}>
+                to={`/departments/${semester.id}/intakes/semesters/modules`} 
+                key={semester.id}
+                onClick={() => localStorage.setItem('semesterId', semester.id)}>
                 <div className='bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-full p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer'>
                   <div>{semester.semesterName || 'Unnamed Semester'}</div>
                 </div>
