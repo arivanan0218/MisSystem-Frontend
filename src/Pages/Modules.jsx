@@ -84,7 +84,7 @@ const Modules = () => {
       moduleName.trim() &&
       moduleCode.trim() && 
       String(credit).trim() && 
-      GPA_Status.trim() && 
+      String(GPA_Status).trim() && 
       moduleCoordinator.trim()) {
       try {
         const token = localStorage.getItem('auth-token'); // Retrieve auth-token
@@ -259,7 +259,7 @@ const Modules = () => {
               {error && <div className="mb-4 text-red-500">{error}</div>}
               <div className="mb-6">
                 <label htmlFor="moduleName" className="block mb-2 text-blue-950 text-lg font-semibold">
-                  Moduke Name
+                  Module Name
                 </label>
                 <input
                   type="text"
