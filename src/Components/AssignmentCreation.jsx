@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import axios from '../axiosConfig';
+import React, { useState, useEffect } from "react";
+import axios from "../axiosConfig";
 
-const AssignmentCreation = ({ closeForm, addAssignment, isEditing, currentAssignment }) => {
-  const [assignmentName, setAssignmentName] = useState('');
-  const [assignmentPercentage, setAssignmentPercentage] = useState('');
-  const [assignmentDuration, setAssignmentDuration] = useState('');
-  const [semesterId, setSemesterId] = useState('');
-  const [intakeId, setIntakeId] = useState('');
-  const [departmentId, setDepartmentId] = useState('');
-  const [moduleId, setModuleId] = useState('');
+const AssignmentCreation = ({
+  closeForm,
+  addAssignment,
+  isEditing,
+  currentAssignment,
+}) => {
+  const [assignmentName, setAssignmentName] = useState("");
+  const [assignmentPercentage, setAssignmentPercentage] = useState("");
+  const [assignmentDuration, setAssignmentDuration] = useState("");
+  const [semesterId, setSemesterId] = useState("");
+  const [intakeId, setIntakeId] = useState("");
+  const [departmentId, setDepartmentId] = useState("");
+  const [moduleId, setModuleId] = useState("");
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -21,10 +26,10 @@ const AssignmentCreation = ({ closeForm, addAssignment, isEditing, currentAssign
       setDepartmentId(currentAssignment.department.id);
       setModuleId(currentAssignment.module.id);
     } else {
-      const storedSemesterId = localStorage.getItem('semesterId');
-      const storedIntakeId = localStorage.getItem('intakeId');
-      const storedDepartmentId = localStorage.getItem('departmentId');
-      const storedModuleId = localStorage.getItem('moduleId');
+      const storedSemesterId = localStorage.getItem("semesterId");
+      const storedIntakeId = localStorage.getItem("intakeId");
+      const storedDepartmentId = localStorage.getItem("departmentId");
+      const storedModuleId = localStorage.getItem("moduleId");
 
       if (storedSemesterId) setSemesterId(storedSemesterId);
       if (storedIntakeId) setIntakeId(storedIntakeId);
@@ -36,12 +41,17 @@ const AssignmentCreation = ({ closeForm, addAssignment, isEditing, currentAssign
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const moduleId = localStorage.getItem('moduleId'); 
-    const intakeId = localStorage.getItem('intakeId'); 
-    const departmentId = localStorage.getItem('departmentId');
-    const assignmentId = localStorage.getItem('assignmentId');
+    const moduleId = localStorage.getItem("moduleId");
+    const intakeId = localStorage.getItem("intakeId");
+    const departmentId = localStorage.getItem("departmentId");
+    const assignmentId = localStorage.getItem("assignmentId");
 
-    if (assignmentName.trim() &&assignmentPercentage &&assignmentDuration.trim() &&moduleId) {
+    if (
+      assignmentName.trim() &&
+      assignmentPercentage &&
+      assignmentDuration.trim() &&
+      moduleId
+    ) {
       const newAssignment = {
         assignmentId,
         semesterId,
@@ -54,15 +64,15 @@ const AssignmentCreation = ({ closeForm, addAssignment, isEditing, currentAssign
       };
 
       try {
-        const response = await axios.post('assignment/create', newAssignment);
+        const response = await axios.post("assignment/create", newAssignment);
         addAssignment(response.data);
         closeForm();
       } catch (error) {
-        console.error('Error adding assignment:', error);
-        setError('Failed to add assignment. Please try again.');
+        console.error("Error adding assignment:", error);
+        setError("Failed to add assignment. Please try again.");
       }
     } else {
-      setError('Please fill out all fields.');
+      setError("Please fill out all fields.");
     }
   };
 
@@ -76,7 +86,7 @@ const AssignmentCreation = ({ closeForm, addAssignment, isEditing, currentAssign
         onClick={(e) => e.stopPropagation()}
       >
         <h1 className="text-blue-950 text-2xl font-semibold">
-          {isEditing ? 'Edit Assignment' : 'Add Assignment'}
+          {isEditing ? "Edit Assignment" : "Add Assignment"}
         </h1>
         <form onSubmit={handleSubmit} className="m-10">
           {error && <div className="mb-4 text-red-500">{error}</div>}
@@ -125,7 +135,7 @@ const AssignmentCreation = ({ closeForm, addAssignment, isEditing, currentAssign
               className="border border-blue-950 p-2 rounded w-full"
             />
           </div>
-          <div className="mb-6">
+          {/* <div className="mb-6">
             <label
               htmlFor="semesterId"
               className="block mb-2 text-blue-950 text-lg font-semibold"
@@ -188,7 +198,7 @@ const AssignmentCreation = ({ closeForm, addAssignment, isEditing, currentAssign
               className={`border p-2 rounded w-[50%] ${localStorage.getItem('moduleId') ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               readOnly={!!localStorage.getItem('moduleId')}
             />
-          </div>
+          </div> */}
           <div className="flex justify-end">
             <button
               onClick={closeForm}
@@ -201,7 +211,7 @@ const AssignmentCreation = ({ closeForm, addAssignment, isEditing, currentAssign
               type="submit"
               className="lg:w-[155px] md:w-[75px] px-4 py-2 bg-blue-950 text-white rounded-lg"
             >
-              {isEditing ? 'Update' : 'Add'}
+              {isEditing ? "Update" : "Add"}
             </button>
           </div>
         </form>
