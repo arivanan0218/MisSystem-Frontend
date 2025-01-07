@@ -5,11 +5,15 @@ import Breadcrumb from '../Components/Breadcrumb';
 import Footer from '../Components/Footer';
 import ModuleCreation from '../Components/ModuleCreation';
 import axios from '../axiosConfig'; // Import axios for HTTP requests
+import edit from '../assets/img/edit.svg';
+import deleteIcon from '../assets/img/delete.svg';
 
 const Modules = () => {
   const [modules, setModules] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
+  const [editFormOpen, setEditFormOpen] = useState(false);
   const [error, setError] = useState(null);
+  const [editingModule, setEditingModule] = useState(null);
   const semesterId = localStorage.getItem('semesterId'); 
   const departmentId = localStorage.getItem('departmentId'); 
   const intakeId = localStorage.getItem('intakeId'); // Get intakeId from localStorage
@@ -17,10 +21,83 @@ const Modules = () => {
   const openForm = () => setFormOpen(true);
   const closeForm = () => setFormOpen(false);
 
+  const openEditForm = (module) => {
+    setEditingModule(module);
+    setEditFormOpen(true);
+  };
+  const closeEditForm = () => {
+    setEditingModule(null);
+    setEditFormOpen(false);
+  };
+
   const addModule = (newModule) => {
     setModules((prevModules) => {
       return Array.isArray(prevModules) ? [...prevModules, newModule] : [newModule];
     });
+  };
+
+  const handleDelete = async (moduleId) => {
+    try {
+      const token = localStorage.getItem('auth-token'); // Retrieve auth-token
+      if (!token) {
+        console.error('No token found. Redirecting to login.');
+        window.location.href = '/login';
+        return;
+      }
+
+      const response = await axios.delete(`/module/${moduleId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        setModules((prevModules) =>
+          prevModules.filter((module) => module.id !== moduleId)
+        );
+      } else {
+        throw new Error('Failed to delete module');
+      }
+    } catch (err) {
+      console.error('Error deleting module:', err);
+      setError('Could not delete module. Please try again later.');
+    }
+  };
+
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    const { moduleName, moduleCode, credit, moduleCoordinator, gpa_Status, semesterId } = editingModule;
+
+    if (moduleName.trim() && moduleCode.trim() && credit && moduleCoordinator.trim() && gpa_Status.trim() && semesterId) {
+      try {
+        const response = await axios.put(
+          `/module/${editingModule.moduleId}`, 
+          {
+            moduleName,
+            moduleCode,
+            credit: parseInt(credit, 10),
+            moduleCoordinator,
+            gpa_Status,
+            semesterId: parseInt(semesterId, 10),
+          }
+        );
+
+        const updatedModule = response.data;
+
+        setModules((prevModules) =>
+          prevModules.map((module) =>
+            module.moduleId === updatedModule.moduleId ? updatedModule : module
+          )
+        );
+
+        closeEditForm();
+      } catch (error) {
+        console.error('Error updating module:', error);
+        setError('Failed to update module. Please try again.');
+      }
+    } else {
+      setError('Please fill out all fields.');
+    }
   };
 
   useEffect(() => {
@@ -93,11 +170,33 @@ const Modules = () => {
           )}
           {modules.length > 0 ? (
             modules.map((module) => (
-              <Link to={`/modules/${module.moduleId}`} key={module.moduleId}>
-                <div className='bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-full p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer'>
-                  <div>{module.moduleName || 'Unnamed Module'}</div>
+              <div key={module.id} className="bg-white flex justify-between items-center">
+                <Link to={`/modules/${module.id}`} className="flex-1">
+                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-[95%] p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
+                    {module.moduleName}
+                  </div>
+                </Link>
+                <div className="flex space-x-2">
+                  {/* <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
+                    <button
+                      onClick={() => openEditForm(module)}
+                      className="text-yellow-500 hover:text-yellow-700"
+                      aria-label="Edit Module"
+                    >
+                      <img src={edit} alt="edit" />
+                    </button>
+                  </div> */}
+                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
+                    <button
+                      onClick={() => handleDelete(module.id)}
+                      className="text-red-500 hover:text-red-700"
+                      aria-label="Delete Module"
+                    >
+                      <img src={deleteIcon} alt="delete" />
+                    </button>
+                  </div>
                 </div>
-              </Link>
+              </div>
             ))
           ) : (
             <div className='text-center text-gray-500'>
@@ -107,6 +206,14 @@ const Modules = () => {
         </div>
       </div>
       <Footer />
+      {editFormOpen && (
+        <ModuleCreation
+          closeForm={closeEditForm}
+          addModule={addModule}
+          isEditing={true}
+          currentModule={editingModule}
+        />
+      )}
     </div>
   );
 };

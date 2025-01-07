@@ -5,11 +5,15 @@ import Breadcrumb from '../Components/Breadcrumb';
 import Footer from '../Components/Footer';
 import SemesterCreation from '../Components/SemesterCreation';
 import axios from '../axiosConfig'; // Import axios for HTTP requests
+import edit from '../assets/img/edit.svg';
+import deleteIcon from '../assets/img/delete.svg';
 
 const Semesters = () => {
   const [semesters, setSemesters] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
+  const [editFormOpen, setEditFormOpen] = useState(false);
   const [error, setError] = useState(null);
+  const [editingSemester, setEditingSemester] = useState(null);
 
   const token = localStorage.getItem('auth-token');
   const departmentId = localStorage.getItem('departmentId'); 
@@ -18,10 +22,79 @@ const Semesters = () => {
   const openForm = () => setFormOpen(true);
   const closeForm = () => setFormOpen(false);
 
+  const openEditForm = (semester) => {
+    setEditingSemester(semester);
+    setEditFormOpen(true);
+  };
+  const closeEditForm = () => {
+    setEditingSemester(null);
+    setEditFormOpen(false);
+  };
+
   const addSemester = (newSemester) => {
     setSemesters((prevSemesters) => {
       return Array.isArray(prevSemesters) ? [...prevSemesters, newSemester] : [newSemester];
     });
+  };
+
+  const handleDelete = async (semesterId) => {
+    try {
+      const response = await axios.delete(`/semester/${semesterId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        setSemesters((prevSemesters) =>
+          prevSemesters.filter((semester) => semester.id !== semesterId)
+        );
+      } else {
+        throw new Error('Failed to delete semester');
+      }
+    } catch (err) {
+      console.error('Error deleting semester:', err);
+      setError('Could not delete semester. Please try again later.');
+    }
+  };
+
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    const { semesterName, semesterYear, semesterDuration } = editingSemester;
+
+    if (semesterName.trim() && semesterYear.trim() && semesterDuration.trim()) {
+      try {
+        const response = await axios.put(
+          `/semester/${editingSemester.id}`, 
+          {
+            semesterName,
+            semesterYear,
+            semesterDuration,
+            intakeId: editingSemester.intakeId,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const updatedSemester = response.data;
+
+        setSemesters((prevSemesters) =>
+          prevSemesters.map((semester) =>
+            semester.id === updatedSemester.id ? updatedSemester : semester
+          )
+        );
+
+        closeEditForm();
+      } catch (error) {
+        console.error('Error updating semester:', error);
+        setError('Failed to update semester. Please try again.');
+      }
+    } else {
+      setError('Please fill out all fields.');
+    }
   };
 
   useEffect(() => {
@@ -97,14 +170,37 @@ const Semesters = () => {
           )}
           {semesters.length > 0 ? (
             semesters.map((semester) => (
-              <Link 
-              to={`/departments/${semester.id}/intakes/semesters/modules`} 
-              key={semester.id}
-              onClick={() => localStorage.setItem('semesterId', semester.id)}>
-                <div className='bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-full p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer'>
-                  <div>{semester.semesterName || 'Unnamed Semester'}</div>
+              <div key={semester.id} className="bg-white flex justify-between items-center">
+                <Link 
+                  to={`/departments/${semester.id}/intakes/semesters/modules`} 
+                  className="flex-1"
+                  onClick={() => localStorage.setItem('semesterId', semester.id)}
+                >
+                  <div className='bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-[95%] p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center'>
+                    {semester.semesterName || 'Unnamed Semester'}
+                  </div>
+                </Link>
+                <div className="flex space-x-2">
+                  {/* <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
+                    <button
+                      onClick={() => openEditForm(semester)}
+                      className="text-yellow-500 hover:text-yellow-700"
+                      aria-label="Edit Semester"
+                    >
+                      <img src={edit} alt="edit" />
+                    </button>
+                  </div> */}
+                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
+                    <button
+                      onClick={() => handleDelete(semester.id)}
+                      className="text-red-500 hover:text-red-700"
+                      aria-label="Delete Semester"
+                    >
+                      <img src={deleteIcon} alt="delete" />
+                    </button>
+                  </div>
                 </div>
-              </Link>
+              </div>
             ))
           ) : (
             <div className='text-center text-gray-500'>
@@ -114,6 +210,14 @@ const Semesters = () => {
         </div>
       </div>
       <Footer />
+      {editFormOpen && (
+        <SemesterCreation
+          closeForm={closeEditForm}
+          addSemester={addSemester}
+          isEditing={true}
+          currentSemester={editingSemester}
+        />
+      )}
     </div>
   );
 };

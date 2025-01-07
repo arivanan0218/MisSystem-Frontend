@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from '../axiosConfig'; // Import your configured Axios instance
+import React, { useState, useEffect } from 'react';
+import axios from '../axiosConfig';
 
-const SemesterCreation = ({ closeForm, addSemester }) => {
+const SemesterCreation = ({ closeForm, addSemester, isEditing, currentSemester }) => {
   const [semesterName, setSemesterName] = useState('');
   const [semesterYear, setSemesterYear] = useState('');
   const [semesterDuration, setSemesterDuration] = useState('');
   const [error, setError] = useState(null);
-  const { degreename } = useParams();
+
+  useEffect(() => {
+    if (isEditing && currentSemester) {
+      setSemesterName(currentSemester.semesterName);
+      setSemesterYear(currentSemester.semesterYear);
+      setSemesterDuration(currentSemester.semesterDuration);
+    }
+  }, [isEditing, currentSemester]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,14 +34,19 @@ const SemesterCreation = ({ closeForm, addSemester }) => {
       };
 
       try {
-        const response = await axios.post('/semester/create', newSemester); // Adjust the endpoint as needed
+        let response;
+        if (isEditing) {
+          response = await axios.put(`/semester/${currentSemester.id}`, newSemester);
+        } else {
+          response = await axios.post('/semester/create', newSemester);
+        }
 
         console.log('Response from API:', response.data);
         addSemester(response.data);
         closeForm();
       } catch (error) {
-        console.error('Error adding semester:', error);
-        setError('Failed to add semester. Please try again.');
+        console.error('Error adding/updating semester:', error);
+        setError('Failed to add/update semester. Please try again.');
       }
     } else {
       setError('Please fill out all fields.');
@@ -51,7 +62,9 @@ const SemesterCreation = ({ closeForm, addSemester }) => {
         className="w-[75%] p-8 rounded-md shadow-md bg-white border-[3px] border-blue-950"
         onClick={(e) => e.stopPropagation()}
       >
-        <h1 className="text-blue-950 text-2xl font-semibold">Add Semester</h1>
+        <h1 className="text-blue-950 text-2xl font-semibold">
+          {isEditing ? 'Edit Semester' : 'Add Semester'}
+        </h1>
         <form onSubmit={handleSubmit} className="m-10">
           {error && <div className="mb-4 text-red-500">{error}</div>}
           <div className="mb-6">
@@ -111,7 +124,7 @@ const SemesterCreation = ({ closeForm, addSemester }) => {
               type="submit"
               className="lg:w-[155px] md:w-[75px] px-4 py-2 bg-blue-950 text-white rounded-lg"
             >
-              Add
+              {isEditing ? 'Update' : 'Add'}
             </button>
           </div>
         </form>
