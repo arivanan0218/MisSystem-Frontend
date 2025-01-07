@@ -17,6 +17,7 @@ import EndExamResults from "./Pages/EndExamResults.jsx";
 import Assignments from "./Pages/Assignments.jsx";
 import UploadMarks from "./Components/UploadMarks.jsx";
 import Marks from "./Pages/Marks.jsx";
+import Signup from "./Pages/Signup.jsx";
 
 function App() {
   return (
@@ -25,7 +26,7 @@ function App() {
         <Routes>
           {/* Routes without Sidebar */}
           <Route path="/" element={<Login />} />
-
+          <Route path="/signup" element={<Signup />} />
           {/* Routes with Sidebar */}
           <Route
             path="*"
