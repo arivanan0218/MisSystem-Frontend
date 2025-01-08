@@ -29,16 +29,15 @@ const ModuleCreation = ({ closeForm, addModule, isEditing, currentModule }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      moduleName.trim() &&
-      moduleCode.trim() &&
-      credit &&
-      moduleCoordinator.trim() &&
-      gpaStatus.trim() &&
-      semesterId
-    ) {
+    const moduleId = localStorage.getItem('moduleId'); 
+    const intakeId = localStorage.getItem('intakeId'); 
+    const departmentId = localStorage.getItem('departmentId');
+
+    if (moduleName.trim() && moduleCode.trim() && credit && moduleCoordinator.trim() && gpaStatus.trim() && semesterId) {
       const newModule = {
-        semesterId: parseInt(semesterId, 10),
+        semesterId,
+        intakeId,
+        departmentId,
         moduleName,
         moduleCode,
         credit: parseInt(credit, 10),
