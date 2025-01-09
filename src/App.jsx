@@ -9,7 +9,7 @@ import Departments from "./Pages/Departments.jsx";
 import Intakes from "./Pages/Intakes.jsx";
 import Semesters from "./Pages/Semesters.jsx";
 import Login from "./Pages/Login.jsx";
-import AddStudents from "./Pages/AddStudents.jsx";
+// import AddStudents from "./Pages/AddStudents.jsx";
 import { UserRoleProvider } from "./Context/UserRoleContext.jsx";
 import StudentDepartment from "./student/StudentDepartment.jsx";
 import ModuleMarks from "./Pages/ModuleMarks.jsx";
@@ -53,10 +53,10 @@ function App() {
                     path="/departments/:degreename/intakes"
                     element={<Intakes />}
                   />
-                  <Route path="/students" element={<AddStudents />} />
+                  <Route path="/students" element={<StudentDepartment />} />
                   <Route
-                    path="/students/addStudents"
-                    element={<AddStudents />}
+                    path="/students/StudentDepartment"
+                    element={<StudentDepartment />}
                   />
                   <Route path="/semesters" element={<Semesters />} />
                   <Route
