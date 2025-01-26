@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { Link, Navigate, useParams,useNavigate } from 'react-router-dom';
-=======
+import { Link, Navigate, useParams,useNavigate } from 'react-router-dom'
 
 
 import Header from '../Components/Header';
@@ -368,8 +367,7 @@ const Modules = () => {
               </div>
             </form>
           </div>
-           <div className='mt-[80px] px-20'>
-        <Link to={'/moduleRegForm'}>
+          <Link to={'/moduleRegForm'}>
         <button
            
             className='bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900'
@@ -378,6 +376,8 @@ const Modules = () => {
         Module Registration
         </button>
         </Link>
+           <div className='mt-[80px] px-20'>
+        
       </div>
         </div>
       )}
