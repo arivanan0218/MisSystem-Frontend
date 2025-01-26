@@ -14,6 +14,7 @@ import { UserRoleProvider } from './Context/UserRoleContext.jsx'
 import StudentDepartment from './student/StudentDepartment.jsx'
 import ModuleMarks from './Pages/ModuleMarks.jsx'
 import EndExamResults from './Pages/EndExamResults.jsx'
+import ModuleRegistrationForm from './Pages/ModuleRegistrationForm.jsx'
 
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
                     path="/departments/:degreename/intakes/semesters"
                     element={<Semesters />}
                   />
+                  <Route path='/moduleRegForm' element={<ModuleRegistrationForm/>} />
                 </Routes>
               </Sidebar>
             }
