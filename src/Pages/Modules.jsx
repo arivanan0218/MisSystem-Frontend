@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+
+import { Link, Navigate, useParams,useNavigate } from 'react-router-dom';
+=======
+
+
 import Header from '../Components/Header';
 import Breadcrumb from '../Components/Breadcrumb';
 import Footer from '../Components/Footer';
@@ -202,6 +206,22 @@ const Modules = () => {
           {error && <div className="text-center text-red-500 mb-4">{error}</div>}
           {modules.length > 0 ? (
             modules.map((module) => (
+
+//               <Link to={`/modules/${module.moduleId}`} key={module.moduleId}>
+//                 <div className='bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-full p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer'>
+//                   <div>{module.moduleName || 'Unnamed Module'}</div>
+//                 </div>
+                
+                
+//               </Link>
+              
+//             ))
+//           ) : (
+//             <div className='text-center text-gray-500'>
+//               No modules available.
+//             </div>
+            
+
               <div key={module.id} className="bg-white flex justify-between items-center">
                 <Link
                   to={`/departments/${module.id}/intakes/semesters/modules/assignments`}
@@ -241,9 +261,11 @@ const Modules = () => {
             ))
           ) : (
             <div className="text-center text-gray-500">No Modules available.</div>
+
           )}
         </div>
       </div>
+
 
       {editFormOpen && (
         <div
@@ -346,8 +368,20 @@ const Modules = () => {
               </div>
             </form>
           </div>
+           <div className='mt-[80px] px-20'>
+        <Link to={'/moduleRegForm'}>
+        <button
+           
+            className='bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900'
+            
+        >
+        Module Registration
+        </button>
+        </Link>
+      </div>
         </div>
       )}
+
 
 
       <Footer />

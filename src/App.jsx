@@ -1,3 +1,4 @@
+
 import React from "react";
 import Sidebar from "./Components/Sidebar.jsx";
 import { useState } from "react";
@@ -18,6 +19,8 @@ import Assignments from "./Pages/Assignments.jsx";
 import UploadMarks from "./Components/UploadMarks.jsx";
 import Marks from "./Pages/Marks.jsx";
 import Signup from "./Pages/Signup.jsx";
+import ModuleRegistrationForm from './Pages/ModuleRegistrationForm.jsx'
+
 
 function App() {
   return (
@@ -63,6 +66,9 @@ function App() {
                     path="/departments/:degreename/intakes/semesters"
                     element={<Semesters />}
                   />
+
+                
+
                   <Route
                     path="/departments/:degreename/intakes/semesters/modules/assignments"
                     element={<Assignments />}
@@ -75,6 +81,8 @@ function App() {
                     element={<Marks />}
                   />
                   <Route path="/marks" element={<Marks />} />
+                  <Route path='/moduleRegForm' element={<ModuleRegistrationForm/>} />
+
                 </Routes>
               </Sidebar>
             }
