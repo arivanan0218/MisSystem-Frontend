@@ -137,7 +137,10 @@ const Departments = () => {
   return (
     <div>
       <Header />
-      <Breadcrumb />
+      <Breadcrumb breadcrumb={[
+        { label: 'Home', link: '/departments' }, 
+        { label: 'Degree Programs', link: '/departments' }]} 
+      />
       <div className="mr-[20%] ml-[10%] px-8 font-poppins">
         <div className="py-8 flex items-center justify-between">
           <input

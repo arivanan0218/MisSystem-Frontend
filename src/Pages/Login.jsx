@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Header from '../Components/Header';
-import Footer from '../Components/Footer';
-import { useUserRole } from '../Context/UserRoleContext';
-import axios from '../axiosConfig';  // Adjust the import path as necessary
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Header from "../Components/Header";
+import Footer from "../Components/Footer";
+import { useUserRole } from "../Context/UserRoleContext";
+import axios from "../axiosConfig"; // Adjust the import path as necessary
 
 const Login = () => {
   const { setUserRole } = useUserRole();
   const navigate = useNavigate();
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -18,37 +21,41 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('/auth/signin', credentials);
+      const response = await axios.post("/auth/signin", credentials);
 
-      if (!response.data.jwtToken || !response.data.roles || response.data.roles.length === 0) {
-        throw new Error('Missing token or roles in response');
+      if (
+        !response.data.jwtToken ||
+        !response.data.roles ||
+        response.data.roles.length === 0
+      ) {
+        throw new Error("Missing token or roles in response");
       }
 
       const jwtToken = response.data.jwtToken;
       const primaryRole = response.data.roles[0]; // Use the first role as the primary role
 
       // Save JWT token and user role
-      localStorage.setItem('auth-token', jwtToken);
-      localStorage.setItem('userRole', primaryRole);
+      localStorage.setItem("auth-token", jwtToken);
+      localStorage.setItem("userRole", primaryRole);
       setUserRole(primaryRole);
 
       // Redirect based on role
       const roleRoutes = {
-        ROLE_AR: '/departments',
-        ROLE_LECTURER: '/departments',
-        ROLE_HOD: '/departments',
-        ROLE_MODULE_COORDINATOR: '/departments',
-        ROLE_STUDENT: '/studentDepartments',
+        ROLE_AR: "/departments",
+        ROLE_LECTURER: "/departments",
+        ROLE_HOD: "/departments",
+        ROLE_MODULE_COORDINATOR: "/departments",
+        ROLE_STUDENT: "/studentDepartments",
       };
 
       const route = roleRoutes[primaryRole];
       if (route) {
         navigate(route);
       } else {
-        throw new Error('Unknown role');
+        throw new Error("Unknown role");
       }
     } catch (err) {
-      console.error('Login error:', err.message);
+      console.error("Login error:", err.message);
       setError(err.message);
     }
   };
@@ -58,7 +65,9 @@ const Login = () => {
       <Header />
       <div className="text-blue-950 flex justify-center">
         <div className="py-[51px] px-[62px] border-[2px] border-blue-950 rounded-2xl flex flex-col items-center">
-          <p className="text-center text-blue-950 text-[80px] font-bold leading-[80px]">FEMIS</p>
+          <p className="text-center text-blue-950 text-[80px] font-bold leading-[80px]">
+            FEMIS
+          </p>
           <p className="text-center text-xl font-medium mb-3 mt-2">
             Welcome to the Management Information System!
           </p>
@@ -88,6 +97,15 @@ const Login = () => {
             Sign in
           </button>
           {error && <p className="text-red-500 mt-4">{error}</p>}
+          <p className="text-sm mt-6">
+            Don't have an account?{" "}
+            <span
+              onClick={() => navigate("/signup")}
+              className="text-blue-700 cursor-pointer underline"
+            >
+              Create your account
+            </span>
+          </p>
         </div>
       </div>
       <Footer />
