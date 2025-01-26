@@ -201,6 +201,16 @@ const Modules = () => {
           
         </div>
 
+        <Link to={'/moduleRegForm'}>
+        <button
+           
+            className='bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900'
+            
+        >
+        Module Registration
+        </button>
+        </Link>
+
         <div className="mt-[80px]">
           {error && <div className="text-center text-red-500 mb-4">{error}</div>}
           {modules.length > 0 ? (
@@ -367,15 +377,7 @@ const Modules = () => {
               </div>
             </form>
           </div>
-          <Link to={'/moduleRegForm'}>
-        <button
-           
-            className='bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900'
-            
-        >
-        Module Registration
-        </button>
-        </Link>
+          
            <div className='mt-[80px] px-20'>
         
       </div>
