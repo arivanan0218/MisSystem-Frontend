@@ -15,6 +15,9 @@ const Departments = () => {
   const [error, setError] = useState(null);
   const [editingDepartment, setEditingDepartment] = useState(null);
 
+  // Get the user role from localStorage
+  const userRole = localStorage.getItem('userRole');
+
   const openForm = () => setFormOpen(true);
   const closeForm = () => setFormOpen(false);
 
@@ -72,7 +75,9 @@ const Departments = () => {
           return;
         }
 
-        const response = await axios.put(`/department/${editingDepartment.id}`, {
+        const response = await axios.put(
+          `/department/${editingDepartment.id}`, 
+          {
           departmentName,
           departmentCode,
         }, {
@@ -140,7 +145,8 @@ const Departments = () => {
             placeholder="Search"
             className="bg-gray-200 rounded-full w-full max-w-[471px] h-[41px] px-3 cursor-pointer text-md"
           />
-          <div>
+          {userRole === 'ROLE_AR' && (
+            <div>
             <button
               onClick={openForm}
               className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-[144px] h-[41px] ml-4"
@@ -150,6 +156,9 @@ const Departments = () => {
             </button>
             {formOpen && <DegreeProgramCreation closeForm={closeForm} addDepartment={addDepartment} />}
           </div>
+
+          )}
+          
         </div>
 
         <div className="mt-[80px]">
@@ -166,7 +175,9 @@ const Departments = () => {
                     {department.departmentName}
                   </div>
                 </Link>
-                <div className="flex space-x-2">
+
+                {userRole === 'ROLE_AR' && (
+                  <div className="flex space-x-2">
                   <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
                     <button
                       onClick={() => openEditForm(department)}
@@ -187,6 +198,8 @@ const Departments = () => {
                     </button>
                   </div>
                 </div>
+                )}
+                
               </div>
             ))
           ) : (
@@ -194,6 +207,66 @@ const Departments = () => {
           )}
         </div>
       </div>
+
+      {editFormOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          onClick={closeEditForm}
+        >
+          <div
+            className="w-[75%] p-8 rounded-md shadow-md bg-white border-[3px] border-blue-950"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h1 className="text-blue-950 text-2xl font-semibold">Edit Department</h1>
+            <form onSubmit={handleEdit}>
+              {error && <div className="mb-4 text-red-500">{error}</div>}
+              <div className="mb-6">
+                <label htmlFor="departmentName" className="block mb-2 text-blue-950 text-lg font-semibold">
+                  Department Name
+                </label>
+                <input
+                  type="text"
+                  id="departmentName"
+                  value={editingDepartment?.departmentName || ''}
+                  onChange={(e) =>
+                    setEditingDepartment({ ...editingDepartment, departmentName: e.target.value })
+                  }
+                  className="border border-blue-950 p-2 rounded w-full"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="departmentCode" className="block mb-2 text-blue-950 text-lg font-semibold">
+                  Department Code
+                </label>
+                <input
+                  type="text"
+                  id="departmentCode"
+                  value={editingDepartment?.departmentCode || ''}
+                  onChange={(e) =>
+                    setEditingDepartment({ ...editingDepartment, departmentCode: e.target.value })
+                  }
+                  className="border border-blue-950 p-2 rounded w-full"
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={closeEditForm}
+                  type="button"
+                  className="lg:w-[155px] md:w-[75px] mr-2 text-center px-4 py-2 rounded-lg bg-white font-semibold text-blue-950 border-[2px] border-blue-950"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="lg:w-[155px] md:w-[75px] py-2 px-4 bg-blue-950 text-white rounded-lg"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
