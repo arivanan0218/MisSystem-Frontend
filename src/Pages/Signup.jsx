@@ -260,7 +260,7 @@ const Signup = () => {
               onClick={togglePasswordVisibility}
               className="absolute top-[50%] right-3 transform -translate-y-[50%] cursor-pointer text-gray-500"
             >
-              {showPassword ? "ðŸ‘ï¸" : "ðŸ™ˆ"}
+              {showPassword ? "👁️" : "🙈"}{" "}
             </span>
           </div>
           <div className="relative w-[380px] mr-4">
@@ -276,7 +276,7 @@ const Signup = () => {
               onClick={togglePasswordVisibility}
               className="absolute top-[50%] right-3 transform -translate-y-[50%] cursor-pointer text-gray-500"
             >
-              {showPassword ? "ðŸ‘ï¸" : "ðŸ™ˆ"}
+              {showPassword ? "👁️" : "🙈"}{" "}
             </span>
           </div>
           <button
