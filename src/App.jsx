@@ -1,4 +1,3 @@
-
 import React from "react";
 import Sidebar from "./Components/Sidebar.jsx";
 import { useState } from "react";
@@ -10,7 +9,7 @@ import Departments from "./Pages/Departments.jsx";
 import Intakes from "./Pages/Intakes.jsx";
 import Semesters from "./Pages/Semesters.jsx";
 import Login from "./Pages/Login.jsx";
-// import AddStudents from "./Pages/AddStudents.jsx";
+import AddStudents from "./Pages/AddStudents.jsx";
 import { UserRoleProvider } from "./Context/UserRoleContext.jsx";
 import StudentDepartment from "./student/StudentDepartment.jsx";
 import ModuleMarks from "./Pages/ModuleMarks.jsx";
@@ -19,8 +18,8 @@ import Assignments from "./Pages/Assignments.jsx";
 import UploadMarks from "./Components/UploadMarks.jsx";
 import Marks from "./Pages/Marks.jsx";
 import Signup from "./Pages/Signup.jsx";
-import ModuleRegistrationForm from './Pages/ModuleRegistrationForm.jsx'
-
+import { ModuleRegistrationPage } from "./Pages/ModuleRegistrationPage.jsx";
+import { ModuleRegistrationForm } from "./Components/ModuleRegistrationForm.jsx";
 
 function App() {
   return (
@@ -56,19 +55,16 @@ function App() {
                     path="/departments/:degreename/intakes"
                     element={<Intakes />}
                   />
-                  <Route path="/students" element={<StudentDepartment />} />
+                  <Route path="/students" element={<AddStudents />} />
                   <Route
-                    path="/students/StudentDepartment"
-                    element={<StudentDepartment />}
+                    path="/students/addStudents"
+                    element={<AddStudents />}
                   />
                   <Route path="/semesters" element={<Semesters />} />
                   <Route
                     path="/departments/:degreename/intakes/semesters"
                     element={<Semesters />}
                   />
-
-                
-
                   <Route
                     path="/departments/:degreename/intakes/semesters/modules/assignments"
                     element={<Assignments />}
@@ -81,8 +77,16 @@ function App() {
                     element={<Marks />}
                   />
                   <Route path="/marks" element={<Marks />} />
-                  <Route path='/moduleRegForm' element={<ModuleRegistrationForm/>} />
 
+                  <Route
+                    path="/moduleRegistration"
+                    element={<ModuleRegistrationPage />}
+                  />
+
+                  <Route
+                    path="/registration/:studentId"
+                    element={<ModuleRegistrationForm />}
+                  />
                 </Routes>
               </Sidebar>
             }

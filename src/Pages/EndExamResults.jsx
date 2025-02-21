@@ -59,7 +59,7 @@ const EndExamResults = () => {
           />
         </div>
         <div className="p-4">
-          <h1 className="text-xl font-semibold text-blue-950 mb-4">End Examination Marks</h1>
+          <h1 className="text-xl font-semibold text-blue-950 mb-4">Modules and Marks</h1>
           <div className="border rounded-lg overflow-hidden">
             <table className="w-full text-left">
               <thead className="bg-gray-200 font-medium">
