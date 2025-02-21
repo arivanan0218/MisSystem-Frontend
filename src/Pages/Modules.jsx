@@ -212,6 +212,13 @@ const Modules = () => {
               >
                 Register your module
               </button>
+
+              <Link to={"/viewMarks"}>
+                <button className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900">
+                  View Marks
+                </button>
+              </Link>
+              
               {formOpen && (
                 <ModuleCreation closeForm={closeForm} addModule={addModule} />
               )}

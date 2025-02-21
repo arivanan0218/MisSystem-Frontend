@@ -2,21 +2,26 @@ import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import axios from "../axiosConfig";
 
-const UploadMarks = () => {
+const UploadMarks = ({ closeForm }) => {
   const [fileData, setFileData] = useState([]);
-  const [assignmentId, setAssignmentId] = useState("");
-  const [moduleId, setModuleId] = useState("");
-  const [semesterId, setSemesterId] = useState("");
-  const [intakeId, setIntakeId] = useState("");
-  const [departmentId, setDepartmentId] = useState("");
+  const [students, setStudents] = useState([]);
+  const [assignments, setAssignments] = useState([]);
 
-  // Get the values from localStorage and set them as default
+  // Fetch students and assignments on component mount
   useEffect(() => {
-    setAssignmentId(localStorage.getItem("assignmentId") || "");
-    setModuleId(localStorage.getItem("moduleId") || "");
-    setSemesterId(localStorage.getItem("semesterId") || "");
-    setIntakeId(localStorage.getItem("intakeId") || "");
-    setDepartmentId(localStorage.getItem("departmentId") || "");
+    const fetchStudentsAndAssignments = async () => {
+      try {
+        const studentsResponse = await axios.get("/student/");
+        const assignmentsResponse = await axios.get("/assignment/");
+        setStudents(studentsResponse.data);
+        setAssignments(assignmentsResponse.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        alert("Error fetching student or assignment data. Please try again.");
+      }
+    };
+
+    fetchStudentsAndAssignments();
   }, []);
 
   // Handle file upload
@@ -32,15 +37,19 @@ const UploadMarks = () => {
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      // Add the input values to each row
-      const updatedData = jsonData.map((row) => ({
-        ...row,
-        assignmentId,
-        moduleId,
-        semesterId,
-        intakeId,
-        departmentId,
-      }));
+      // Map the uploaded data to include studentId and assignmentId
+      const updatedData = jsonData.map((row) => {
+        const student = students.find((s) => s.student_Reg_No === row.student_Reg_No);
+        const assignment = assignments.find((a) => a.assignmentName === row.assignmentName);
+
+        return {
+          studentId: student ? student.id : null,
+          assignmentId: assignment ? assignment.id : null,
+          marksObtained: row.marksObtained,
+          student_Reg_No: row.student_Reg_No,
+          assignmentName: row.assignmentName,
+        };
+      });
 
       setFileData(updatedData);
     };
@@ -50,24 +59,40 @@ const UploadMarks = () => {
   // Submit the data to the backend
   const handleSubmit = async () => {
     try {
-      await axios.post("/marks/create-list", fileData, {
+      // Filter out rows with missing studentId or assignmentId
+      const validData = fileData.filter(
+        (row) => row.studentId !== null && row.assignmentId !== null
+      );
+
+      if (validData.length === 0) {
+        alert("No valid data to upload. Please check the file.");
+        return;
+      }
+
+      const response = await axios.post("/marks/create-list", validData, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-      alert("Data uploaded successfully!");
+
+      if (response.status === 200) {
+        alert("Data uploaded successfully!");
+        closeForm();
+      } else {
+        alert("Error uploading data. Please try again.");
+      }
     } catch (error) {
-      console.error(error);
-      alert("Error uploading data. Please try again.");
+      console.error("Error uploading data:", error);
+      alert(`Error uploading data: ${error.message}`);
     }
   };
 
   // Download the template
   const handleDownloadTemplate = () => {
     const templateData = [
-      ["registerNo", "studentName", "obtainedMarks"], // Headers
-      ["REG001", "John Doe", 85.5], // Example row
-      ["REG002", "Jane Smith", 78.0], // Example row
+      ["student_Reg_No", "assignmentName", "marksObtained"], // Updated headers
+      ["REG001", "CA01", 85.5], // Example row
+      ["REG002", "CA02", 78.0], // Example row
     ];
 
     const worksheet = XLSX.utils.aoa_to_sheet(templateData);
@@ -86,7 +111,7 @@ const UploadMarks = () => {
         style={{
           marginBottom: "20px",
           padding: "10px 20px",
-          background: "#007BFF",
+          background: "#1e3a8a",
           color: "#fff",
           border: "none",
           borderRadius: "5px",
@@ -96,99 +121,70 @@ const UploadMarks = () => {
         Download Excel Template
       </button>
 
-      {/* Inputs for IDs */}
-      <div>
-        <label>Assignment ID:</label>
-        <input
-          type="text"
-          value={assignmentId}
-          onChange={(e) => setAssignmentId(e.target.value)}
-          placeholder="Enter Assignment ID"
-        />
-      </div>
-      <div>
-        <label>Module ID:</label>
-        <input
-          type="text"
-          value={moduleId}
-          onChange={(e) => setModuleId(e.target.value)}
-          placeholder="Enter Module ID"
-        />
-      </div>
-      <div>
-        <label>Semester ID:</label>
-        <input
-          type="text"
-          value={semesterId}
-          onChange={(e) => setSemesterId(e.target.value)}
-          placeholder="Enter Semester ID"
-        />
-      </div>
-      <div>
-        <label>Intake ID:</label>
-        <input
-          type="text"
-          value={intakeId}
-          onChange={(e) => setIntakeId(e.target.value)}
-          placeholder="Enter Intake ID"
-        />
-      </div>
-      <div>
-        <label>Department ID:</label>
-        <input
-          type="text"
-          value={departmentId}
-          onChange={(e) => setDepartmentId(e.target.value)}
-          placeholder="Enter Department ID"
-        />
-      </div>
-
       {/* File upload section */}
       <input
         type="file"
         accept=".xlsx, .xls, .csv"
         onChange={handleFileUpload}
       />
-      <button
-        onClick={handleSubmit}
-        disabled={fileData.length === 0}
-        style={{
-          marginLeft: "10px",
-          padding: "10px 20px",
-          background: "#4CAF50",
-          color: "#fff",
-          border: "none",
-          cursor: "pointer",
-        }}
-      >
-        Submit
-      </button>
 
-      {/* Preview data */}
-      <h3>Preview Data:</h3>
+      {/* Preview Data */}
       {fileData.length > 0 && (
-        <table
-          border="1"
-          style={{ marginTop: "10px", borderCollapse: "collapse" }}
-        >
-          <thead>
-            <tr>
-              {Object.keys(fileData[0]).map((key, index) => (
-                <th key={index}>{key}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {fileData.map((row, index) => (
-              <tr key={index}>
-                {Object.values(row).map((value, idx) => (
-                  <td key={idx}>{value}</td>
-                ))}
+        <div style={{ marginTop: "20px" }}>
+          <h3>Preview Data:</h3>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th style={{ border: "1px solid #ddd", padding: "8px" }}>Student Reg No</th>
+                <th style={{ border: "1px solid #ddd", padding: "8px" }}>Assignment Name</th>
+                <th style={{ border: "1px solid #ddd", padding: "8px" }}>Marks Obtained</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {fileData.map((row, index) => (
+                <tr key={index}>
+                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{row.student_Reg_No}</td>
+                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{row.assignmentName}</td>
+                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{row.marksObtained}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
+
+      {/* Submit Button placed near Cancel Button */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+        <button
+          onClick={closeForm}
+          style={{
+            marginLeft: "10px",
+            padding: "10px 20px",
+            background: "#ffffff",
+            color: "#1e3a8a",
+            border: "2px solid #1e3a8a",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={fileData.length === 0}
+          style={{
+            marginLeft: "10px",
+            padding: "10px 20px",
+            background: "#1e3a8a",
+            color: "#fff",
+            border: "2px solid #1e3a8a",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          Submit
+        </button>
+      </div>
     </div>
   );
 };

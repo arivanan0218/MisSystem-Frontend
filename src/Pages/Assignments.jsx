@@ -166,25 +166,7 @@ const Assignments = () => {
   return (
     <div>
       <Header />
-      <Breadcrumb
-        breadcrumb={[
-          { label: "Home", link: "/departments" },
-          { label: "Degree Programs", link: `/departments` },
-          { label: "Intakes", link: `/departments/${departmentId}/intakes` }, // Correct path with intakeName
-          {
-            label: "Semesters",
-            link: `/departments/${departmentId}/intakes/${intakeId}/semesters`,
-          }, // Correct path with intakeName
-          {
-            label: "Modules",
-            link: `/departments/${departmentId}/intakes/semesters/modules`,
-          },
-          {
-            label: "Assignments",
-            link: `/departments/${departmentId}/intakes/semesters/modules/assignments`,
-          },
-        ]}
-      />
+      <Breadcrumb />
       <div className="mr-[20%] ml-[10%] px-8 font-poppins">
         <div className="py-8 flex items-center justify-between">
           <input
