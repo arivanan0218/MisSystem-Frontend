@@ -163,16 +163,16 @@ const Semesters = () => {
          { label: 'Home', link: '/departments' },
          { label: 'Degree Programs', link: `/departments` },
          { label: 'Intakes', link: `/departments/${departmentId}/intakes` },// Correct path with intakeName
-        { label: 'Semesters', link: `/departments/${departmentId}/intakes/${intakeId}/semesters` } // Correct path with intakeName
-      ]} />
-      <div className='mr-[20%] ml-[10%] px-8 font-poppins'>
-        <div className='py-8 flex items-center justify-between'>
-          <input
+         // Correct path with intakeName
+          ]} />
+          <div className='mr-[20%] ml-[10%] px-8 font-poppins'>
+            <div className='py-8 flex items-center justify-between'>
+              <input
             type="text"
             placeholder='Search'
             className='bg-gray-200 rounded-full w-full max-w-[471px] h-[41px] px-3 cursor-pointer text-md'
-          />
-          {userRole === 'ROLE_AR' && (
+              />
+              {userRole === 'ROLE_AR' && (
             <div>
             <button 
               onClick={openForm} 
@@ -182,20 +182,23 @@ const Semesters = () => {
               Add Semester +
             </button>
             {formOpen && <SemesterCreation closeForm={closeForm} addSemester={addSemester} />}
-          </div>
-          )}
-          
-        </div>
+              </div>
+              )}
+              
+            </div>
 
-        <div className="mt-[80px]">
-          {error && <div className="text-center text-red-500 mb-4">{error}</div>}
-          {semesters.length > 0 ? (
+            <div className="mt-[80px]">
+              {error && <div className="text-center text-red-500 mb-4">{error}</div>}
+              {semesters.length > 0 ? (
             semesters.map((semester) => (
               <div key={semester.id} className="bg-white flex justify-between items-center">
                 <Link
-                  to={`/departments/${semester.id}/intakes/semesters/modules`}
-                  className="flex-1"
-                  onClick={() => localStorage.setItem('semesterId', semester.id)} // Save departmentId to localStorage
+              to={`/departments/${semester.id}/intakes/semesters/modules`}
+              className="flex-1"
+              onClick={() => {
+                localStorage.setItem('semesterId', semester.id); // Save semesterId to localStorage
+                localStorage.setItem('semesterName', semester.semesterName); // Save semesterName to localStorage
+              }}
                 >
                   <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-[95%] p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
                     {semester.semesterName}

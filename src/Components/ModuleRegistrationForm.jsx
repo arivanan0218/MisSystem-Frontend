@@ -1,6 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import instance from "../axiosConfig";
 
 export const ModuleRegistrationForm = () => {
@@ -33,13 +35,26 @@ export const ModuleRegistrationForm = () => {
     documentTitle: "Module Registration Form",
   });
 
+  const handleDownloadPDF = async () => {
+    const element = componentRef.current;
+    const canvas = await html2canvas(element);
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save("Module_Registration_Form.pdf");
+  };
+
   return (
     <div className="p-6">
       <button
-        onClick={handlePrint}
-        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+        onClick={handleDownloadPDF}
+        className="mb-4 px-4 py-2 bg-blue-950 text-white rounded hover:bg-green-700"
       >
-        Print Form
+        Download PDF
       </button>
 
       <div
@@ -49,7 +64,8 @@ export const ModuleRegistrationForm = () => {
         {studentData ? (
           <>
             <h2 className="text-center text-xl font-bold mb-4">
-              Registration for Semester 06 Modules for End Semester Examination{" "}
+              Registration for {" "}
+              {localStorage.getItem("semesterName")} Modules for End Semester Examination{" "}
               {studentData.departmentName}
             </h2>
 

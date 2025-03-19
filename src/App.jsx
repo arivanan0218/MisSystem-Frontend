@@ -82,7 +82,7 @@ function App() {
                     path="/moduleRegistration"
                     element={<ModuleRegistrationPage />}
                   />
-                  <Route path="/viewMarks" element={<ViewMarks/>} />
+                  {/* <Route path="/viewMarks" element={<ViewMarks/>} /> */}
 
                   <Route
                     path="/registration/:studentId"
