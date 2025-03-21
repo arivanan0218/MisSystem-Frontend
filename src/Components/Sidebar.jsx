@@ -154,9 +154,9 @@ const Sidebar = ({ children, setBreadcrumb }) => {
           </li>
 
           <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
-            <Link to={'/module/endExam'} onClick={() => setBreadcrumb('Grading')}>
+            <Link to={'/transcriptLanding'} onClick={() => setBreadcrumb('Transcript')}>
               <MdGrading className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
-              {open && <span>Grading</span>}
+              {open && <span>Transcript</span>}
             </Link>
           </li>
         </ul>

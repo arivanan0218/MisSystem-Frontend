@@ -18,8 +18,8 @@ import Assignments from "./Pages/Assignments.jsx";
 import UploadMarks from "./Components/UploadMarks.jsx";
 import Marks from "./Pages/Marks.jsx";
 import Signup from "./Pages/Signup.jsx";
-import { ModuleRegistrationPage } from "./Pages/ModuleRegistrationPage.jsx";
-import { ModuleRegistrationForm } from "./Components/ModuleRegistrationForm.jsx";
+import TranscriptLanding from "./Pages/TranscriptLanding.jsx";
+import TranscriptPage from "./Transcript/pages/TranscriptPage.jsx";
 
 function App() {
   return (
@@ -52,6 +52,14 @@ function App() {
                     element={<StudentDepartment />}
                   />
                   <Route
+                    path="/transcriptLanding"
+                    element={<TranscriptLanding />}
+                  />
+                  <Route
+                    path="/transcriptpage"
+                    element={<TranscriptPage />}
+                  />
+                  <Route
                     path="/departments/:degreename/intakes"
                     element={<Intakes />}
                   />
@@ -77,17 +85,6 @@ function App() {
                     element={<Marks />}
                   />
                   <Route path="/marks" element={<Marks />} />
-
-                  <Route
-                    path="/moduleRegistration"
-                    element={<ModuleRegistrationPage />}
-                  />
-                  {/* <Route path="/viewMarks" element={<ViewMarks/>} /> */}
-
-                  <Route
-                    path="/registration/:studentId"
-                    element={<ModuleRegistrationForm />}
-                  />
                 </Routes>
               </Sidebar>
             }
