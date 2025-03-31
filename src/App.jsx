@@ -20,6 +20,15 @@ import Marks from "./Pages/Marks.jsx";
 import Signup from "./Pages/Signup.jsx";
 import TranscriptLanding from "./Pages/TranscriptLanding.jsx";
 import TranscriptPage from "./Transcript/pages/TranscriptPage.jsx";
+import LecturerDepartments from "./lecturer/LecturerDepartments.jsx";
+import Lecturers from "./lecturer/Lecturers.jsx";
+import UploadLecturers from "./lecturer/UploadLecturer.jsx";
+import ViewMarks from "./Pages/ViewMarks.jsx";
+import Students from "./student/Students.jsx";
+import UploadStudents from "./student/UploadStudent.jsx";
+import StudentIntakes from "./student/StudentIntakes.jsx";
+import { ModuleRegistrationPage } from "./Pages/ModuleRegistrationPage.jsx";
+import { ModuleRegistrationForm } from "./Components/ModuleRegistrationForm.jsx";
 
 function App() {
   return (
@@ -47,6 +56,31 @@ function App() {
                   <Route path="/createModule" element={<ModuleCreation />} />
                   <Route path="/module/:id" element={<ModuleDetail />} />
                   <Route path="/departments" element={<Departments />} />
+                  <Route path="/lecturerdepartments" element={<LecturerDepartments />} />
+                  <Route path="/moduleRegistration" element={<ModuleRegistrationPage/>}/>
+                  
+                  <Route
+                    path="/studentdepartments/:degreename/sintakes"
+                    element={<StudentIntakes />}
+                  />
+
+                  <Route
+                    path="/studentdepartments/:degreename/sintakes/:intakename/students"
+                    element={<Students />}
+                  />
+                  <Route
+                    path="/registration/:studentId"
+                    element={<ModuleRegistrationForm />}
+                  />
+                  <Route
+                    path="/lecturerdepartments/:degreename/lecturers"
+                    element={<Lecturers />}
+                  />
+                  <Route path="/students" element={<Students />} />
+                  <Route
+                    path="/studentdepartments/:degreename/sintakes/students"
+                    element={<Students />}
+                  />
                   <Route
                     path="/studentDepartments"
                     element={<StudentDepartment />}
@@ -63,7 +97,7 @@ function App() {
                     path="/departments/:degreename/intakes"
                     element={<Intakes />}
                   />
-                  <Route path="/students" element={<AddStudents />} />
+                  
                   <Route
                     path="/students/addStudents"
                     element={<AddStudents />}
@@ -79,13 +113,23 @@ function App() {
                   />
                   <Route path="/assignments" element={<Assignments />} />
                   <Route path="/uploadMarks" element={<UploadMarks />} />
+                  <Route path="/uploadLecturers" element={<UploadLecturers />} />
+                  <Route path="/uploadStudents" element={<UploadStudents />} />
 
                   <Route
                     path="/departments/:degreename/intakes/semesters/modules/assignments/marks"
                     element={<Marks />}
                   />
+                  <Route path="/lecturers" element={<Lecturers />} />
                   <Route path="/marks" element={<Marks />} />
-                </Routes>
+                  <Route path="/viewmarks" element={<ViewMarks />} />
+
+                  <Route path="/moduleRegistration" element={<ModuleRegistrationPage/>}/>
+                  
+                  <Route
+                    path="/registration/:studentId"
+                    element={<ModuleRegistrationForm />} />
+                  </Routes>
               </Sidebar>
             }
           />
