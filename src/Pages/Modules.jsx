@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Header from "../Components/Header";
@@ -23,10 +23,6 @@ const Modules = () => {
 
   // Get IDs from localStorage
   const token = localStorage.getItem("auth-token");
-  // const departmentId = localStorage.getItem('departmentId');
-  // const intakeId = localStorage.getItem('intakeId');
-  // const semesterId = localStorage.getItem('semesterId');
-
   const semesterId = localStorage.getItem("semesterId");
   const departmentId = localStorage.getItem("departmentId");
   const intakeId = localStorage.getItem("intakeId"); // Get intakeId from localStorage
@@ -88,7 +84,7 @@ const Modules = () => {
       moduleName.trim() &&
       moduleCode.trim() &&
       String(credit).trim() &&
-      String(GPA_Status).trim() &&
+      GPA_Status &&
       moduleCoordinator.trim()
     ) {
       try {
@@ -358,10 +354,9 @@ const Modules = () => {
                   htmlFor="GPA_Status"
                   className="block mb-2 text-blue-950 text-lg font-semibold"
                 >
-                  GPA_Status
+                  GPA Status
                 </label>
-                <input
-                  type="text"
+                <select
                   id="GPA_Status"
                   value={editingModule?.GPA_Status || ""}
                   onChange={(e) =>
@@ -371,7 +366,11 @@ const Modules = () => {
                     })
                   }
                   className="border border-blue-950 p-2 rounded w-full"
-                />
+                >
+                  <option value="" disabled>Select GPA Status</option>
+                  <option value="G">GPA (G)</option>
+                  <option value="N">Non-GPA (N)</option>
+                </select>
               </div>
 
               <div className="mb-6">

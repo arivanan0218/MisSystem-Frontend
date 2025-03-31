@@ -140,14 +140,14 @@ const Sidebar = ({ children, setBreadcrumb }) => {
           </li>
 
           <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
-            <Link to={'/departments'} onClick={() => setBreadcrumb('Lecturers')}>
+            <Link to={'/LecturerDepartments'} onClick={() => setBreadcrumb('Lecturers')}>
               <FaChalkboardTeacher className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
               {open && <span>Lecturers</span>}
             </Link>
           </li>
 
           <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
-            <Link to={'/students'} onClick={() => setBreadcrumb('Students')}>
+            <Link to={'/StudentDepartments'} onClick={() => setBreadcrumb('Students')}>
               <PiStudentFill className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
               {open && <span>Students</span>}
             </Link>

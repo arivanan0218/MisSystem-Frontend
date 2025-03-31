@@ -130,8 +130,8 @@ export const ModuleRegistrationPage = () => {
 
   const columns = [
     { title: "ID", dataIndex: "id" },
-    { title: "Reg No", dataIndex: "student_Reg_No" },
-    { title: "Name", dataIndex: "student_name" },
+    { title: "Reg No", dataIndex: "regNo" },
+    { title: "Name", dataIndex: "name" },
     ...uniqueModules.map((mod) => ({
       title: mod.moduleCode,
       key: mod.id, // Use the unique `id` as the key
@@ -180,7 +180,7 @@ export const ModuleRegistrationPage = () => {
       />
       <Table
         dataSource={students.filter((s) =>
-          s.student_Reg_No.toLowerCase().includes(search.toLowerCase())
+          s.regNo?.toLowerCase().includes(search.toLowerCase())
         )}
         columns={columns}
         rowKey="id"
