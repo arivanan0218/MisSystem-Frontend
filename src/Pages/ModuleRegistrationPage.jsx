@@ -3,6 +3,8 @@ import { Input, Button, Table } from "antd";
 import Select from "react-select";
 import instance from "../axiosConfig";
 import { useNavigate } from "react-router-dom";
+import Header from "../Components/Header";
+import Footer from "../Components/Footer";
 
 export const ModuleRegistrationPage = () => {
   const [modules, setModules] = useState([]);
@@ -130,8 +132,8 @@ export const ModuleRegistrationPage = () => {
 
   const columns = [
     { title: "ID", dataIndex: "id" },
-    { title: "Reg No", dataIndex: "regNo" },
-    { title: "Name", dataIndex: "name" },
+    { title: "Reg No", dataIndex: "student_Reg_No" },
+    { title: "Name", dataIndex: "student_name" },
     ...uniqueModules.map((mod) => ({
       title: mod.moduleCode,
       key: mod.id, // Use the unique `id` as the key
@@ -171,7 +173,9 @@ export const ModuleRegistrationPage = () => {
   ];
 
   return (
+    
     <div className="p-6">
+      <Header/>
       <Input
         placeholder="Search students..."
         value={search}
@@ -180,11 +184,12 @@ export const ModuleRegistrationPage = () => {
       />
       <Table
         dataSource={students.filter((s) =>
-          s.regNo?.toLowerCase().includes(search.toLowerCase())
+          s.student_Reg_No.toLowerCase().includes(search.toLowerCase())
         )}
         columns={columns}
         rowKey="id"
       />
+      <Footer/>
     </div>
   );
 };
