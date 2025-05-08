@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../axiosConfig";
 import {
   useReactTable,
   getCoreRowModel,
@@ -20,24 +20,7 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [filteredData, setFilteredData] = useState(data);
-
-  const handleDelete = async (rowData) => {
-    const token = localStorage.getItem("jwtToken"); // Retrieve stored token
-
-    try {
-      const response = await axios.delete(`http://localhost:8081/api/student/${rowData.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      console.log(response.data);
-      setFilteredData(prevData => prevData.filter(item => item.id !== rowData.id));
-    } catch (error) {
-      console.error("Error deleting student:", error.response?.data || error.message);
-      alert("Failed to delete the student.");
-    }
-  };
+  const [departments, setDepartments] = useState([]);
 
   useEffect(() => {
     const filtered = data.filter((item) =>
@@ -49,32 +32,58 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
     setFilteredData(filtered);
   }, [data, selectedDepartment, globalFilter]);
 
+  useEffect(() => {
+    const uniqueDepartments = Array.from(
+      new Set(data.map((item) => item.department))
+    );
+    setDepartments(uniqueDepartments);
+  }, [data]);
+
+  const handleDelete = async (rowData) => {
+    try {
+      const response = await axios.delete(`/student/${rowData.id}`);
+      console.log("Delete response:", response.data);
+      setFilteredData((prev) => prev.filter((item) => item.id !== rowData.id));
+      alert("Student deleted successfully");
+      if (onDelete) onDelete(rowData.id);
+    } catch (error) {
+      console.error("Error deleting student:", error);
+      if (error.response) {
+        alert(
+          `Failed to delete the student: ${error.response.data.message || error.response.statusText}`
+        );
+      } else {
+        alert("Failed to delete the student. Please try again.");
+      }
+    }
+  };
+
   const columns = [
-    
-    { accessorKey: "regNo", header: "Registration No." },
-    { accessorKey: "name", header: "Name" },
-    { accessorKey: "nic", header: "NIC" },
-    { accessorKey: "email", header: "Email" },
+    { accessorKey: "departmentId", header: "Department ID" },
+    { accessorKey: "intakeId", header: "Intake ID" },
+    { accessorKey: "studentRegNo", header: "Registration No." },
+    {
+      id: "fullName",
+      header: "Full Name",
+      accessorFn: (row) => `${row.firstName || ""} ${row.lastName || ""}`,
+    },
+    { accessorKey: "firstName", header: "First Name" },
+    { accessorKey: "lastName", header: "Last Name" },
+    { accessorKey: "studentNIC", header: "NIC" },
+    { accessorKey: "studentMail", header: "Email" },
     { accessorKey: "phoneNumber", header: "Phone Number" },
-    { accessorKey: "username", header: "User Name" },
-    { accessorKey: "password", header: "Password" },
+    { accessorKey: "username", header: "Username" },
+    { accessorKey: "gender", header: "Gender" },
+    { accessorKey: "dateOfBirth", header: "Date of Birth" },
     {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
         <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onEdit(row.original)}
-          >
+          <Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
             Edit
           </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => handleDelete(row.original)}
-          >
+          <Button variant="destructive" size="sm" onClick={() => handleDelete(row.original)}>
             Delete
           </Button>
         </div>
@@ -109,12 +118,11 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
             <DropdownMenuItem onClick={() => setSelectedDepartment("")}>
               All
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setSelectedDepartment("CS")}>
-              CS
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setSelectedDepartment("Math")}>
-              Math
-            </DropdownMenuItem>
+            {departments.map((dept) => (
+              <DropdownMenuItem key={dept} onClick={() => setSelectedDepartment(dept)}>
+                {dept}
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -158,8 +166,7 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
           Previous
         </Button>
         <span>
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
+          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
         </span>
         <Button
           onClick={() => table.nextPage()}

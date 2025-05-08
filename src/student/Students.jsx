@@ -105,13 +105,15 @@ const Students = () => {
           >
             <h1 className="text-blue-950 text-2xl font-semibold">Student Details</h1>
             <div className="my-4">
-              <p><strong>Registration No.:</strong> {studentDetails.regNo || "N/A"}</p>
-              <p><strong>Name:</strong> {studentDetails.name || "N/A"}</p>
-              <p><strong>NIC:</strong> {studentDetails.nic || "N/A"}</p>
-              <p><strong>Email:</strong> {studentDetails.email || "N/A"}</p>
+            <p><strong>Registration No.:</strong> {studentDetails.studentRegNo || "N/A"}</p>
+              <p><strong>Name:</strong> {studentDetails.firstName} {studentDetails.lastName}</p>
+              <p><strong>NIC:</strong> {studentDetails.studentNIC || "N/A"}</p>
+              <p><strong>Email:</strong> {studentDetails.studentMail || "N/A"}</p>
               <p><strong>Phone:</strong> {studentDetails.phoneNumber || "N/A"}</p>
-              <p><strong>Username</strong> {studentDetails.username || "N/A"}</p>
+              <p><strong>Username:</strong> {studentDetails.username || "N/A"}</p>
               <p><strong>Password:</strong> {studentDetails.password || "N/A"}</p>
+              <p><strong>Gender:</strong> {studentDetails.gender || "N/A"}</p>
+              <p><strong>Date of Birth:</strong> {studentDetails.dateOfBirth || "N/A"}</p>
             </div>
             <button
               onClick={closePopup}
