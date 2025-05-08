@@ -137,8 +137,16 @@ const Modules = () => {
           return;
         }
 
+        // The backend endpoint expects a path variable that's not actually used, but is required by the URL pattern
+        // We'll use a placeholder value for the path variable and pass the actual values as query parameters
+        const pathVariable = "query"; // This is just a placeholder, the actual values are passed as query params
+        
+        // Construct the endpoint URL to match exactly what the backend expects
+        const endpoint = `/module/semester/${pathVariable}?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
+        console.log("Calling API endpoint:", endpoint);
+        
         const response = await axios.get(
-          `/module/semester/${departmentId}?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`,
+          endpoint,
           {
             headers: {
               Authorization: `Bearer ${token}`,

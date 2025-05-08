@@ -11,16 +11,33 @@ export const ModuleRegistrationForm = () => {
   const componentRef = useRef();
 
   useEffect(() => {
+    // First try to get data from localStorage (set by ModuleRegistrationPage)
+    const storedData = localStorage.getItem('currentStudentData');
+    
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        console.log("ModuleRegistrationForm - Using stored data");
+        setStudentData(parsedData);
+        // Clear the stored data to avoid stale data on refresh
+        localStorage.removeItem('currentStudentData');
+        return;
+      } catch (e) {
+        console.error("Error parsing stored student data:", e);
+      }
+    }
+    
+    // If no stored data is available, fetch from API
     const fetchStudentData = async () => {
       const semesterId = localStorage.getItem("semesterId");
       const intakeId = localStorage.getItem("intakeId");
       const departmentId = localStorage.getItem("departmentId");
 
       try {
+        console.log("ModuleRegistrationForm - Fetching data from API");
         const res = await instance.get(
           `/module-registrations/student/${studentId}/semester/${semesterId}/intake/${intakeId}/department/${departmentId}`
         );
-        console.log("Module Registration Data:", res.data);
         setStudentData(res.data);
       } catch (error) {
         console.error("Error fetching module registrations:", error);

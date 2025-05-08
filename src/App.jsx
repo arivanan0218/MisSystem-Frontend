@@ -29,6 +29,7 @@ import UploadStudents from "./student/UploadStudent.jsx";
 import StudentIntakes from "./student/StudentIntakes.jsx";
 import { ModuleRegistrationPage } from "./Pages/ModuleRegistrationPage.jsx";
 import { ModuleRegistrationForm } from "./Components/ModuleRegistrationForm.jsx";
+import TokenTest from "./Pages/TokenTest.jsx"; // Import the TokenTest diagnostic page
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
           {/* Routes without Sidebar */}
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/token-test" element={<TokenTest />} />
           {/* Routes with Sidebar */}
           <Route
             path="*"
