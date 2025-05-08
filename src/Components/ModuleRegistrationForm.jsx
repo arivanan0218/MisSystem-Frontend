@@ -36,7 +36,7 @@ export const ModuleRegistrationForm = () => {
       try {
         console.log("ModuleRegistrationForm - Fetching data from API");
         const res = await instance.get(
-          `/module-registrations/student/${studentId}/semester/${semesterId}/intake/${intakeId}/department/${departmentId}`
+          `/module-registration/student/${studentId}/semester/${semesterId}/intake/${intakeId}/department/${departmentId}`
         );
         setStudentData(res.data);
       } catch (error) {
