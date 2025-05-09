@@ -185,7 +185,7 @@ const Sidebar = ({ children, setBreadcrumb }) => {
 
           {/* Transcript icon - visible to all users */}
           <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
-            <Link to={'/transcriptLanding'} onClick={() => setBreadcrumb('Transcript')}>
+            <Link to={'/module/endExam'} onClick={() => setBreadcrumb('Transcript')}>
               <MdGrading className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
               {open && <span>Transcript</span>}
             </Link>

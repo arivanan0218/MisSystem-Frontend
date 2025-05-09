@@ -18,8 +18,8 @@ import Assignments from "./Pages/Assignments.jsx";
 import UploadMarks from "./Components/UploadMarks.jsx";
 import Marks from "./Pages/Marks.jsx";
 import Signup from "./Pages/Signup.jsx";
-import TranscriptLanding from "./Pages/TranscriptLanding.jsx";
-import TranscriptPage from "./Transcript/pages/TranscriptPage.jsx";
+//import TranscriptLanding from "./Pages/TranscriptLanding.jsx";
+//import TranscriptPage from "./Transcript/pages/TranscriptPage.jsx";
 import LecturerDepartments from "./lecturer/LecturerDepartments.jsx";
 import Lecturers from "./lecturer/Lecturers.jsx";
 import UploadLecturers from "./lecturer/UploadLecturer.jsx";
@@ -30,6 +30,8 @@ import StudentIntakes from "./student/StudentIntakes.jsx";
 import { ModuleRegistrationPage } from "./Pages/ModuleRegistrationPage.jsx";
 import { ModuleRegistrationForm } from "./Components/ModuleRegistrationForm.jsx";
 import TokenTest from "./Pages/TokenTest.jsx"; // Import the TokenTest diagnostic page
+import Transcript from "./Pages/Transcript.jsx";
+import StudentTranscript from "./Pages/StudentTranscript.jsx"
 
 function App() {
   return (
@@ -74,6 +76,15 @@ function App() {
                     path="/registration/:studentId"
                     element={<ModuleRegistrationForm />}
                   />
+
+                  <Route
+                    path="/transcript"
+                    element={<Transcript />}
+                  />
+                   <Route
+                    path="/module/endExam"
+                    element={<StudentTranscript />}
+                  />
                   <Route
                     path="/lecturerdepartments/:degreename/lecturers"
                     element={<Lecturers />}
@@ -87,14 +98,8 @@ function App() {
                     path="/studentDepartments"
                     element={<StudentDepartment />}
                   />
-                  <Route
-                    path="/transcriptLanding"
-                    element={<TranscriptLanding />}
-                  />
-                  <Route
-                    path="/transcriptpage"
-                    element={<TranscriptPage />}
-                  />
+                  
+                 
                   <Route
                     path="/departments/:degreename/intakes"
                     element={<Intakes />}
