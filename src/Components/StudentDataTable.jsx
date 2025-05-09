@@ -59,20 +59,20 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
   };
 
   const columns = [
-    { accessorKey: "departmentId", header: "Department ID" },
-    { accessorKey: "intakeId", header: "Intake ID" },
+    // { accessorKey: "departmentId", header: "Department ID" },
+    // { accessorKey: "intakeId", header: "Intake ID" },
     { accessorKey: "studentRegNo", header: "Registration No." },
     {
       id: "fullName",
       header: "Full Name",
       accessorFn: (row) => `${row.firstName || ""} ${row.lastName || ""}`,
     },
-    { accessorKey: "firstName", header: "First Name" },
-    { accessorKey: "lastName", header: "Last Name" },
+    // { accessorKey: "firstName", header: "First Name" },
+    // { accessorKey: "lastName", header: "Last Name" },
     { accessorKey: "studentNIC", header: "NIC" },
     { accessorKey: "studentMail", header: "Email" },
     { accessorKey: "phoneNumber", header: "Phone Number" },
-    { accessorKey: "username", header: "Username" },
+    // { accessorKey: "username", header: "Username" },
     { accessorKey: "gender", header: "Gender" },
     { accessorKey: "dateOfBirth", header: "Date of Birth" },
     {

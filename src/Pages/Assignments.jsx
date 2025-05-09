@@ -189,6 +189,12 @@ const Assignments = () => {
                   addAssignment={addAssignment}
                 />
               )}
+
+              <Link to={"/viewMarks"}>
+                <button className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900">
+                  View Marks
+                </button>
+              </Link>
             </div>
           )}
         </div>

@@ -139,15 +139,18 @@ const ModuleCreation = ({ closeForm, addModule, isEditing, currentModule }) => {
             >
               GPA Status
             </label>
-            <input
-              type="text"
+            <select
               id="gpaStatus"
               value={gpaStatus}
               onChange={(e) => setGpaStatus(e.target.value)}
-              className="border border-blue-950 p-2 rounded w-full"
-            />
+              className="border border-blue-950 p-2 rounded w-full cursor-pointer"
+            >
+              <option value="" disabled>Select GPA Status</option>
+              <option value="G">GPA (G)</option>
+              <option value="N">Non-GPA (N)</option>
+            </select>
           </div>
-          <div className="mb-6">
+          {/* <div className="mb-6">
             <label
               htmlFor="semesterId"
               className="block mb-2 text-blue-950 text-lg font-semibold"
@@ -162,7 +165,7 @@ const ModuleCreation = ({ closeForm, addModule, isEditing, currentModule }) => {
               className={`border p-2 rounded w-[50%] ${localStorage.getItem('semesterId') ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               readOnly={!!localStorage.getItem('semesterId')}
             />
-          </div>
+          </div> */}
           <div className="flex justify-end">
             <button
               onClick={closeForm}

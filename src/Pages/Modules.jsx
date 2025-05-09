@@ -217,9 +217,9 @@ const Modules = () => {
                 Register your module
               </button>
 
-              <Link to={"/viewMarks"}>
+              <Link to={"/semesterResults"}>
                 <button className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900">
-                  View Marks
+                  View semester Results
                 </button>
               </Link>
               
@@ -373,7 +373,7 @@ const Modules = () => {
                       GPA_Status: e.target.value,
                     })
                   }
-                  className="border border-blue-950 p-2 rounded w-full"
+                  className="border border-blue-950 p-2 rounded w-full cursor-pointer"
                 >
                   <option value="" disabled>Select GPA Status</option>
                   <option value="G">GPA (G)</option>

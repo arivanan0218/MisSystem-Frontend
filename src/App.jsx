@@ -30,6 +30,9 @@ import StudentIntakes from "./student/StudentIntakes.jsx";
 import { ModuleRegistrationPage } from "./Pages/ModuleRegistrationPage.jsx";
 import { ModuleRegistrationForm } from "./Components/ModuleRegistrationForm.jsx";
 import TokenTest from "./Pages/TokenTest.jsx"; // Import the TokenTest diagnostic page
+import ViewsemiMarks from "./Pages/ViewsemiResults.jsx";
+import ViewSemiResults from "./Pages/ViewsemiResults.jsx";
+import ViewFinalResults from "./Pages/ViewFinalResults.jsx";
 
 function App() {
   return (
@@ -125,6 +128,8 @@ function App() {
                   <Route path="/lecturers" element={<Lecturers />} />
                   <Route path="/marks" element={<Marks />} />
                   <Route path="/viewmarks" element={<ViewMarks />} />
+                  <Route path="/semesterResults" element={<ViewsemiMarks />} />
+                  <Route path="/viewFinalResults" element={<ViewFinalResults />} />
 
                   <Route path="/moduleRegistration" element={<ModuleRegistrationPage/>}/>
                   

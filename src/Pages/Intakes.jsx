@@ -155,6 +155,7 @@ const Intakes = () => {
               Add Intake +
             </button>
             {formOpen && <IntakeCreation closeForm={closeForm} addIntake={addIntake} />}
+            
           </div>
           )}
           
