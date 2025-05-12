@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Header from '../Components/Header';
-import Footer from '../Components/Footer';
-import { useUserRole } from '../Context/UserRoleContext';
-import axios from '../axiosConfig';  // Adjust the import path as necessary
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Header from "../Components/Header";
+import Footer from "../Components/Footer";
+import { useUserRole } from "../Context/UserRoleContext";
+import axios from "../axiosConfig"; // Adjust the import path as necessary
 
 const Login = () => {
   const { setUserRole } = useUserRole();
   const navigate = useNavigate();
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -18,37 +21,76 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('/auth/signin', credentials);
+      const response = await axios.post("/auth/signin", credentials);
+      console.log("Full login response:", response);
 
-      if (!response.data.jwtToken || !response.data.roles || response.data.roles.length === 0) {
-        throw new Error('Missing token or roles in response');
+      // Check if we have the necessary data
+      if (!response.data) {
+        throw new Error("Empty response from server");
       }
 
-      const jwtToken = response.data.jwtToken;
+      // Log the raw response data for debugging
+      console.log("Auth response data:", response.data);
+      
+      // Check for token in different possible locations
+      let jwtToken = null;
+      
+      // Option 1: Direct jwtToken property
+      if (response.data.jwtToken) {
+        jwtToken = response.data.jwtToken;
+        console.log("Found token in response.data.jwtToken");
+      } 
+      // Option 2: token property
+      else if (response.data.token) {
+        jwtToken = response.data.token;
+        console.log("Found token in response.data.token");
+      }
+      // Option 3: Check if token is in the response headers
+      else {
+        const authHeader = response.headers['authorization'];
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          jwtToken = authHeader.substring(7);
+          console.log("Found token in authorization header");
+        }
+      }
+      
+      console.log("Raw token:", jwtToken);
+      
+      // If the token includes cookie attributes, extract just the token value
+      if (jwtToken && typeof jwtToken === 'string' && jwtToken.includes('=')) {
+        const tokenParts = jwtToken.split(';');
+        const tokenKeyValue = tokenParts[0].split('=');
+        if (tokenKeyValue.length > 1) {
+          jwtToken = tokenKeyValue[1];
+          console.log("Extracted token from cookie format:", jwtToken);
+        }
+      }
+      
+      // Verify we have a token
+      if (!jwtToken) {
+        throw new Error("Could not extract JWT token from response");
+      }
+      
+      // Check for roles
+      if (!response.data.roles || !Array.isArray(response.data.roles) || response.data.roles.length === 0) {
+        throw new Error("No roles found in response");
+      }
+      
       const primaryRole = response.data.roles[0]; // Use the first role as the primary role
+      console.log("User role:", primaryRole);
 
       // Save JWT token and user role
-      localStorage.setItem('auth-token', jwtToken);
-      localStorage.setItem('userRole', primaryRole);
+      localStorage.setItem("auth-token", jwtToken);
+      console.log("Token saved to localStorage, length:", jwtToken.length);
+      
+      localStorage.setItem("userRole", primaryRole);
       setUserRole(primaryRole);
 
-      // Redirect based on role
-      const roleRoutes = {
-        ROLE_AR: '/departments',
-        ROLE_LECTURER: '/departments',
-        ROLE_HOD: '/departments',
-        ROLE_MODULE_COORDINATOR: '/departments',
-        ROLE_STUDENT: '/studentDepartments',
-      };
-
-      const route = roleRoutes[primaryRole];
-      if (route) {
-        navigate(route);
-      } else {
-        throw new Error('Unknown role');
-      }
+      // Redirect all users to the home page regardless of role
+      console.log('Redirecting user with role:', primaryRole, 'to home page');
+      navigate('/departments');
     } catch (err) {
-      console.error('Login error:', err.message);
+      console.error("Login error:", err.message);
       setError(err.message);
     }
   };
@@ -58,7 +100,9 @@ const Login = () => {
       <Header />
       <div className="text-blue-950 flex justify-center">
         <div className="py-[51px] px-[62px] border-[2px] border-blue-950 rounded-2xl flex flex-col items-center">
-          <p className="text-center text-blue-950 text-[80px] font-bold leading-[80px]">FEMIS</p>
+          <p className="text-center text-blue-950 text-[80px] font-bold leading-[80px]">
+            FEMIS
+          </p>
           <p className="text-center text-xl font-medium mb-3 mt-2">
             Welcome to the Management Information System!
           </p>
@@ -88,6 +132,15 @@ const Login = () => {
             Sign in
           </button>
           {error && <p className="text-red-500 mt-4">{error}</p>}
+          <p className="text-sm mt-6">
+            Don't have an account?{" "}
+            <span
+              onClick={() => navigate("/signup")}
+              className="text-blue-700 cursor-pointer underline"
+            >
+              Create your account
+            </span>
+          </p>
         </div>
       </div>
       <Footer />

@@ -89,7 +89,7 @@
 
 // export default Sidebar
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdDashboard } from "react-icons/md";
 import { IoHome } from "react-icons/io5";
 import { FaChalkboardTeacher } from "react-icons/fa";
@@ -102,14 +102,37 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ children, setBreadcrumb }) => {
   const [open, setOpen] = useState(false);
+  const [userRole, setUserRole] = useState('');
   const toggle = () => setOpen(!open);
   
   // Use the navigate function to handle redirects
   const navigate = useNavigate();
 
+  // Get user role from localStorage on component mount
+  useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    setUserRole(role || '');
+    console.log('User role:', role);
+  }, []);
+
+  // Check if user is a student
+  const isStudent = userRole === 'ROLE_STUDENT';
+  
+  // Check if user is lecturer, HOD, or module coordinator
+  const isLecturerOrAdmin = ['ROLE_LECTURER', 'ROLE_HOD', 'ROLE_MODULE_COORDINATOR'].includes(userRole);
+  
+  // Check if user is admin
+  const isAdmin = userRole === 'ROLE_ADMIN' || userRole === 'ROLE_AR';
+  
+  // Log the user role and conditions for debugging
+  console.log('Current user role:', userRole);
+  console.log('Is student:', isStudent);
+  console.log('Is lecturer or similar:', isLecturerOrAdmin);
+  console.log('Is admin:', isAdmin);
+
   const logout = () => {
     // Clear the token from localStorage
-    localStorage.removeItem('auth-token');
+    localStorage.removeItem('token'); // Updated from 'auth-token' to 'token'
     localStorage.removeItem('userRole');
     localStorage.removeItem('departmentId'); // Clear the departmentId
 
@@ -132,6 +155,7 @@ const Sidebar = ({ children, setBreadcrumb }) => {
         </div>
 
         <ul className='text-blue-950 font-bold pl-7'>
+          {/* Home icon - visible to all users */}
           <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
             <Link to={'/departments'} onClick={() => setBreadcrumb('Site Home')}>
               <IoHome className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
@@ -139,24 +163,31 @@ const Sidebar = ({ children, setBreadcrumb }) => {
             </Link>
           </li>
 
-          <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
-            <Link to={'/departments'} onClick={() => setBreadcrumb('Lecturers')}>
-              <FaChalkboardTeacher className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
-              {open && <span>Lecturers</span>}
-            </Link>
-          </li>
+          {/* Lecturer icon - visible only to admin users */}
+          {isAdmin && (
+            <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
+              <Link to={'/LecturerDepartments'} onClick={() => setBreadcrumb('Lecturers')}>
+                <FaChalkboardTeacher className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
+                {open && <span>Lecturers</span>}
+              </Link>
+            </li>
+          )}
 
-          <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
-            <Link to={'/students'} onClick={() => setBreadcrumb('Students')}>
-              <PiStudentFill className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
-              {open && <span>Students</span>}
-            </Link>
-          </li>
+          {/* Student icon - visible to lecturers, HODs, module coordinators, and admins */}
+          {(isLecturerOrAdmin || isAdmin) && (
+            <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
+              <Link to={'/StudentDepartments'} onClick={() => setBreadcrumb('Students')}>
+                <PiStudentFill className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
+                {open && <span>Students</span>}
+              </Link>
+            </li>
+          )}
 
+          {/* Transcript icon - visible to all users */}
           <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
-            <Link to={'/module/endExam'} onClick={() => setBreadcrumb('Grading')}>
+            <Link to={'/module/endExam'} onClick={() => setBreadcrumb('Transcript')}>
               <MdGrading className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
-              {open && <span>Grading</span>}
+              {open && <span>Transcript</span>}
             </Link>
           </li>
         </ul>

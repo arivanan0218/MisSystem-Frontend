@@ -19,6 +19,7 @@ const SemesterCreation = ({ closeForm, addSemester, isEditing, currentSemester }
     e.preventDefault();
 
     const intakeId = localStorage.getItem('intakeId'); // Get intakeId from localStorage
+    const departmentId = localStorage.getItem('departmentId');
 
     if (!intakeId) {
       setError('No intake selected. Please go back and select an intake.');
@@ -27,6 +28,7 @@ const SemesterCreation = ({ closeForm, addSemester, isEditing, currentSemester }
 
     if (semesterName.trim() && semesterYear.trim() && semesterDuration.trim()) {
       const newSemester = {
+        departmentId,
         intakeId, // Use intakeId from localStorage
         semesterName,
         semesterYear,

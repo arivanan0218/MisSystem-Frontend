@@ -1,13 +1,10 @@
 
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Footer from '../Components/Footer';
 import { Link } from 'react-router-dom';
 import Header from '../Components/Header';
 import Breadcrumb from '../Components/Breadcrumb';
-import IntakeCreation from '../Components/IntakeCreation';  // Adjust the component name for intake creation
-import edit from '../assets/img/edit.svg';
-import deleteIcon from '../assets/img/delete.svg';
 import axios from '../axiosConfig';  // Import the axios instance
 
 const Intakes = () => {
@@ -43,64 +40,64 @@ const Intakes = () => {
     setEditFormOpen(false);
   };
 
-  const addIntake = (newIntake) => {
-    setIntakes((prevIntakes) => {
-      return Array.isArray(prevIntakes) ? [...prevIntakes, newIntake] : [newIntake];
-    });
-  };
+//   const addIntake = (newIntake) => {
+//     setIntakes((prevIntakes) => {
+//       return Array.isArray(prevIntakes) ? [...prevIntakes, newIntake] : [newIntake];
+//     });
+//   };
 
-  const handleDelete = async (intakeId) => {
-    try {
-      const response = await axios.delete(`/intake/${intakeId}`);
+//   const handleDelete = async (intakeId) => {
+//     try {
+//       const response = await axios.delete(`/intake/${intakeId}`);
 
-      if (!response.status === 200) {
-        throw new Error('Failed to delete intake');
-      }
+//       if (!response.status === 200) {
+//         throw new Error('Failed to delete intake');
+//       }
 
-      // Remove the deleted intake from the state
-      setIntakes((prevIntakes) =>
-        prevIntakes.filter((intake) => intake.id !== intakeId)
-      );
-    } catch (err) {
-      console.error('Error deleting intake:', err);
-      setError('Could not delete intake. Please try again later.');
-    }
-  };
+//       // Remove the deleted intake from the state
+//       setIntakes((prevIntakes) =>
+//         prevIntakes.filter((intake) => intake.id !== intakeId)
+//       );
+//     } catch (err) {
+//       console.error('Error deleting intake:', err);
+//       setError('Could not delete intake. Please try again later.');
+//     }
+//   };
 
-  const handleEdit = async (e) => {
-    e.preventDefault();
-    const { intakeYear, batch } = editingIntake;
+//   const handleEdit = async (e) => {
+//     e.preventDefault();
+//     const { intakeYear, batch } = editingIntake;
 
-    if (intakeYear.trim() && batch.trim()) {
-      try {
-        const response = await axios.put(`/intake/${editingIntake.id}`, {
-          intakeYear,
-          batch,
-          departmentId: editingIntake.departmentId,
-        });
+//     if (intakeYear.trim() && batch.trim()) {
+//       try {
+//         const response = await axios.put(`/intake/${editingIntake.id}`, {
+//           intakeYear,
+//           batch,
+//           departmentId: editingIntake.departmentId,
+//         });
 
-        const updatedIntake = response.data;
+//         const updatedIntake = response.data;
 
-        if (response.status !== 200) {
-          throw new Error('Failed to update intake');
-        }
+//         if (response.status !== 200) {
+//           throw new Error('Failed to update intake');
+//         }
 
-        // Update the UI with the updated intake
-        setIntakes((prevIntakes) =>
-          prevIntakes.map((intake) =>
-            intake.id === updatedIntake.id ? updatedIntake : intake
-          )
-        );
+//         // Update the UI with the updated intake
+//         setIntakes((prevIntakes) =>
+//           prevIntakes.map((intake) =>
+//             intake.id === updatedIntake.id ? updatedIntake : intake
+//           )
+//         );
 
-        closeEditForm(); // Close the edit form/modal
-      } catch (error) {
-        console.error('Error updating intake:', error);
-        setError('Failed to update intake. Please try again.');
-      }
-    } else {
-      setError('Please fill out all fields.');
-    }
-  };
+//         closeEditForm(); // Close the edit form/modal
+//       } catch (error) {
+//         console.error('Error updating intake:', error);
+//         setError('Failed to update intake. Please try again.');
+//       }
+//     } else {
+//       setError('Please fill out all fields.');
+//     }
+//   };
 
   useEffect(() => {
     const fetchIntakes = async () => {
@@ -135,8 +132,8 @@ const Intakes = () => {
       <Header />
       <Breadcrumb breadcrumb={[
         { label: 'Home', link: '/departments' },
-        { label: 'Degree Programs', link: `/departments` },
-        { label: 'Intakes', link: `/departments/${departmentId}/intakes` }
+        { label: 'Student Departments', link: `/studentdepartment` },
+        { label: 'Student Intakes', link: `/studentdepartment/${departmentId}/sintakes` }
       ]} />
       <div className="mr-[20%] ml-[10%] px-8 font-poppins">
         <div className="py-8 flex items-center justify-between">
@@ -145,7 +142,7 @@ const Intakes = () => {
             placeholder="Search"
             className="bg-gray-200 rounded-full w-full max-w-[471px] h-[41px] px-3 cursor-pointer text-md"
           />
-          {userRole === 'ROLE_AR' && (
+          {/* {userRole === 'ROLE_AR' && (
             <div>
             <button
               onClick={openForm}
@@ -155,9 +152,8 @@ const Intakes = () => {
               Add Intake +
             </button>
             {formOpen && <IntakeCreation closeForm={closeForm} addIntake={addIntake} />}
-            
           </div>
-          )}
+          )} */}
           
         </div>
 
@@ -166,7 +162,7 @@ const Intakes = () => {
           {intakes.length > 0 ? (
             intakes.map((intake) => (
               <div key={intake.id} className="bg-white flex justify-between items-center">
-                    <Link to={`${intake.id}/semesters`} 
+                    <Link to={`${intake.id}/students`} 
                     className="flex-1"
                     onClick={() => localStorage.setItem('intakeId', intake.id)} // Save departmentId to localStorage
                     >
@@ -174,7 +170,7 @@ const Intakes = () => {
                     {intake.intakeYear} - {intake.batch}
                   </div>
                 </Link>
-                {userRole === 'ROLE_AR' && (
+                {/* {userRole === 'ROLE_AR' && (
                   <div className="flex space-x-2">
                   <div>
                     <button
@@ -196,7 +192,7 @@ const Intakes = () => {
                     </button>
                   </div>
                 </div>
-                )}
+                )} */}
                 
               </div>
             ))
@@ -206,7 +202,7 @@ const Intakes = () => {
         </div>
       </div>
 
-      {editFormOpen && (
+      {/* {editFormOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
           onClick={closeEditForm}
@@ -260,7 +256,7 @@ const Intakes = () => {
             </form>
           </div>
         </div>
-      )}
+      )} */}
 
       <Footer />
     </div>
