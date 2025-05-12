@@ -171,18 +171,30 @@ const Lecturers = () => {
     try {
       const departmentId = localStorage.getItem("departmentId");
       if (!departmentId) {
-        throw new Error("Department ID is missing");
+        // If no department ID, fetch all lecturers
+        const response = await axios.get(`/lecturer/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        if (response.status !== 200) {
+          throw new Error(`Failed to fetch lecturers: ${response.statusText}`);
+        }
+        
+        setLecturers(response.data);
+        console.log('Fetched lecturers:', response.data);
+      } else {
+        // Fetch lecturers by department
+        const response = await axios.get(`/lecturer/by-department/${departmentId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log('Fetched lecturers by department:', response.data);
+        
+        if (response.status !== 200) {
+          throw new Error(`Failed to fetch lecturers: ${response.statusText}`);
+        }
+        
+        setLecturers(response.data);
       }
-  
-      const response = await axios.get(`/lecturer/by-department/${departmentId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-  
-      if (response.status !== 200) {
-        throw new Error(`Failed to fetch lecturers: ${response.statusText}`);
-      }
-  
-      setLecturers(response.data);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching lecturers:", error);
@@ -226,7 +238,18 @@ const Lecturers = () => {
           {loading ? (
             <div className="text-center">Loading...</div>
           ) : lecturers.length > 0 ? (
-            <DataTable data={lecturers} onRowClick={handleRowClick} />
+            <DataTable 
+              data={lecturers} 
+              onRowClick={handleRowClick}
+              onEdit={(lecturer) => {
+                setLecturerDetails(lecturer);
+                openForm();
+              }}
+              onDelete={() => {
+                // Refresh the data after deletion
+                fetchLecturers();
+              }}
+            />
           ) : (
             <div className="text-center text-gray-500">No lecturers available.</div>
           )}
