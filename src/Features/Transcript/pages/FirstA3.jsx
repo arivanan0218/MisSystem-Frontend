@@ -1,21 +1,3 @@
-// import React from 'react'
-
-// const FirstA3 = () => {
-//   return (
-//     <div className="flex justify-center items-center w-full bg-gray-100">
-//       <div className="w-[420mm] h-[297mm] bg-white shadow-lg border border-gray-300 p-10">
-//       <div className="flex justify-between">
-//         <div className="bg-red-500">Left Item</div>
-//         <div>Right Item</div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default FirstA3
-
-
 import React from 'react';
 import CoverBoard from '../component/cover/CoverBoard';
 import Ins from '../component/cover/Ins';

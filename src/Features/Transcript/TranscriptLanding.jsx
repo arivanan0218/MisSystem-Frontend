@@ -14,10 +14,7 @@ const TranscriptLanding = () => {
         throw new Error("Please enter a registration number");
       }
 
-      // Add your API call here to generate transcript
-      // Example:
-      // const response = await axios.post("/transcript/generate", { regNumber });
-      
+     
       // Navigate to TranscriptPage with state
       navigate("/transcriptpage", {
         state: {

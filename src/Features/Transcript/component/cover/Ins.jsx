@@ -42,35 +42,6 @@ const Ins = () => {
       </div>
       
       
-      {/* Codeholder Requirements Section */}
-      {/* <div className="border-2 border-blue-950 rounded-2xl p-6 mb-8">
-        <h2 className="text-blue-950 text-2xl font-semibold mb-4">Codeholder Requirements</h2>
-        
-        <ul className="list-disc ml-8 space-y-4">
-          <li>A registered total of 320 enrolled students in the Career Modules (CBA Technical Library, ETC) General Report (GT) General Form for his official by May her specialization course and General Training.</li>
-          <li>Technical Library and General Review modules must be chosen from the list offered by the general Department authorized; the evaluation requirements are appropriate; and the provided by the Institutional Engineer, St Lindsd (IRS).</li>
-          <li>Competitized the Development Programme, Industrial Training, Surgical Language Delivery, Test and new other mandatory requirements prescribed by the Faculty Board, with the approval of the Board.</li>
-          <li>A maximum Overall Cost Index Average of 2.00.</li>
-          <li>A maximum requirement not less academic years as a daily registered full time student of the University.</li>
-        </ul>
-      </div> */}
-
-      {/* CCFA Formula Section */}
-      {/* <div className="border-2 border-blue-950 rounded-2xl p-6 mb-8">
-        <h2 className="text-blue-950 text-2xl font-semibold mb-4">The Overall Cost Index Average (CCFA)</h2>
-        
-        <div className="bg-gray-100 p-4 rounded-lg">
-          <code className="whitespace-pre-wrap">
-            {`COF = ∑_{i=1}^{N} ( (∑_{j=1}^{n} C_i²) / (C_j + C_i²) )\n\n`}
-            where C is the number of students that is working the graduation requirement in the P semester.\n
-            C/V is the cost level at which the student is enrolled,\n
-            N is the number of students that are working the graduation requirement in the P semester.\n
-            V_i is defined as follows:\n\n
-            - C_i is for i = 1, 2, ..., N\n
-            - C_i is for i = 2, ..., N
-          </code>
-        </div>
-      </div> */}
     </div>
   );
 };

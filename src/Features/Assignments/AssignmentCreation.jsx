@@ -135,70 +135,7 @@ const AssignmentCreation = ({
               className="border border-blue-950 p-2 rounded w-full"
             />
           </div>
-          {/* <div className="mb-6">
-            <label
-              htmlFor="semesterId"
-              className="block mb-2 text-blue-950 text-lg font-semibold"
-            >
-              Semester ID
-            </label>
-            <input
-              type="number"
-              id="semesterId"
-              value={semesterId}
-              onChange={(e) => setSemesterId(e.target.value)}
-              className={`border p-2 rounded w-[50%] ${localStorage.getItem('semesterId') ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-              readOnly={!!localStorage.getItem('semesterId')}
-            />
-          </div>
-          <div className="mb-6">
-            <label
-              htmlFor="intakeId"
-              className="block mb-2 text-blue-950 text-lg font-semibold"
-            >
-              Intake ID
-            </label>
-            <input
-              type="number"
-              id="intakeId"
-              value={intakeId}
-              onChange={(e) => setIntakeId(e.target.value)}
-              className={`border p-2 rounded w-[50%] ${localStorage.getItem('intakeId') ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-              readOnly={!!localStorage.getItem('intakeId')}
-            />
-          </div>
-          <div className="mb-6">
-            <label
-              htmlFor="departmentId"
-              className="block mb-2 text-blue-950 text-lg font-semibold"
-            >
-              Department ID
-            </label>
-            <input
-              type="number"
-              id="departmentId"
-              value={departmentId}
-              onChange={(e) => setDepartmentId(e.target.value)}
-              className={`border p-2 rounded w-[50%] ${localStorage.getItem('departmentId') ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-              readOnly={!!localStorage.getItem('departmentId')}
-            />
-          </div>
-          <div className="mb-6">
-            <label
-              htmlFor="moduleId"
-              className="block mb-2 text-blue-950 text-lg font-semibold"
-            >
-              Module ID
-            </label>
-            <input
-              type="number"
-              id="moduleId"
-              value={moduleId}
-              onChange={(e) => setModuleId(e.target.value)}
-              className={`border p-2 rounded w-[50%] ${localStorage.getItem('moduleId') ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-              readOnly={!!localStorage.getItem('moduleId')}
-            />
-          </div> */}
+        
           <div className="flex justify-end">
             <button
               onClick={closeForm}

@@ -150,22 +150,7 @@ const ModuleCreation = ({ closeForm, addModule, isEditing, currentModule }) => {
               <option value="N">Non-GPA (N)</option>
             </select>
           </div>
-          {/* <div className="mb-6">
-            <label
-              htmlFor="semesterId"
-              className="block mb-2 text-blue-950 text-lg font-semibold"
-            >
-              Semester ID
-            </label>
-            <input
-              type="number"
-              id="semesterId"
-              value={semesterId}
-              onChange={(e) => setSemesterId(e.target.value)}
-              className={`border p-2 rounded w-[50%] ${localStorage.getItem('semesterId') ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-              readOnly={!!localStorage.getItem('semesterId')}
-            />
-          </div> */}
+          
           <div className="flex justify-end">
             <button
               onClick={closeForm}

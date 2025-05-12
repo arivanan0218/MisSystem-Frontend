@@ -131,23 +131,7 @@ const StudentDepartment = () => {
       <Header />
       <Breadcrumb />
       <div className="mr-[20%] ml-[10%] px-8 font-poppins">
-        {/* <div className="py-8 flex items-center justify-between">
-          <input
-            type="text"
-            placeholder="Search"
-            className="bg-gray-200 rounded-full w-full max-w-[471px] h-[41px] px-3 cursor-pointer text-md"
-          />
-          <div>
-            <button
-              onClick={openForm}
-              className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-[144px] h-[41px] ml-4"
-              aria-label="Add Degree Program"
-            >
-              Add Degree +
-            </button>
-            {formOpen && <DegreeProgramCreation closeForm={closeForm} addDepartment={addDepartment} />}
-          </div>
-        </div> */}
+        
 
         <div className="mt-[80px]">
           {error && <div className="text-center text-red-500 mb-4">{error}</div>}
@@ -163,27 +147,7 @@ const StudentDepartment = () => {
                     {department.departmentName}
                   </div>
                 </Link>
-                {/* <div className="flex space-x-2">
-                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
-                    <button
-                      onClick={() => openEditForm(department)}
-                      className="text-yellow-500 hover:text-yellow-700"
-                      aria-label="Edit Degree"
-                    >
-                      <img src={edit} alt="edit" />
-                    </button>
-                  </div>
-
-                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
-                    <button
-                      onClick={() => handleDelete(department.id)}
-                      className="text-red-500 hover:text-red-700"
-                      aria-label="Delete Degree"
-                    >
-                      <img src={deleteIcon} alt="delete" />
-                    </button>
-                  </div>
-                </div> */}
+                
               </div>
             ))
           ) : (
