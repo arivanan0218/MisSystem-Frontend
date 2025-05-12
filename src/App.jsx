@@ -13,7 +13,7 @@ import AddStudents from "./Features/student/AddStudents.jsx";
 import { UserRoleProvider } from "./Context/UserRoleContext.jsx";
 import StudentDepartment from "./Features/student/StudentDepartment.jsx";
 import ModuleMarks from "./Features/ModuleManagement/ModuleMarks.jsx";
-import EndExamResults from "./Pages/EndExamResults.jsx";
+// import EndExamResults from "./Pages/EndExamResults.jsx";
 import Assignments from "./Features/Assignments/Assignments.jsx";
 import UploadMarks from "./Components/UploadMarks.jsx";
 import Marks from "./Features/Assignments/Marks.jsx";
@@ -29,7 +29,7 @@ import UploadStudents from "./Features/student/UploadStudent.jsx";
 import StudentIntakes from "./Features/student/StudentIntakes.jsx";
 import { ModuleRegistrationPage } from "./Features/ModuleManagement/ModuleRegistrationPage.jsx";
 import { ModuleRegistrationForm } from "./Features/ModuleManagement/ModuleRegistrationForm.jsx";
-import TokenTest from "./Pages/TokenTest.jsx"; // Import the TokenTest diagnostic page
+// import TokenTest from "./Pages/TokenTest.jsx"; // Import the TokenTest diagnostic page
 import ViewsemiMarks from "./Features/ModuleManagement/ViewsemiResults.jsx";
 import ViewSemiResults from "./Features/ModuleManagement/ViewsemiResults.jsx";
 import ViewFinalResults from "./Features/Semester/ViewFinalResults.jsx";
@@ -44,7 +44,7 @@ function App() {
           {/* Routes without Sidebar */}
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/token-test" element={<TokenTest />} />
+          {/* <Route path="/token-test" element={<TokenTest />} /> */}
           {/* Routes with Sidebar */}
           <Route
             path="*"
