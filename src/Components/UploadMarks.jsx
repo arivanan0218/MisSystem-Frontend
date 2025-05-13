@@ -59,8 +59,7 @@ const UploadMarks = ({ closeForm }) => {
         // Direct approach: Query the module_registration table through API
         console.log(`Fetching registered students for module ID: ${moduleId}`);
         
-        // This endpoint should directly query the module_registration table
-        // and join with student table to get student details
+        // This endpoint should directly query the module_registration table using our new endpoint
         const endpoint = `/module-registration/module/${moduleId}`;
         console.log('Using endpoint:', endpoint);
         
@@ -70,21 +69,9 @@ const UploadMarks = ({ closeForm }) => {
           if (response.status === 200) {
             let studentsData = [];
             
-            // Handle different response formats
-            if (Array.isArray(response.data)) {
+            // Handle response from our new endpoint - should be an array of ModuleRegistrationDTO objects
+            if (Array.isArray(response.data) && response.data.length > 0) {
               studentsData = response.data;
-            } else if (response.data && response.data.students && Array.isArray(response.data.students)) {
-              studentsData = response.data.students;
-            } else if (response.data && typeof response.data === 'object') {
-              // Try to extract students from the response object
-              const possibleArrays = Object.values(response.data).filter(val => Array.isArray(val));
-              if (possibleArrays.length > 0) {
-                // Use the largest array found (likely the students array)
-                studentsData = possibleArrays.reduce((a, b) => a.length > b.length ? a : b, []);
-              }
-            }
-            
-            if (studentsData.length > 0) {
               console.log(`Successfully fetched ${studentsData.length} registered students`);
               setRegisteredStudents(studentsData);
               
@@ -244,8 +231,8 @@ const UploadMarks = ({ closeForm }) => {
             student = students.find(s => {
               // Get all possible registration number properties from student
               const studentRegNo = (s.regNo || '').toString().trim();
-              const studentRegNo2 = (s.student_Reg_No || '').toString().trim();
-              const studentRegNo3 = (s.studentRegNo || '').toString().trim();
+              const studentRegNo2 = (s.studentRegNo || '').toString().trim();
+              const studentRegNo3 = (s.student_Reg_No || '').toString().trim();
               const studentId = (s.id || '').toString().trim();
               
               // Compare with the registration number from the Excel file
@@ -262,7 +249,7 @@ const UploadMarks = ({ closeForm }) => {
               console.warn(`No student match found for registration number: ${cleanRegNo}`);
               // Log all student reg numbers for debugging
               console.log('Available student registration numbers:', 
-                students.map(s => s.regNo || s.student_Reg_No || s.studentRegNo || s.id).filter(Boolean));
+                students.map(s => s.regNo || s.studentRegNo || s.student_Reg_No || s.id).filter(Boolean));
             }
           }
         }
@@ -279,7 +266,7 @@ const UploadMarks = ({ closeForm }) => {
           assignmentId: currentAssignmentId, // Always use the current assignment ID
           marksObtained: parseFloat(row.marksObtained),
           student_Reg_No: row.student_Reg_No, // Preserve the registration number
-          student_name: student.firstName ? `${student.firstName} ${student.lastName || ''}` : student.name || student.student_name || ''
+          student_name: student.firstName ? `${student.firstName} ${student.lastName || ''}` : student.name || student.studentName || student.student_name || ''
         });
       }
       
@@ -300,7 +287,6 @@ const UploadMarks = ({ closeForm }) => {
       }
 
       // Add authorization header
-      const token = localStorage.getItem("auth-token");
       const response = await axios.post("/marks/create-list", validData, {
         headers: {
           "Content-Type": "application/json",
@@ -372,31 +358,16 @@ const UploadMarks = ({ closeForm }) => {
       console.log('No registered students in state, attempting to fetch from module_registration table...');
       
       try {
-        // Direct query to module_registration table
+        // Direct query to module_registration table with the new endpoint
         const endpoint = `/module-registration/module/${moduleId}`;
         console.log('Fetching from:', endpoint);
         
         const response = await axios.get(endpoint);
         
         if (response.status === 200) {
-          let fetchedStudents = [];
-          
-          // Handle different response formats
-          if (Array.isArray(response.data)) {
-            fetchedStudents = response.data;
-          } else if (response.data && response.data.students && Array.isArray(response.data.students)) {
-            fetchedStudents = response.data.students;
-          } else if (response.data && typeof response.data === 'object') {
-            // Try to extract students from the response object
-            const possibleArrays = Object.values(response.data).filter(val => Array.isArray(val));
-            if (possibleArrays.length > 0) {
-              // Use the largest array found (likely the students array)
-              fetchedStudents = possibleArrays.reduce((a, b) => a.length > b.length ? a : b, []);
-            }
-          }
-          
-          if (fetchedStudents.length > 0) {
-            registeredStudentsData = fetchedStudents;
+          // The response from our new endpoint is already an array of ModuleRegistrationDTO objects
+          if (Array.isArray(response.data) && response.data.length > 0) {
+            registeredStudentsData = response.data;
             console.log(`Successfully fetched ${registeredStudentsData.length} registered students from module_registration`);
             
             // Update the state for future use
@@ -449,8 +420,8 @@ const UploadMarks = ({ closeForm }) => {
     // Create the data array for the Excel sheet
     const excelData = [];
     
-    // Add header row with clear column names
-    excelData.push(["student_Reg_No", "marksObtained"]);
+    // Add header row with clear column names - include student name for reference
+    excelData.push(["student_Reg_No", "student_Name", "marksObtained"]);
     
     // Track if we successfully added any students
     let studentsAdded = 0;
@@ -466,17 +437,22 @@ const UploadMarks = ({ closeForm }) => {
         let studentName = '';
         
         if (typeof student === 'object') {
-          // Extract registration number based on API response structure
-          if (student.regNo) {
+          // Handle data from our new endpoint (ModuleRegistrationDTO)
+          if (student.studentRegNo) {
+            regNo = student.studentRegNo;
+            studentName = student.studentName || '';
+          }
+          // Keep fallbacks for other possible formats 
+          else if (student.regNo) {
             regNo = student.regNo;
-            studentName = student.firstName ? `${student.firstName} ${student.lastName || ''}` : '';
+            studentName = student.firstName ? `${student.firstName} ${student.lastName || ''}` : 
+                         (student.studentName || '');
           } else if (student.student) {
             // Handle nested student object
             const studentObj = student.student;
-            regNo = studentObj.regNo || '';
-            studentName = studentObj.firstName ? `${studentObj.firstName} ${studentObj.lastName || ''}` : '';
-          } else if (student.studentRegNo) {
-            regNo = student.studentRegNo;
+            regNo = studentObj.regNo || studentObj.studentRegNo || '';
+            studentName = studentObj.studentName || 
+                         (studentObj.firstName ? `${studentObj.firstName} ${studentObj.lastName || ''}` : '');
           }
         } else if (typeof student === 'string') {
           regNo = student;
@@ -486,8 +462,9 @@ const UploadMarks = ({ closeForm }) => {
         if (regNo && regNo.trim() !== '') {
           console.log(`Adding student ${index+1}: ${regNo} ${studentName ? `(${studentName})` : ''}`);
           
-          // Add the student registration number and an empty column for marks
-          excelData.push([regNo, ""]);
+          // Add both student registration number and name to make the template more user-friendly
+          // But leave the marks column empty for the user to fill
+          excelData.push([regNo, studentName, ""]);
           studentsAdded++;
         }
       });
@@ -496,8 +473,8 @@ const UploadMarks = ({ closeForm }) => {
     // If no valid students were added, add example rows with clear indication they are examples
     if (studentsAdded === 0) {
       console.warn('No registered students found in database, adding example rows');
-      excelData.push(["EXAMPLE_REG001", ""]);
-      excelData.push(["EXAMPLE_REG002", ""]);
+      excelData.push(["EXAMPLE_REG001", "Example Student 1", ""]);
+      excelData.push(["EXAMPLE_REG002", "Example Student 2", ""]);
       
       // Add a note about examples
       alert("No registered students found for this module. Example rows have been added to the template.");
