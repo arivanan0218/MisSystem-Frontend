@@ -2,36 +2,36 @@ import React from "react";
 import Sidebar from "./Components/Sidebar.jsx";
 import { useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ModuleCreation from "./Components/ModuleCreation.jsx";
-import Modules from "./Pages/Modules.jsx";
-import ModuleDetail from "./Pages/ModuleDetail.jsx";
-import Departments from "./Pages/Departments.jsx";
-import Intakes from "./Pages/Intakes.jsx";
-import Semesters from "./Pages/Semesters.jsx";
-import Login from "./Pages/Login.jsx";
-import AddStudents from "./Pages/AddStudents.jsx";
+import ModuleCreation from "./Features/ModuleManagement/ModuleCreation.jsx";
+import Modules from "./Features/ModuleManagement/Modules.jsx";
+import ModuleDetail from "./Features/ModuleManagement/ModuleDetail.jsx";
+import Departments from "./Features/DegreeProgram/Departments.jsx";
+import Intakes from "./Features/Intakes/Intakes.jsx";
+import Semesters from "./Features/Semester/Semesters.jsx";
+import Login from "./Features/Auth/Login.jsx";
+import AddStudents from "./Features/student/AddStudents.jsx";
 import { UserRoleProvider } from "./Context/UserRoleContext.jsx";
-import StudentDepartment from "./student/StudentDepartment.jsx";
-import ModuleMarks from "./Pages/ModuleMarks.jsx";
-import EndExamResults from "./Pages/EndExamResults.jsx";
-import Assignments from "./Pages/Assignments.jsx";
+import StudentDepartment from "./Features/student/StudentDepartment.jsx";
+import ModuleMarks from "./Features/ModuleManagement/ModuleMarks.jsx";
+import Assignments from "./Features/Assignments/Assignments.jsx";
 import UploadMarks from "./Components/UploadMarks.jsx";
-import Marks from "./Pages/Marks.jsx";
-import Signup from "./Pages/Signup.jsx";
-//import TranscriptLanding from "./Pages/TranscriptLanding.jsx";
-//import TranscriptPage from "./Transcript/pages/TranscriptPage.jsx";
-import LecturerDepartments from "./lecturer/LecturerDepartments.jsx";
-import Lecturers from "./lecturer/Lecturers.jsx";
-import UploadLecturers from "./lecturer/UploadLecturer.jsx";
-import ViewMarks from "./Pages/ViewMarks.jsx";
-import Students from "./student/Students.jsx";
-import UploadStudents from "./student/UploadStudent.jsx";
-import StudentIntakes from "./student/StudentIntakes.jsx";
-import { ModuleRegistrationPage } from "./Pages/ModuleRegistrationPage.jsx";
-import { ModuleRegistrationForm } from "./Components/ModuleRegistrationForm.jsx";
-import TokenTest from "./Pages/TokenTest.jsx"; // Import the TokenTest diagnostic page
-import Transcript from "./Pages/Transcript.jsx";
-import StudentTranscript from "./Pages/StudentTranscript.jsx"
+import Marks from "./Features/Assignments/Marks.jsx";
+import Signup from "./Features/Auth/Signup.jsx";
+import LecturerDepartments from "./Features/lecturer/LecturerDepartments.jsx";
+import Lecturers from "./Features/lecturer/Lecturers.jsx";
+import UploadLecturers from "./Features/lecturer/UploadLecturer.jsx";
+import ViewMarks from "./Features/Assignments/ViewMarks.jsx";
+import Students from "./Features/student/Students.jsx";
+import UploadStudents from "./Features/student/UploadStudent.jsx";
+import StudentIntakes from "./Features/student/StudentIntakes.jsx";
+import { ModuleRegistrationPage } from "./Features/ModuleManagement/ModuleRegistrationPage.jsx";
+import { ModuleRegistrationForm } from "./Features/ModuleManagement/ModuleRegistrationForm.jsx";
+// import TokenTest from "./Pages/TokenTest.jsx"; // Import the TokenTest diagnostic page
+import ViewsemiMarks from "./Features/ModuleManagement/ViewsemiResults.jsx";
+import ViewSemiResults from "./Features/ModuleManagement/ViewsemiResults.jsx";
+import ViewFinalResults from "./Features/Semester/ViewFinalResults.jsx";
+import Transcript from "./Features/Transcript/Transcript.jsx";
+import StudentTranscript from "./Features/Transcript/StudentTranscript.jsx"
 
 function App() {
   return (
@@ -41,7 +41,7 @@ function App() {
           {/* Routes without Sidebar */}
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/token-test" element={<TokenTest />} />
+          {/* <Route path="/token-test" element={<TokenTest />} /> */}
           {/* Routes with Sidebar */}
           <Route
             path="*"
@@ -128,8 +128,10 @@ function App() {
                     element={<Marks />}
                   />
                   <Route path="/lecturers" element={<Lecturers />} />
-                  <Route path="/marks" element={<Marks />} />
+                  {/* <Route path="/marks" element={<Marks />} /> */}
                   <Route path="/viewmarks" element={<ViewMarks />} />
+                  <Route path="/semesterResults" element={<ViewsemiMarks />} />
+                  <Route path="/viewFinalResults" element={<ViewFinalResults />} />
 
                   <Route path="/moduleRegistration" element={<ModuleRegistrationPage/>}/>
                   
