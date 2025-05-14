@@ -2,10 +2,15 @@ import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import axios from "../axiosConfig";
 
-const UploadMarks = ({ closeForm }) => {
+const UploadMarks = ({ closeForm, onUploadSuccess, editMode = false, markToEdit = null }) => {
   const [fileData, setFileData] = useState([]);
   const [students, setStudents] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [editMark, setEditMark] = useState({
+    studentId: 0,
+    assignmentId: 0,
+    marksObtained: 0
+  });
   
   // Get module registration data from localStorage
   const moduleId = localStorage.getItem("moduleId");
@@ -16,6 +21,17 @@ const UploadMarks = ({ closeForm }) => {
   const token = localStorage.getItem("auth-token");
   const [registeredStudents, setRegisteredStudents] = useState([]);
   const [assignmentName, setAssignmentName] = useState("");
+
+  // If in edit mode, set the initial value
+  useEffect(() => {
+    if (editMode && markToEdit) {
+      setEditMark({
+        studentId: markToEdit.studentId || 0,
+        assignmentId: markToEdit.assignmentId || parseInt(assignmentId) || 0,
+        marksObtained: markToEdit.marksObtained || 0
+      });
+    }
+  }, [editMode, markToEdit, assignmentId]);
 
   // Fetch students and assignments on component mount
   useEffect(() => {
@@ -173,10 +189,12 @@ const UploadMarks = ({ closeForm }) => {
       const enhancedData = jsonData.map(row => {
         // Make sure student_Reg_No is preserved exactly as in the Excel file
         const studentRegNo = row.student_Reg_No || row['Student Reg No'] || row['Registration Number'] || '';
+        const studentName = row.student_Name || row['Student Name'] || '';
         
         return {
           ...row,
           student_Reg_No: studentRegNo, // Ensure consistent property name
+          student_Name: studentName,    // Include student name
           assignmentName: currentAssignmentName || 'Current Assignment',
           assignmentId: currentAssignmentId
         };
@@ -187,6 +205,67 @@ const UploadMarks = ({ closeForm }) => {
     };
 
     reader.readAsArrayBuffer(file);
+  };
+
+  // Handle edit mark changes
+  const handleEditChange = (e) => {
+    const value = parseFloat(e.target.value);
+    setEditMark(prev => ({
+      ...prev,
+      marksObtained: isNaN(value) ? 0 : value
+    }));
+  };
+
+  // Handle saving edited mark
+  const handleSaveEdit = async () => {
+    try {
+      if (!markToEdit || !markToEdit.id) {
+        alert("Error: No mark selected for editing.");
+        return;
+      }
+
+      // Validate the mark
+      if (editMark.marksObtained < 0) {
+        alert("Marks cannot be negative.");
+        return;
+      }
+
+      // Create update payload - use the assignmentId from markToEdit if available
+      const updateData = {
+        studentId: markToEdit.studentId,
+        assignmentId: markToEdit.assignmentId || parseInt(assignmentId),
+        marksObtained: editMark.marksObtained
+      };
+
+      console.log("Sending update with data:", updateData);
+
+      // Send update request
+      const response = await axios.put(`/marks/${markToEdit.id}`, updateData, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (response.status === 200) {
+        alert("Mark updated successfully!");
+        if (onUploadSuccess) {
+          onUploadSuccess(); // Refresh the marks list
+        }
+        closeForm();
+      } else {
+        alert(`Error updating mark: ${response.data || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Error updating mark:", error);
+      let errorMessage = `Error updating mark: ${error.message}`;
+      
+      if (error.response && error.response.data) {
+        errorMessage = error.response.data;
+      }
+      
+      alert(errorMessage);
+    }
   };
 
   // Handle form submission
@@ -296,9 +375,12 @@ const UploadMarks = ({ closeForm }) => {
 
       if (response.status === 200) {
         alert("Data uploaded successfully!");
+        if (onUploadSuccess) {
+          onUploadSuccess(); // Call callback to refresh the marks list
+        }
         closeForm();
       } else {
-        alert("Error uploading data. Please try again.");
+        alert(`Error uploading data: ${response.data || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error uploading data:", error);
@@ -306,9 +388,10 @@ const UploadMarks = ({ closeForm }) => {
       
       // Add more context to the error message
       if (error.response) {
-        errorMessage += `\nStatus: ${error.response.status}`;
         if (error.response.data) {
-          errorMessage += `\nDetails: ${JSON.stringify(error.response.data)}`;
+          errorMessage = error.response.data;
+        } else {
+          errorMessage += `\nStatus: ${error.response.status}`;
         }
       }
       
@@ -504,6 +587,72 @@ const UploadMarks = ({ closeForm }) => {
     alert("Template downloaded successfully. Please fill in the marks and upload the file.");
   };
 
+  // If in edit mode, show the edit form
+  if (editMode && markToEdit) {
+    return (
+      <div style={{ padding: "20px" }}>
+        <h2>Edit Mark</h2>
+        <div style={{ marginBottom: "20px" }}>
+          <p><strong>Student:</strong> {markToEdit.student_name || "Unknown Student"}</p>
+          <p><strong>Registration Number:</strong> {markToEdit.student_Reg_No || "Unknown"}</p>
+          <p><strong>Assignment:</strong> {markToEdit.assignmentName || assignmentName || "Unknown Assignment"}</p>
+        </div>
+        
+        <div style={{ marginBottom: "20px" }}>
+          <label htmlFor="marksObtained" style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>
+            Marks Obtained:
+          </label>
+          <input
+            type="number"
+            id="marksObtained"
+            min="0"
+            step="0.01"
+            value={editMark.marksObtained}
+            onChange={handleEditChange}
+            style={{
+              width: "100%",
+              padding: "10px",
+              border: "1px solid #ddd",
+              borderRadius: "5px",
+            }}
+          />
+        </div>
+        
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <button
+            onClick={closeForm}
+            style={{
+              marginLeft: "10px",
+              padding: "10px 20px",
+              background: "#ffffff",
+              color: "#1e3a8a",
+              border: "2px solid #1e3a8a",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSaveEdit}
+            style={{
+              marginLeft: "10px",
+              padding: "10px 20px",
+              background: "#1e3a8a",
+              color: "#fff",
+              border: "2px solid #1e3a8a",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Save Changes
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Default view for file upload
   return (
     <div style={{ padding: "20px" }}>
       <h2>Upload Marks List</h2>
@@ -539,6 +688,7 @@ const UploadMarks = ({ closeForm }) => {
             <thead>
               <tr>
                 <th style={{ border: "1px solid #ddd", padding: "8px" }}>Student Reg No</th>
+                <th style={{ border: "1px solid #ddd", padding: "8px" }}>Student Name</th>
                 <th style={{ border: "1px solid #ddd", padding: "8px" }}>Assignment Name</th>
                 <th style={{ border: "1px solid #ddd", padding: "8px" }}>Marks Obtained</th>
               </tr>
@@ -547,6 +697,7 @@ const UploadMarks = ({ closeForm }) => {
               {fileData.map((row, index) => (
                 <tr key={index}>
                   <td style={{ border: "1px solid #ddd", padding: "8px" }}>{row.student_Reg_No}</td>
+                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{row.student_Name || ""}</td>
                   <td style={{ border: "1px solid #ddd", padding: "8px" }}>{row.assignmentName}</td>
                   <td style={{ border: "1px solid #ddd", padding: "8px" }}>{row.marksObtained}</td>
                 </tr>
@@ -583,6 +734,7 @@ const UploadMarks = ({ closeForm }) => {
             border: "2px solid #1e3a8a",
             borderRadius: "5px",
             cursor: "pointer",
+            opacity: fileData.length === 0 ? 0.5 : 1,
           }}
         >
           Submit

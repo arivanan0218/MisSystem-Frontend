@@ -15,6 +15,8 @@ const Marks = () => {
   const [loading, setLoading] = useState(true);
   const [studentData, setStudentData] = useState(null); // Store student data for student users
   const [searchTerm, setSearchTerm] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const [currentEditMark, setCurrentEditMark] = useState(null);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,7 +33,11 @@ const Marks = () => {
 
   // Open and close the form
   const openForm = () => setFormOpen(true);
-  const closeForm = () => setFormOpen(false);
+  const closeForm = () => {
+    setFormOpen(false);
+    setEditMode(false);
+    setCurrentEditMark(null);
+  };
 
   // Fetch all students
   const fetchStudents = async () => {
@@ -91,96 +97,90 @@ const Marks = () => {
     }
   };
 
-  // Fetch marks from API
+  // Fetch marks for the current assignment
   const fetchMarks = async () => {
     try {
       setLoading(true);
-      console.log("Fetching marks data...");
       
-      // Fetch all marks
-      const response = await axios.get("/marks/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // If no assignment is selected, use the general endpoint
+      if (!assignmentId) {
+        console.log("No assignment ID selected. Fetching all marks.");
+        const response = await axios.get("/marks", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      if (response.status !== 200) {
-        throw new Error(`Failed to fetch marks: ${response.statusText}`);
-      }
-
-      console.log("Marks API response:", response.data);
-
-      // Check if response.data is an array (for admin/lecturer) or an object (for students)
-      if (Array.isArray(response.data)) {
-        console.log('Admin/Lecturer marks data received:', response.data);
-        
-        // Direct mapping from API response
-        const formattedMarks = response.data.map(mark => ({
-          id: mark.id,
-          studentId: mark.studentId,
-          assignmentId: mark.assignmentId,
-          student_name: mark.student_name || "Unnamed Student",
-          assignmentName: mark.assignmentName || "Unknown Assignment",
-          marksObtained: mark.marksObtained || 0,
-          student_Reg_No: mark.student_Reg_No || "No Register No"
-        }));
-        
-        console.log('Formatted marks data:', formattedMarks);
-        
-        // Filter marks by the current assignment ID if available
-        if (assignmentId) {
-          const filteredMarks = formattedMarks.filter(mark => 
-            mark.assignmentId == assignmentId || mark.assignmentId === 0
-          );
-          console.log(`Filtered marks for assignment ID ${assignmentId}:`, filteredMarks);
-          setMarks(filteredMarks);
-        } else {
-          setMarks(formattedMarks);
+        if (response.status !== 200) {
+          throw new Error(`Failed to fetch marks: ${response.statusText}`);
         }
-        setStudentData(null);
-      } else if (response.data && typeof response.data === 'object') {
-        // For students, we get a MarksResponseDTO
-        console.log('Student marks data:', response.data);
-        setStudentData(response.data);
+
+        console.log("All marks data received:", response.data);
+        setMarks(response.data || []);
+        setLoading(false);
+        return;
+      }
+      
+      // For students, we need to get their specific marks
+      if (userRole === "ROLE_STUDENT") {
+        const studentId = localStorage.getItem("userId"); // Assuming userId is stored for students
         
-        if (response.data.assignmentMarks && response.data.assignmentMarks.length > 0) {
-          // Transform the student marks data to match the expected format for the UI
-          const transformedMarks = response.data.assignmentMarks.map(mark => ({
-            id: mark.assignmentId,
-            student_Reg_No: response.data.regNo || response.data.student_Reg_No || response.data.studentRegNo || response.data.studentId.toString(),
-            student_name: response.data.student_name || response.data.studentName || 'Unnamed Student',
-            marksObtained: mark.marksObtained,
-            assignmentName: mark.assignmentName,
-            assignmentId: mark.assignmentId
-          }));
+        if (!studentId) {
+          console.error("No student ID found in localStorage");
+          setLoading(false);
+          return;
+        }
+        
+        console.log(`Fetching marks for student ID ${studentId}`);
+        const response = await axios.get(`/marks/student/${studentId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
+        if (response.status === 200) {
+          console.log('Student marks data:', response.data);
+          setStudentData(response.data);
           
-          console.log('Transformed student marks:', transformedMarks);
-          
-          // Filter by current assignment ID if available
-          if (assignmentId) {
-            const filteredMarks = transformedMarks.filter(mark => mark.assignmentId == assignmentId);
-            console.log(`Filtered student marks for assignment ID ${assignmentId}:`, filteredMarks);
-            setMarks(filteredMarks);
-          } else {
+          if (response.data.assignmentMarks && response.data.assignmentMarks.length > 0) {
+            // Transform the student marks data to match the expected format for the UI
+            // Then filter for current assignment
+            const transformedMarks = response.data.assignmentMarks
+              .filter(mark => mark.assignmentId == assignmentId)
+              .map(mark => ({
+                id: mark.assignmentId,
+                student_Reg_No: response.data.regNo || response.data.student_Reg_No || 
+                              response.data.studentRegNo || response.data.studentId.toString(),
+                student_name: response.data.student_name || response.data.studentName || 'Unnamed Student',
+                marksObtained: mark.marksObtained,
+                assignmentName: mark.assignmentName,
+                assignmentId: mark.assignmentId,
+                studentId: response.data.studentId
+              }));
+            
+            console.log('Transformed and filtered student marks:', transformedMarks);
             setMarks(transformedMarks);
+          } else {
+            // If no assignment marks, set to empty array
+            setMarks([]);
           }
-          
-          // If we have assignment marks, set the first one as the current assignment details
-          const firstAssignment = response.data.assignmentMarks[0];
-          setAssignmentDetails({
-            assignmentName: firstAssignment.assignmentName,
-            assignmentPercentage: firstAssignment.assignmentPercentage,
-            assignmentDuration: 'N/A'
-          });
-        } else {
-          // If no assignment marks, set to empty array
-          setMarks([]);
         }
       } else {
-        // If neither, set to empty array
-        console.log('No marks data found or unexpected data format');
-        setMarks([]);
-        setStudentData(null);
+        // For admin/lecturers, use the new assignment-specific endpoint
+        console.log(`Fetching marks for assignment ID: ${assignmentId}`);
+        
+        const response = await axios.get(`/marks/assignment/${assignmentId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
+        if (response.status !== 200) {
+          throw new Error(`Failed to fetch assignment marks: ${response.statusText}`);
+        }
+        
+        console.log(`Marks for assignment ID ${assignmentId}:`, response.data);
+        setMarks(response.data || []);
       }
       
       setLoading(false);
@@ -194,6 +194,7 @@ const Marks = () => {
   // Handle search input change
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page when search changes
   };
 
   // Filter marks based on search term
@@ -213,23 +214,49 @@ const Marks = () => {
   const totalPages = Math.ceil(filteredMarks.length / itemsPerPage);
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  // Handle mark editing
+  const handleEditMark = (mark) => {
+    console.log("Editing mark:", mark);
+    
+    // If assignment ID is missing in the mark, add it from localStorage
+    if (!mark.assignmentId && assignmentId) {
+      mark.assignmentId = parseInt(assignmentId);
+    }
+    
+    setCurrentEditMark(mark);
+    setEditMode(true);
+    openForm();
+  };
+
   // Handle mark deletion
   const handleDeleteMark = async (markId) => {
     if (window.confirm("Are you sure you want to delete this mark?")) {
       try {
-        await axios.delete(`/marks/${markId}`, {
+        const response = await axios.delete(`/marks/${markId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         // Refresh the marks data after deletion
         fetchMarks();
+        // Show success message
+        alert("Mark deleted successfully");
       } catch (error) {
         console.error("Error deleting mark:", error);
-        setError("Failed to delete mark. Please try again.");
+        // Show more specific error message from the backend if available
+        if (error.response && error.response.data) {
+          setError(`Failed to delete mark: ${error.response.data}`);
+        } else {
+          setError("Failed to delete mark. Please try again.");
+        }
       }
     }
   };
 
-  // Fetch data on component mount
+  // Reset to first page when assignment or search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [assignmentId, searchTerm]);
+
+  // Fetch data when component mounts or when assignment/module changes
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -246,7 +273,7 @@ const Marks = () => {
     };
     
     loadData();
-  }, [assignmentId, departmentId, intakeId, semesterId, moduleId]);
+  }, [assignmentId, moduleId]);
 
   return (
     <div>
@@ -264,7 +291,11 @@ const Marks = () => {
           />
           {(userRole === "ROLE_AR" || userRole === "ROLE_HOD" || userRole === "ROLE_MODULE_COORDINATOR" || userRole === "ROLE_LECTURER") && (
             <button
-              onClick={openForm}
+              onClick={() => {
+                setEditMode(false);
+                setCurrentEditMark(null);
+                openForm();
+              }}
               className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-[144px] h-[41px] ml-4"
               aria-label="Add Marks"
             >
@@ -287,10 +318,22 @@ const Marks = () => {
           </p>
         </div>
 
+        {/* Display error message if any */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <strong className="font-bold">Error: </strong>
+            <span className="block sm:inline">{error}</span>
+            <button 
+              className="absolute top-0 bottom-0 right-0 px-4 py-3" 
+              onClick={() => setError(null)}
+            >
+              <span className="text-red-500">×</span>
+            </button>
+          </div>
+        )}
+
         {/* Marks Table */}
         <div className="mt-[30px]">
-          {error && <div className="text-center text-red-500 mb-4">{error}</div>}
-          
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900 mx-auto mb-4"></div>
@@ -317,11 +360,7 @@ const Marks = () => {
                         {(userRole === "ROLE_AR" || userRole === "ROLE_HOD" || userRole === "ROLE_MODULE_COORDINATOR" || userRole === "ROLE_LECTURER") ? (
                           <div className="flex space-x-4">
                             <button
-                              onClick={() => {
-                                localStorage.setItem("markId", mark.id);
-                                // Navigate to edit page or open edit form
-                                alert(`Edit functionality for mark ID: ${mark.id}`);
-                              }}
+                              onClick={() => handleEditMark(mark)}
                               className="text-blue-800 hover:underline"
                             >
                               Edit
@@ -363,14 +402,18 @@ const Marks = () => {
                 <h3 className="text-lg font-semibold text-gray-700 mb-2">No Marks Available</h3>
                 <p className="text-gray-600 mb-4 text-center max-w-md">
                   {userRole === "ROLE_STUDENT" ? 
-                    "You don't have any marks recorded for this module yet. Your lecturer will upload marks after grading your assignments." :
+                    "You don't have any marks recorded for this assignment yet. Your lecturer will upload marks after grading your assignment." :
                     searchTerm ? 
                       "No marks match your search criteria. Try a different search term." :
-                      "There are no marks recorded for this module yet. Use the 'Add Marks' button to upload marks for students."}
+                      "There are no marks recorded for this assignment yet. Use the 'Add Marks' button to upload marks for students."}
                 </p>
                 {userRole !== "ROLE_STUDENT" && !searchTerm && (
                   <button
-                    onClick={openForm}
+                    onClick={() => {
+                      setEditMode(false);
+                      setCurrentEditMark(null);
+                      openForm();
+                    }}
                     className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                   >
                     Add Marks
@@ -439,7 +482,7 @@ const Marks = () => {
         )}
       </div>
 
-      {/* Popup for Add Marks */}
+      {/* Popup for Add/Edit Marks */}
       {formOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
@@ -449,8 +492,15 @@ const Marks = () => {
             className="w-[75%] p-8 rounded-md shadow-md bg-white border-[3px] border-blue-950"
             onClick={(e) => e.stopPropagation()}
           >
-            <h1 className="text-blue-950 text-2xl font-semibold">Upload Marks</h1>
-            <UploadMarks closeForm={closeForm} onUploadSuccess={fetchMarks} />
+            <h1 className="text-blue-950 text-2xl font-semibold">
+              {editMode ? "Edit Marks" : "Upload Marks"}
+            </h1>
+            <UploadMarks 
+              closeForm={closeForm} 
+              onUploadSuccess={fetchMarks} 
+              editMode={editMode}
+              markToEdit={currentEditMark}
+            />
           </div>
         </div>
       )}
