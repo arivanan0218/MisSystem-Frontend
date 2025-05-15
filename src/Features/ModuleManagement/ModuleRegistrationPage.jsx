@@ -1,346 +1,575 @@
 import { useState, useEffect } from "react";
-import { Input, Button, Table } from "antd";
-import Select from "react-select";
+import { Table, Button, Select, Tag, message, Spin, Alert, Modal, Input, Tabs } from "antd";
 import instance from "../../axiosConfig";
-import { useNavigate } from "react-router-dom";
 import Header from "../../Components/Header";
 import Footer from "../../Components/Footer";
 
-export const ModuleRegistrationPage = () => {
-  const [modules, setModules] = useState([]);
-  const [students, setStudents] = useState([]);
-  const [selectedModules, setSelectedModules] = useState({});
-  const [search, setSearch] = useState("");
+const { TabPane } = Tabs;
+const { Option } = Select;
 
-  const navigate = useNavigate();
+export const ModuleRegistrationPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [pendingRegistrations, setPendingRegistrations] = useState([]);
+  const [moduleList, setModuleList] = useState([]);
+  const [selectedModule, setSelectedModule] = useState(null);
+  const [moduleRegistrations, setModuleRegistrations] = useState([]);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [currentRegistration, setCurrentRegistration] = useState(null);
+  const [departments, setDepartments] = useState([]);
+  const [intakes, setIntakes] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState({
+    departmentId: localStorage.getItem("departmentId") || "",
+    intakeId: localStorage.getItem("intakeId") || "",
+    semesterId: localStorage.getItem("semesterId") || ""
+  });
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Check if token exists
-    const token = localStorage.getItem('token') || localStorage.getItem('auth-token');
-    console.log('Auth token exists:', !!token);
+    // Load filter options
+    fetchFilterOptions();
     
-    // Fetch modules
-    console.log('Fetching modules...');
-    instance
-      .get("/module/")
-      .then((res) => {
-        console.log('Modules fetched successfully:', res.data);
-        setModules(Array.isArray(res.data) ? res.data : []);
-      })
-      .catch((error) => {
-        console.error('Error fetching modules:', error.response?.status, error.message);
-        setModules([]);
-      });
-
-    // Fetch students
-    console.log('Fetching students...');
-    instance
-      .get("/student/")
-      .then((res) => {
-        console.log('Students fetched successfully:', res.data);
-        console.log('Student data type:', typeof res.data);
-        console.log('Is array?', Array.isArray(res.data));
-        if (res.data && res.data.length > 0) {
-          console.log('First student:', res.data[0]);
-        }
-        setStudents(Array.isArray(res.data) ? res.data : []);
-      })
-      .catch((error) => {
-        console.error('Error fetching students:', error.response?.status, error.message);
-        setStudents([]);
-      });
+    // If all filters are set, load pending registrations
+    if (selectedFilters.departmentId && selectedFilters.intakeId && selectedFilters.semesterId) {
+      fetchPendingRegistrations();
+      fetchModuleList();
+    }
   }, []);
 
-  useEffect(() => {
-    // Automatically select GPA modules when students and modules are loaded
-    const updatedSelection = {};
-    students.forEach((student) => {
-      modules.forEach((mod) => {
-        if (mod.gpa_Status === "G") {
-          if (!updatedSelection[student.id]) {
-            updatedSelection[student.id] = {};
-          }
-          updatedSelection[student.id][mod.id] = "G"; // Store GPA status
+  const fetchFilterOptions = async () => {
+    setLoading(true);
+    try {
+      // Fetch departments
+      const deptResponse = await instance.get('/department/');
+      setDepartments(deptResponse.data);
+      
+      // Fetch intakes
+      const intakeResponse = await instance.get('/intake/');
+      setIntakes(intakeResponse.data);
+      
+      // Fetch semesters
+      const semesterResponse = await instance.get('/semester/');
+      setSemesters(semesterResponse.data);
+      
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching filter options:", error);
+      setError("Failed to load filter options. Please refresh the page.");
+      setLoading(false);
+    }
+  };
+
+  const fetchPendingRegistrations = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await instance.get('/module-registration/pending', {
+        params: {
+          departmentId: selectedFilters.departmentId,
+          intakeId: selectedFilters.intakeId,
+          semesterId: selectedFilters.semesterId
         }
       });
-    });
-    setSelectedModules(updatedSelection);
-  }, [modules, students]);
+      
+      setPendingRegistrations(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching pending registrations:", error);
+      setError("Failed to load pending registrations.");
+      setLoading(false);
+    }
+  };
 
-  const fetchModuleRegistration = async (studentId) => {
-    const semesterId = localStorage.getItem("semesterId");
-    const intakeId = localStorage.getItem("intakeId");
-    const departmentId = localStorage.getItem("departmentId");
-
+  const fetchModuleList = async () => {
+    setLoading(true);
     try {
-      console.log(`Fetching module registrations for student ${studentId}`);
+      const response = await instance.get('/module/semester', {
+        params: {
+          departmentId: selectedFilters.departmentId,
+          intakeId: selectedFilters.intakeId,
+          semesterId: selectedFilters.semesterId
+        }
+      });
       
-      // Try both API endpoint patterns to ensure compatibility
-      let res;
-      try {
-        // First attempt: Query parameters approach
-        console.log("Trying endpoint with query parameters");
-        res = await instance.get(
-          `/module-registration/student`, {
-            params: {
-              studentId,
-              semesterId,
-              intakeId,
-              departmentId
-            }
-          }
-        );
-      } catch (err) {
-        console.log("Query parameters approach failed:", err.message);
-        console.log("Trying path parameters approach");
-        
-        // Second attempt: Path parameters approach
-        res = await instance.get(
-          `/module-registration/student/${studentId}/semester/${semesterId}/intake/${intakeId}/department/${departmentId}`
-        );
-      }
-      
-      // Only log once with a clear identifier
-      console.log("ModuleRegistrationPage - API Response:", res.data);
+      setModuleList(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching module list:", error);
+      setError("Failed to load module list.");
+      setLoading(false);
+    }
+  };
 
-      const updatedModules = {};
+  const fetchModuleRegistrations = async (moduleId) => {
+    setLoading(true);
+    try {
+      const response = await instance.get('/module-registration/pending/module', {
+        params: {
+          moduleId,
+          departmentId: selectedFilters.departmentId,
+          intakeId: selectedFilters.intakeId,
+          semesterId: selectedFilters.semesterId
+        }
+      });
       
-      // Handle both API response formats
-      if (res.data && res.data.modules && Array.isArray(res.data.modules)) {
-        // Process each module - handle both possible field names
-        res.data.modules.forEach((mod) => {
-          if (mod) {
-            const moduleId = mod.moduleId || mod.id;
-            if (moduleId) {
-              // Use either grade or gpa_Status
-              updatedModules[moduleId] = mod.grade || mod.gpa_Status || 'G'; 
-            }
-          }
-        });
-
-        setSelectedModules((prev) => ({
-          ...prev,
-          [studentId]: updatedModules,
-        }));
-        
-        console.log(`Successfully processed ${res.data.modules.length} modules for student ${studentId}`);
-      } else {
-        console.log("No modules found in the response or invalid format");
-        // Still update the state with an empty object to avoid undefined errors
-        setSelectedModules((prev) => ({
-          ...prev,
-          [studentId]: {},
-        }));
-      }
-      
-      // Store the student data in localStorage before navigating
-      localStorage.setItem('currentStudentData', JSON.stringify(res.data));
-      
-      // Navigate to the registration page
-      navigate(`/registration/${studentId}`);
+      setModuleRegistrations(response.data);
+      setSelectedModule(moduleId);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching module registrations:", error);
-      alert(`Error fetching module registrations: ${error.message}`);
-      
-      // Update with empty object to avoid undefined errors
-      setSelectedModules((prev) => ({
-        ...prev,
-        [studentId]: {},
-      }));
+      message.error("Failed to load module registrations.");
+      setLoading(false);
     }
   };
 
-  const handleSelect = (studentId, moduleId, value) => {
-    setSelectedModules((prev) => {
-      const updated = { ...prev };
-
-      if (!updated[studentId]) {
-        updated[studentId] = {};
-      }
-
-      if (value) {
-        updated[studentId][moduleId] = value;
-      } else {
-        delete updated[studentId][moduleId];
-      }
-
-      return { ...updated }; // Ensures re-render
-    });
+  const handleFilterChange = (field, value) => {
+    setSelectedFilters(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    // Save to localStorage
+    localStorage.setItem(field, value);
   };
 
-  const handleSubmit = async (studentId) => {
-    const takenModules = selectedModules[studentId] || {};
-    const invalidModules = uniqueModules.filter(
-      (mod) => mod.gpa_Status !== "G" && !takenModules[mod.id]
-    );
+  const applyFilters = () => {
+    fetchPendingRegistrations();
+    fetchModuleList();
+    setSelectedModule(null);
+    setModuleRegistrations([]);
+  };
 
-    if (invalidModules.length > 0) {
-      alert("Please make a selection for all required modules.");
-      return;
-    }
-
-    // Try both API payload formats to ensure compatibility
+  const handleApproveRegistration = async (registrationId) => {
+    setLoading(true);
     try {
-      // Format 1: Using the takenModules format from the first code example
-      const takenModuleIds = Object.keys(takenModules).map((modId) => ({
-        moduleId: modId,
-        gpaStatus: takenModules[modId],
-      }));
-
-      const payload1 = {
-        studentId,
-        semesterId: localStorage.getItem("semesterId"),
-        intakeId: localStorage.getItem("intakeId"),
-        departmentId: localStorage.getItem("departmentId"),
-        takenModules: takenModuleIds,
-      };
-
-      console.log("Attempting submission with payload format 1:", payload1);
-      
-      try {
-        const response = await instance.post("/module-registration", payload1);
-        console.log("Registration successful with format 1:", response);
-        alert("Module registration successful!");
-        return; // Exit if successful
-      } catch (error) {
-        console.error("Format 1 failed, trying format 2:", error);
-        // Continue to try format 2
-      }
-
-      // Format 2: Using the modules format from the second code example
-      const modulesList = Object.keys(takenModules).map((modId) => {
-        const module = modules.find(m => m.id.toString() === modId.toString());
-        return {
-          moduleId: modId,
-          grade: takenModules[modId],
-          moduleName: module?.moduleName || "",
-          moduleCode: module?.moduleCode || "",
-          status: "Taken"
-        };
+      await instance.put('/module-registration/update', {
+        registrationId,
+        action: "APPROVE"
       });
-
-      const payload2 = {
-        studentId,
-        semesterId: localStorage.getItem("semesterId"),
-        intakeId: localStorage.getItem("intakeId"),
-        departmentId: localStorage.getItem("departmentId"),
-        modules: modulesList
-      };
-
-      console.log("Attempting submission with payload format 2:", payload2);
-      const response = await instance.post("/module-registration", payload2);
-      console.log("Registration successful with format 2:", response);
-      alert("Module registration successful!");
       
-    } catch (error) {
-      console.error("Error submitting module registration (both formats failed):", error);
+      message.success("Registration approved successfully");
       
-      // More detailed error message
-      let errorMsg = "Failed to register modules.";
-      if (error.response) {
-        errorMsg += ` Server responded with status: ${error.response.status}.`;
-        if (error.response.data && error.response.data.message) {
-          errorMsg += ` Message: ${error.response.data.message}`;
-        }
-      } else if (error.request) {
-        errorMsg += " No response received from server. Please check your connection.";
+      // Refresh the data
+      if (selectedModule) {
+        fetchModuleRegistrations(selectedModule);
       } else {
-        errorMsg += ` Error: ${error.message}`;
+        fetchPendingRegistrations();
       }
-      
-      alert(errorMsg);
+    } catch (error) {
+      console.error("Error approving registration:", error);
+      message.error("Failed to approve registration");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Deduplicate the modules array based on the `id` property
-  const uniqueModules = Array.from(new Map(modules.map((mod) => [mod.id, mod])).values());
+  const handleRejectRegistration = async (registrationId) => {
+    setLoading(true);
+    try {
+      await instance.put('/module-registration/update', {
+        registrationId,
+        action: "REJECT"
+      });
+      
+      message.success("Registration rejected successfully");
+      
+      // Refresh the data
+      if (selectedModule) {
+        fetchModuleRegistrations(selectedModule);
+      } else {
+        fetchPendingRegistrations();
+      }
+    } catch (error) {
+      console.error("Error rejecting registration:", error);
+      message.error("Failed to reject registration");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  console.log("Unique Modules:", uniqueModules);
+  const openEditModal = (registration) => {
+    setCurrentRegistration(registration);
+    setEditModalVisible(true);
+  };
 
-  const columns = [
-    { title: "ID", dataIndex: "id" },
-    { 
-      title: "Reg No", 
-      dataIndex: "studentRegNo",
-      render: (text, record) => record.studentRegNo || record.regNo || 'N/A'
-    },
-    { 
-      title: "Name", 
-      dataIndex: "studentName",
-      render: (text, record) => record.studentName || record.name || 'N/A'
-    },
-    ...uniqueModules.map((mod) => ({
-      title: mod.moduleCode,
-      key: mod.id, // Use the unique `id` as the key
-      render: (_, student) => {
-        const selectedStatus = selectedModules[student.id]?.[mod.id] || " ";
-        return mod.gpa_Status === "G" ? (
-          <span>G</span> // GPA modules always show "G"
-        ) : (
-          <Select
-            options={[
-              { value: "-", label: "-" },
-              { value: "G", label: "G" },
-              { value: "N", label: "N" },
-            ]}
-            value={
-              selectedStatus
-                ? { value: selectedStatus, label: selectedStatus }
-                : { value: " ", label: "-" }
-            }
-            onChange={(selectedOption) =>
-              handleSelect(student.id, mod.id, selectedOption.value)
-            }
-            className="w-full"
-          />
-        );
-      },
-    })),
+  const handleEditSubmit = async () => {
+    if (!currentRegistration) return;
+    
+    setLoading(true);
+    try {
+      await instance.put('/module-registration/update', {
+        registrationId: currentRegistration.id,
+        action: "EDIT",
+        gpaStatus: currentRegistration.gpaStatus,
+        status: currentRegistration.status
+      });
+      
+      message.success("Registration updated successfully");
+      
+      // Refresh the data
+      if (selectedModule) {
+        fetchModuleRegistrations(selectedModule);
+      } else {
+        fetchPendingRegistrations();
+      }
+      
+      setEditModalVisible(false);
+    } catch (error) {
+      console.error("Error updating registration:", error);
+      message.error("Failed to update registration");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to determine module type tag
+  const getModuleTypeDisplay = (type) => {
+    switch (type) {
+      case 'CM': return { text: 'Core Module', color: 'blue' };
+      case 'TE': return { text: 'Technical Elective', color: 'green' };
+      case 'GE': return { text: 'General Elective', color: 'orange' };
+      default: return { text: type || 'Unknown', color: 'default' };
+    }
+  };
+
+  // Columns for the pending registrations table
+  const pendingColumns = [
     {
-      title: "Action",
-      render: (_, student) => (
-        <>
-          <Button onClick={() => fetchModuleRegistration(student.id)}>Fetch</Button>
-          <Button onClick={() => handleSubmit(student.id)}>Add</Button>
-        </>
-      ),
+      title: "Reg No",
+      dataIndex: "studentRegNo",
+      key: "studentRegNo"
     },
+    {
+      title: "Student Name",
+      dataIndex: "studentName",
+      key: "studentName"
+    },
+    {
+      title: "Module Code",
+      dataIndex: "moduleCode",
+      key: "moduleCode"
+    },
+    {
+      title: "Module Name",
+      dataIndex: "moduleName",
+      key: "moduleName"
+    },
+    {
+      title: "Module Type",
+      dataIndex: "moduleType",
+      key: "moduleType",
+      render: (type) => {
+        const display = getModuleTypeDisplay(type);
+        return <Tag color={display.color}>{display.text}</Tag>;
+      }
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => status === "Taken" ? "✓ Taken" : "✗ Not Taken"
+    },
+    {
+      title: "GPA Status",
+      dataIndex: "gpaStatus",
+      key: "gpaStatus",
+      render: (status) => {
+        let text, color;
+        switch (status) {
+          case 'GPA':
+            text = 'GPA';
+            color = 'green';
+            break;
+          case 'NGPA':
+            text = 'NGPA';
+            color = 'orange';
+            break;
+          default:
+            text = status || 'N/A';
+            color = 'default';
+        }
+        return <Tag color={color}>{text}</Tag>;
+      }
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <div className="flex space-x-2">
+          <Button 
+            type="primary" 
+            size="small" 
+            onClick={() => handleApproveRegistration(record.id)}
+            loading={loading}
+          >
+            Approve
+          </Button>
+          <Button 
+            danger 
+            size="small" 
+            onClick={() => handleRejectRegistration(record.id)}
+            loading={loading}
+          >
+            Reject
+          </Button>
+          <Button 
+            size="small" 
+            onClick={() => openEditModal(record)}
+            loading={loading}
+          >
+            Edit
+          </Button>
+        </div>
+      )
+    }
+  ];
+
+  // Columns for the module selection list
+  const moduleColumns = [
+    {
+      title: "Module Code",
+      dataIndex: "moduleCode",
+      key: "moduleCode"
+    },
+    {
+      title: "Module Name",
+      dataIndex: "moduleName",
+      key: "moduleName"
+    },
+    {
+      title: "Module Type",
+      dataIndex: "moduleType",
+      key: "moduleType",
+      render: (type) => {
+        const display = getModuleTypeDisplay(type);
+        return <Tag color={display.color}>{display.text}</Tag>;
+      }
+    },
+    {
+      title: "Credit",
+      dataIndex: "credit",
+      key: "credit",
+      render: (credit, record) => record.moduleType === 'GE' ? 'N/A' : credit
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <Button 
+          type="primary" 
+          onClick={() => fetchModuleRegistrations(record.id)}
+          loading={loading}
+        >
+          View Registrations
+        </Button>
+      )
+    }
   ];
 
   return (
     <div>
       <Header />
       <div className="p-6">
-        <Input
-          placeholder="Search students..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="mb-4 w-1/4"
-        />
-        {/* Debugging info - can be removed for production */}
-        <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0', borderRadius: '5px' }}>
-          <p><strong>Students loaded:</strong> {students.length}</p>
-          {students.length > 0 && (
+        <h1 className="text-2xl font-bold mb-4">Module Registration Administration</h1>
+        
+        {error && (
+          <Alert 
+            message="Error" 
+            description={error}
+            type="error" 
+            showIcon
+            className="mb-4"
+          />
+        )}
+        
+        <div className="bg-gray-100 p-4 rounded mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div>
-              <p><strong>First student properties:</strong> {Object.keys(students[0]).join(', ')}</p>
-              <p><strong>Student Reg No field:</strong> {students[0].studentRegNo || students[0].regNo || 'Not found'}</p>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+              <Select
+                placeholder="Select Department"
+                value={selectedFilters.departmentId || undefined}
+                onChange={(value) => handleFilterChange('departmentId', value)}
+                className="w-full"
+                loading={loading}
+              >
+                {departments.map(dept => (
+                  <Option key={dept.id} value={dept.id.toString()}>
+                    {dept.departmentName}
+                  </Option>
+                ))}
+              </Select>
             </div>
-          )}
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Intake</label>
+              <Select
+                placeholder="Select Intake"
+                value={selectedFilters.intakeId || undefined}
+                onChange={(value) => handleFilterChange('intakeId', value)}
+                className="w-full"
+                loading={loading}
+              >
+                {intakes.map(intake => (
+                  <Option key={intake.id} value={intake.id.toString()}>
+                    {intake.intakeName}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+              <Select
+                placeholder="Select Semester"
+                value={selectedFilters.semesterId || undefined}
+                onChange={(value) => handleFilterChange('semesterId', value)}
+                className="w-full"
+                loading={loading}
+              >
+                {semesters.map(semester => (
+                  <Option key={semester.id} value={semester.id.toString()}>
+                    {semester.semesterName}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+            
+            <div className="flex items-end">
+              <Button 
+                type="primary" 
+                onClick={applyFilters}
+                loading={loading}
+                disabled={!selectedFilters.departmentId || !selectedFilters.intakeId || !selectedFilters.semesterId}
+                className="w-full"
+              >
+                Apply Filters
+              </Button>
+            </div>
+          </div>
         </div>
         
-        <Table
-          dataSource={students.filter((s) => {
-            // If search is empty, show all students
-            if (!search) return true;
-            
-            // Search by registration number, handling different property names
-            const regNo = s.studentRegNo || s.regNo || '';
-            return regNo.toString().toLowerCase().includes(search.toLowerCase());
-          })}
-          columns={columns}
-          rowKey="id"
-          locale={{ emptyText: 'No students found. Please check the console for errors.' }}
-        />
+        <Tabs defaultActiveKey="1">
+          <TabPane tab="All Pending Registrations" key="1">
+            {loading && pendingRegistrations.length === 0 ? (
+              <div className="flex justify-center my-8">
+                <Spin size="large" tip="Loading pending registrations..." />
+              </div>
+            ) : (
+              <Table
+                dataSource={pendingRegistrations}
+                columns={pendingColumns}
+                rowKey="id"
+                pagination={{ pageSize: 10 }}
+                locale={{ emptyText: 'No pending registrations found' }}
+              />
+            )}
+          </TabPane>
+          
+          <TabPane tab="By Module" key="2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-1">
+                <h3 className="text-lg font-medium mb-2">Modules</h3>
+                {loading && moduleList.length === 0 ? (
+                  <div className="flex justify-center my-8">
+                    <Spin size="large" tip="Loading modules..." />
+                  </div>
+                ) : (
+                  <Table
+                    dataSource={moduleList}
+                    columns={moduleColumns}
+                    rowKey="id"
+                    pagination={{ pageSize: 10 }}
+                    locale={{ emptyText: 'No modules found' }}
+                    rowClassName={(record) => record.id === selectedModule ? 'bg-blue-50' : ''}
+                  />
+                )}
+              </div>
+              
+              <div className="md:col-span-2">
+                <h3 className="text-lg font-medium mb-2">Module Registrations</h3>
+                {selectedModule ? (
+                  loading && moduleRegistrations.length === 0 ? (
+                    <div className="flex justify-center my-8">
+                      <Spin size="large" tip="Loading registrations..." />
+                    </div>
+                  ) : (
+                    <Table
+                      dataSource={moduleRegistrations}
+                      columns={pendingColumns}
+                      rowKey="id"
+                      pagination={{ pageSize: 10 }}
+                      locale={{ emptyText: 'No registrations found for this module' }}
+                    />
+                  )
+                ) : (
+                  <div className="border border-dashed border-gray-300 rounded-md p-8 text-center text-gray-500">
+                    Select a module to view registrations
+                  </div>
+                )}
+              </div>
+            </div>
+          </TabPane>
+        </Tabs>
+        
+        {/* Edit Registration Modal */}
+        <Modal
+          title="Edit Registration"
+          open={editModalVisible}
+          onCancel={() => setEditModalVisible(false)}
+          onOk={handleEditSubmit}
+          confirmLoading={loading}
+        >
+          {currentRegistration && (
+            <div className="space-y-4">
+              <div>
+                <p><strong>Student:</strong> {currentRegistration.studentName}</p>
+                <p><strong>Reg No:</strong> {currentRegistration.studentRegNo}</p>
+                <p><strong>Module:</strong> {currentRegistration.moduleCode} - {currentRegistration.moduleName}</p>
+                <p><strong>Module Type:</strong> {currentRegistration.moduleType}</p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <Select
+                  value={currentRegistration.status}
+                  onChange={(value) => setCurrentRegistration({ ...currentRegistration, status: value })}
+                  className="w-full"
+                >
+                  <Option value="Taken">Taken</Option>
+                  <Option value="Not-Taken">Not Taken</Option>
+                </Select>
+              </div>
+              
+              {(currentRegistration.moduleType === 'TE' && currentRegistration.status === 'Taken') && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">GPA Status</label>
+                  <Select
+                    value={currentRegistration.gpaStatus}
+                    onChange={(value) => setCurrentRegistration({ ...currentRegistration, gpaStatus: value })}
+                    className="w-full"
+                  >
+                    <Option value="GPA">GPA</Option>
+                    <Option value="NGPA">NGPA</Option>
+                  </Select>
+                </div>
+              )}
+              
+              <Alert
+                message="Note"
+                description={
+                  <ul className="list-disc pl-5">
+                    <li>Core Modules (CM) are always taken as GPA</li>
+                    <li>Technical Electives (TE) can be taken as GPA or NGPA</li>
+                    <li>General Electives (GE) are always taken as NGPA</li>
+                  </ul>
+                }
+                type="info"
+                showIcon
+              />
+            </div>
+          )}
+        </Modal>
       </div>
       <Footer />
     </div>
