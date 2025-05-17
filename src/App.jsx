@@ -33,6 +33,7 @@ import ViewFinalResults from "./Features/Semester/ViewFinalResults.jsx";
 import Transcript from "./Features/Transcript/Transcript.jsx";
 import StudentTranscript from "./Features/Transcript/StudentTranscript.jsx"
 
+
 function App() {
   return (
     <UserRoleProvider>
@@ -62,6 +63,8 @@ function App() {
                   <Route path="/departments" element={<Departments />} />
                   <Route path="/lecturerdepartments" element={<LecturerDepartments />} />
                   <Route path="/moduleRegistration" element={<ModuleRegistrationPage/>}/>
+                  <Route path="/moduleMarks" element={<ModuleMarks />} />
+                  
                   
                   <Route
                     path="/studentdepartments/:degreename/sintakes"
