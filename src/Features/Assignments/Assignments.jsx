@@ -164,42 +164,43 @@ const Assignments = () => {
   }, [departmentId, intakeId, semesterId, moduleId, token]);
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       <Header />
       <Breadcrumb />
-      <div className="mr-[20%] ml-[10%] px-8 font-poppins">
-        <div className="py-8 flex items-center justify-between">
+      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins">
+        <div className="py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <input
             type="text"
             placeholder="Search"
             className="bg-gray-200 rounded-full w-full max-w-[471px] h-[41px] px-3 cursor-pointer text-md"
           />
           {userRole === "ROLE_AR" && (
-            <div>
-              <button
-                onClick={openForm}
-                className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-[160px] h-[41px] ml-4"
-                aria-label="Add Assignment"
-              >
-                Add Assignment +
-              </button>
-              {formOpen && (
-                <AssignmentCreation
-                  closeForm={closeForm}
-                  addAssignment={addAssignment}
-                />
-              )}
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mt-4">
+  <button
+    onClick={openForm}
+    className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
+    aria-label="Add Assignment"
+  >
+    Add Assignment +
+  </button>
 
-              <Link to={"/viewMarks"}>
-                <button className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900">
-                  View Marks
-                </button>
-              </Link>
-            </div>
+  <Link to={"/viewMarks"} className="w-full sm:w-auto">
+    <button
+      className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
+    >
+      View Marks
+    </button>
+  </Link>
+
+  {formOpen && (
+    <AssignmentCreation closeForm={closeForm} addAssignment={addAssignment} />
+  )}
+</div>
+
           )}
         </div>
 
-        <div className="mt-[80px]">
+        <div className="mt-10">
           {error && (
             <div className="text-center text-red-500 mb-4">{error}</div>
           )}
