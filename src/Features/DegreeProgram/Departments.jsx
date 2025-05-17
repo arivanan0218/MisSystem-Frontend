@@ -6,7 +6,7 @@ import Breadcrumb from '../../Components/Breadcrumb';
 import DegreeProgramCreation from './DegreeProgramCreation';
 import edit from '../../assets/img/edit.svg';
 import deleteIcon from '../../assets/img/delete.svg';
-import axios from '../../axiosConfig'; // Use axios for API requests
+import axios from '../../axiosConfig';
 
 const Departments = () => {
   const [departments, setDepartments] = useState([]);
@@ -15,7 +15,6 @@ const Departments = () => {
   const [error, setError] = useState(null);
   const [editingDepartment, setEditingDepartment] = useState(null);
 
-  // Get the user role from localStorage
   const userRole = localStorage.getItem('userRole');
 
   const openForm = () => setFormOpen(true);
@@ -36,7 +35,7 @@ const Departments = () => {
 
   const handleDelete = async (departmentId) => {
     try {
-      const token = localStorage.getItem('auth-token'); // Retrieve auth-token
+      const token = localStorage.getItem('auth-token');
       if (!token) {
         console.error('No token found. Redirecting to login.');
         window.location.href = '/login';
@@ -68,7 +67,7 @@ const Departments = () => {
 
     if (departmentName.trim() && departmentCode.trim()) {
       try {
-        const token = localStorage.getItem('auth-token'); // Retrieve auth-token
+        const token = localStorage.getItem('auth-token');
         if (!token) {
           console.error('No token found. Redirecting to login.');
           window.location.href = '/login';
@@ -76,15 +75,17 @@ const Departments = () => {
         }
 
         const response = await axios.put(
-          `/department/${editingDepartment.id}`, 
+          `/department/${editingDepartment.id}`,
           {
-          departmentName,
-          departmentCode,
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+            departmentName,
+            departmentCode,
           },
-        });
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         const updatedDepartment = response.data;
 
@@ -107,7 +108,7 @@ const Departments = () => {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const token = localStorage.getItem('auth-token'); // Retrieve auth-token
+        const token = localStorage.getItem('auth-token');
         if (!token) {
           console.error('No token found. Redirecting to login.');
           window.location.href = '/login';
@@ -121,7 +122,7 @@ const Departments = () => {
         });
 
         if (response.status === 200) {
-          setDepartments(response.data); // Set the departments directly from the response
+          setDepartments(response.data);
         } else {
           throw new Error('Failed to fetch departments');
         }
@@ -135,74 +136,75 @@ const Departments = () => {
   }, []);
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <Breadcrumb breadcrumb={[
-        { label: 'Home', link: '/departments' }, 
-        { label: 'Degree Programs', link: '/departments' }]} 
+      <Breadcrumb
+        breadcrumb={[
+          { label: 'Home', link: '/departments' },
+          { label: 'Degree Programs', link: '/departments' },
+        ]}
       />
-      <div className="mr-[20%] ml-[10%] px-8 font-poppins">
-        <div className="py-8 flex items-center justify-between">
+      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins">
+        <div className="py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <input
             type="text"
             placeholder="Search"
-            className="bg-gray-200 rounded-full w-full max-w-[471px] h-[41px] px-3 cursor-pointer text-md"
+            className="bg-gray-200 rounded-full w-full md:max-w-[471px] h-[41px] px-4 text-sm md:text-md"
           />
           {userRole === 'ROLE_AR' && (
             <div>
-            <button
-              onClick={openForm}
-              className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-[144px] h-[41px] ml-4"
-              aria-label="Add Degree Program"
-            >
-              Add Degree +
-            </button>
-            {formOpen && <DegreeProgramCreation closeForm={closeForm} addDepartment={addDepartment} />}
-          </div>
-
+              <button
+                onClick={openForm}
+                className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-full md:w-[144px] h-[41px]"
+                aria-label="Add Degree Program"
+              >
+                Add Degree +
+              </button>
+              {formOpen && <DegreeProgramCreation closeForm={closeForm} addDepartment={addDepartment} />}
+            </div>
           )}
-          
         </div>
 
-        <div className="mt-[80px]">
+        <div className="mt-10">
           {error && <div className="text-center text-red-500 mb-4">{error}</div>}
           {departments.length > 0 ? (
             departments.map((department) => (
-              <div key={department.id} className="bg-white flex justify-between items-center">
+              <div
+                key={department.id}
+                className="bg-white flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2"
+              >
                 <Link
                   to={`/departments/${department.id}/intakes`}
                   className="flex-1"
-                  onClick={() => localStorage.setItem('departmentId', department.id)} // Save departmentId to localStorage
+                  onClick={() => localStorage.setItem('departmentId', department.id)}
                 >
-                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-[95%] p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
+                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border border-b-[3px] font-semibold w-full p-2 px-4 rounded-[12px] hover:shadow-md mb-3 cursor-pointer flex justify-between items-center">
                     {department.departmentName}
                   </div>
                 </Link>
 
                 {userRole === 'ROLE_AR' && (
-                  <div className="flex space-x-2">
-                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
-                    <button
-                      onClick={() => openEditForm(department)}
-                      className="text-yellow-500 hover:text-yellow-700"
-                      aria-label="Edit Degree"
-                    >
-                      <img src={edit} alt="edit" />
-                    </button>
+                  <div className="flex flex-row gap-2">
+                    <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-md mb-3 flex items-center justify-center">
+                      <button
+                        onClick={() => openEditForm(department)}
+                        className="text-yellow-500 hover:text-yellow-700"
+                        aria-label="Edit Degree"
+                      >
+                        <img src={edit} alt="edit" />
+                      </button>
+                    </div>
+                    <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-md mb-3 flex items-center justify-center">
+                      <button
+                        onClick={() => handleDelete(department.id)}
+                        className="text-red-500 hover:text-red-700"
+                        aria-label="Delete Degree"
+                      >
+                        <img src={deleteIcon} alt="delete" />
+                      </button>
+                    </div>
                   </div>
-
-                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
-                    <button
-                      onClick={() => handleDelete(department.id)}
-                      className="text-red-500 hover:text-red-700"
-                      aria-label="Delete Degree"
-                    >
-                      <img src={deleteIcon} alt="delete" />
-                    </button>
-                  </div>
-                </div>
                 )}
-                
               </div>
             ))
           ) : (
@@ -217,14 +219,14 @@ const Departments = () => {
           onClick={closeEditForm}
         >
           <div
-            className="w-[75%] p-8 rounded-md shadow-md bg-white border-[3px] border-blue-950"
+            className="w-[90%] max-w-[600px] p-6 sm:p-8 rounded-md shadow-md bg-white border-[3px] border-blue-950"
             onClick={(e) => e.stopPropagation()}
           >
-            <h1 className="text-blue-950 text-2xl font-semibold">Edit Department</h1>
+            <h1 className="text-blue-950 text-2xl font-semibold mb-4">Edit Department</h1>
             <form onSubmit={handleEdit}>
               {error && <div className="mb-4 text-red-500">{error}</div>}
-              <div className="mb-6">
-                <label htmlFor="departmentName" className="block mb-2 text-blue-950 text-lg font-semibold">
+              <div className="mb-4">
+                <label htmlFor="departmentName" className="block mb-1 text-blue-950 text-md font-semibold">
                   Department Name
                 </label>
                 <input
@@ -237,8 +239,8 @@ const Departments = () => {
                   className="border border-blue-950 p-2 rounded w-full"
                 />
               </div>
-              <div className="mb-4">
-                <label htmlFor="departmentCode" className="block mb-2 text-blue-950 text-lg font-semibold">
+              <div className="mb-6">
+                <label htmlFor="departmentCode" className="block mb-1 text-blue-950 text-md font-semibold">
                   Department Code
                 </label>
                 <input
@@ -251,17 +253,17 @@ const Departments = () => {
                   className="border border-blue-950 p-2 rounded w-full"
                 />
               </div>
-              <div className="flex justify-end">
+              <div className="flex flex-col sm:flex-row justify-end gap-2">
                 <button
                   onClick={closeEditForm}
                   type="button"
-                  className="lg:w-[155px] md:w-[75px] mr-2 text-center px-4 py-2 rounded-lg bg-white font-semibold text-blue-950 border-[2px] border-blue-950"
+                  className="w-full sm:w-[150px] text-center px-4 py-2 rounded-lg bg-white font-semibold text-blue-950 border-[2px] border-blue-950"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="lg:w-[155px] md:w-[75px] py-2 px-4 bg-blue-950 text-white rounded-lg"
+                  className="w-full sm:w-[150px] py-2 px-4 bg-blue-950 text-white rounded-lg"
                 >
                   Save Changes
                 </button>
