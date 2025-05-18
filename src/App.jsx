@@ -32,6 +32,7 @@ import ViewSemiResults from "./Features/ModuleManagement/ViewsemiResults.jsx";
 import ViewFinalResults from "./Features/Semester/ViewFinalResults.jsx";
 import Transcript from "./Features/Transcript/Transcript.jsx";
 import StudentTranscript from "./Features/Transcript/StudentTranscript.jsx"
+import MRPforStudent from "./Features/ModuleManagement/MRPforStudent.jsx";
 
 function App() {
   return (
@@ -138,6 +139,11 @@ function App() {
                   <Route
                     path="/registration/:studentId"
                     element={<ModuleRegistrationForm />} />
+
+                  <Route
+                  path="/ModuleRegistrationFormViewForStudent"
+                  element={<MRPforStudent />} />
+                  
                   </Routes>
               </Sidebar>
             }
