@@ -104,8 +104,8 @@ const Sidebar = ({ children, setBreadcrumb }) => {
         <div className={`${open ? '' : 'w-20'}`}>
           <div className='flex justify-center mt-40'>
             <a href="">
-              <CgProfile className={`${open ? 'mr-5' : ''} text-blue-950 inline-block w-6 h-6`} />
-              {open && <span className='text-blue-950 font-semibold'>Username</span>}
+               <CgProfile className={`${open ? 'mr-5' : ''} text-blue-950 inline-block w-6 h-6`} />
+              {open && <span className='text-blue-950 font-semibold'>Username</span>}           
             </a>
           </div>
 
