@@ -144,7 +144,7 @@ const Departments = () => {
           { label: 'Degree Programs', link: '/departments' },
         ]}
       />
-      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins">
+      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins justify-center md:mr-[20%] md:ml-[10%]">
         <div className="py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <input
             type="text"
@@ -171,7 +171,7 @@ const Departments = () => {
             departments.map((department) => (
               <div
                 key={department.id}
-                className="bg-white flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2"
+                className="bg-white flex md:w-full justify-between items-center gap-2"
               >
                 <Link
                   to={`/departments/${department.id}/intakes`}
@@ -179,7 +179,9 @@ const Departments = () => {
                   onClick={() => localStorage.setItem('departmentId', department.id)}
                 >
                   <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border border-b-[3px] font-semibold w-full p-2 px-4 rounded-[12px] hover:shadow-md mb-3 cursor-pointer flex justify-between items-center">
-                    {department.departmentName}
+                    <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis w-0 flex-1">
+                      {department.departmentName}
+                    </span>
                   </div>
                 </Link>
 
@@ -206,6 +208,7 @@ const Departments = () => {
                   </div>
                 )}
               </div>
+
             ))
           ) : (
             <div className="text-center text-gray-500">No departments available.</div>

@@ -167,81 +167,84 @@ const Semesters = () => {
          { label: 'Degree Programs', link: `/departments` },
          { label: 'Intakes', link: `/departments/${departmentId}/intakes` },// Correct path with intakeName
          // Correct path with intakeName
-          ]} />
-          <div className="px-4 sm:px-6 lg:px-8 font-poppins">
-  <div className="py-8 flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-    <input
-      type="text"
-      placeholder="Search"
-      className="bg-gray-200 rounded-full w-full md:max-w-[471px] h-[41px] px-4 text-md"
-    />
+      ]} />
 
-    {userRole === 'ROLE_AR' && (
-      <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-        <button
-          onClick={openForm}
-          className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-full sm:w-[144px] h-[41px]"
-          aria-label="Add Semester"
-        >
-          Add Semester +
-        </button>
+      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins justify-center md:mr-[20%] md:ml-[10%]">
+        <div className="py-8 flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+          <input
+            type="text"
+            placeholder="Search"
+            className="bg-gray-200 rounded-full w-full md:max-w-[471px] h-[41px] px-4 text-md"
+          />
 
-        <Link to="/viewFinalResults">
-          <button className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 w-full sm:w-auto">
-            View Final Results
-          </button>
-        </Link>
-      </div>
-    )}
-  </div>
+          {userRole === 'ROLE_AR' && (
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+              <button
+                onClick={openForm}
+                className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-full sm:w-[144px] h-[41px]"
+                aria-label="Add Semester"
+              >
+                Add Semester +
+              </button>
 
-            <div className="mt-[80px]">
-              {error && <div className="text-center text-red-500 mb-4">{error}</div>}
-              {semesters.length > 0 ? (
-            semesters.map((semester) => (
-              <div key={semester.id} className="bg-white flex justify-between items-center">
-                <Link
-              to={`/departments/${semester.id}/intakes/semesters/modules`}
-              className="flex-1"
-              onClick={() => {
-                localStorage.setItem('semesterId', semester.id); // Save semesterId to localStorage
-                localStorage.setItem('semesterName', semester.semesterName); // Save semesterName to localStorage
-              }}
-                >
-                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-[95%] p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
-                    {semester.semesterName}
-                  </div>
-                </Link>
-
-                {userRole === 'ROLE_AR' && (
-                  <div className="flex space-x-2">
-                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
-                    <button
-                      onClick={() => openEditForm(semester)}
-                      className="text-yellow-500 hover:text-yellow-700"
-                      aria-label="Edit Degree"
-                    >
-                      <img src={edit} alt="edit" />
-                    </button>
-                  </div>
-
-                  <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
-                    <button
-                      onClick={() => handleDelete(semester.id)}
-                      className="text-red-500 hover:text-red-700"
-                      aria-label="Delete Semester"
-                    >
-                      <img src={deleteIcon} alt="delete" />
-                    </button>
-                  </div>
-                </div>
-                )}
-                
-              </div>
-            ))
-          ) : (
-            <div className="text-center text-gray-500">No semester available.</div>
+              <Link to="/viewFinalResults">
+                <button className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 w-full sm:w-auto">
+                  View Final Results
+                </button>
+              </Link>
+            </div>
           )}
+        </div>
+
+        <div className="mt-[80px]">
+          {error && <div className="text-center text-red-500 mb-4">{error}</div>}
+          {semesters.length > 0 ? (
+        semesters.map((semester) => (
+          <div key={semester.id} className="bg-white flex md:w-full justify-between items-center gap-2">
+            <Link
+          to={`/departments/${semester.id}/intakes/semesters/modules`}
+          className="flex-1"
+          onClick={() => {
+            localStorage.setItem('semesterId', semester.id); // Save semesterId to localStorage
+            localStorage.setItem('semesterName', semester.semesterName); // Save semesterName to localStorage
+          }}
+            >
+              <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-[95%] p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
+                <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis w-0 flex-1">
+                  {semester.semesterName}
+                </span>
+              </div>
+            </Link>
+
+            {userRole === 'ROLE_AR' && (
+              <div className="flex space-x-2">
+              <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
+                <button
+                  onClick={() => openEditForm(semester)}
+                  className="text-yellow-500 hover:text-yellow-700"
+                  aria-label="Edit Degree"
+                >
+                  <img src={edit} alt="edit" />
+                </button>
+              </div>
+
+              <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
+                <button
+                  onClick={() => handleDelete(semester.id)}
+                  className="text-red-500 hover:text-red-700"
+                  aria-label="Delete Semester"
+                >
+                  <img src={deleteIcon} alt="delete" />
+                </button>
+              </div>
+            </div>
+            )}
+            
+          </div>
+        ))
+      ) : (
+        <div className="text-center text-gray-500">No semester available.</div>
+      )}
         </div>
       </div>
 

@@ -189,21 +189,21 @@ const Modules = () => {
           },
         ]}
       />
-      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins">
+      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins justify-center md:mr-[20%] md:ml-[10%]">
         <div className="py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <input
             type="text"
             placeholder="Search"
-            className="bg-gray-200 rounded-full w-full max-w-[471px] h-[41px] px-3 cursor-pointer text-md"
+            className="bg-gray-200 rounded-full w-full max-w-[405px] h-[41px] px-3 cursor-pointer text-md"
           />
           {userRole === "ROLE_AR" && (
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mt-4">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 ">
               <button
                 onClick={openForm}
                 className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
                 aria-label="Add Module"
               >
-                Add Module +
+               + Module
               </button>
 
               <button
@@ -211,21 +211,12 @@ const Modules = () => {
                 className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
                 aria-label="Register Module"
               >
-                Register your module
+                Module Registration
               </button>
-
-              <Link to={"/semesterResults"} className="w-full sm:w-auto">
-                <button
-                  className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
-                >
-                  View semester Results
-                </button>
-              </Link>
-
             
               <Link to={"/semesterResults"}>
-                <button className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 ml-4">
-                  View semester Results
+                <button className="bg-blue-950 text-white px-4 py-2 mt-1 rounded-lg font-medium hover:bg-blue-900">
+                  Semester Results
                 </button>
               </Link>
               
@@ -246,7 +237,7 @@ const Modules = () => {
           </div>
         )}
 
-        <div className="mt-[80px]">
+        <div className="md:mt-[80px]">
           {error && (
             <div className="text-center p-3 mb-4 bg-red-100 border border-red-400 text-red-700 rounded">
               {error}
@@ -256,7 +247,7 @@ const Modules = () => {
             modules.map((module) => (
               <div
                 key={module.id}
-                className="bg-white flex justify-between items-center"
+                className="bg-white flex md:w-full justify-between items-center gap-2"
               >
                 <Link
                   to={`/departments/${module.id}/intakes/semesters/modules/assignments`}
@@ -265,16 +256,24 @@ const Modules = () => {
                 >
                   <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-[95%] p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
                     <div className="flex flex-col">
-                      <span>{module.moduleName} ({module.moduleCode})</span>
+                      <div>
+                        <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis w-0 flex-1">
+                          {module.moduleName}
+                        </span>
+                        <span>
+                          ({module.moduleCode})
+                        </span>
+                      </div>
+
                       <div className="flex text-sm font-normal mt-1">
                         <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md mr-2">
                           {getModuleTypeLabel(module.moduleType)}
                         </span>
-                        <span className={`px-2 py-1 rounded-md ${module.gpaStatus === 'G' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                        <span className={`px-2 py-1 rounded-md ${module.gpaStatus === 'G' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} truncate whitespace-nowrap overflow-hidden text-ellipsis w-0 flex-1`}>
                           {getGpaStatusLabel(module.gpaStatus)}
                         </span>
                         {(module.moduleType === 'CM' || module.moduleType === 'TE') && module.credit && (
-                          <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-md ml-2">
+                          <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-md ml-2 truncate whitespace-nowrap overflow-hidden text-ellipsis w-0 flex-1">
                             {module.credit} Credits
                           </span>
                         )}
@@ -285,7 +284,7 @@ const Modules = () => {
 
                 {userRole === "ROLE_AR" && (
                   <div className="flex space-x-2">
-                    <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
+                    <div className="bg-white text-blue-950 border-blue-950 min-h-[77px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
                       <button
                         onClick={() => openEditForm(module)}
                         className="text-yellow-500 hover:text-yellow-700"
