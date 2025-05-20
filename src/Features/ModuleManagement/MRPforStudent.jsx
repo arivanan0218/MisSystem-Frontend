@@ -1,71 +1,199 @@
-import React, {useState, useRef } from 'react';
+import React, {useState, useRef, useEffect } from 'react';
 import { Card, Table, Typography, Button, message, Checkbox } from 'antd';
 import { MinusCircleFilled, PlusCircleFilled } from '@ant-design/icons';
 import Header from "../../Components/Header";
 import Breadcrumb from "../../Components/Breadcrumb";
 import Footer from "../../Components/Footer";
+import axios from 'axios';
+import instance from "../../axiosConfig";
 
 const { Title } = Typography;
 
 export const MRPforStudent = () => {
 const studentId = localStorage.getItem("selectedStudentId");
-// Initial data state
-  const [data, setData] = useState([
-    { key: 1, code: 'EE 4133', name: 'Module 1', gpa: 'N' },
-    { key: 2, code: 'EE 4133', name: 'Module 2', gpa: 'G' },
-    { key: 3, code: 'EE 4133', name: 'Module 3', gpa: 'N' },
-    { key: 4, code: 'EE 4140', name: 'Module 4', gpa: 'G' },
-  ]);
-  const [data2, setData2] = useState([
-    { key: 1, code: 'EE 4312', name: 'Module 5', gpa: false, ngpa: false },
-    { key: 2, code: 'EE 4302', name: 'Module 6', gpa: false, ngpa: false },
-    { key: 3, code: 'EE 4164', name: 'Module 7', gpa: false, ngpa: false },
-    { key: 4, code: 'EE 4421', name: 'Module 8', gpa: false, ngpa: false },
-    { key: 5, code: 'EE 4162', name: 'Module 9', gpa: false, ngpa: false },
-  ]);
+const departmentId = localStorage.getItem('departmentId');
+const intakeId = localStorage.getItem('intakeId');
+const semesterId = localStorage.getItem('semesterId');
+const [data, setData] = useState([]);     // Selected Modules
+const [data2, setData2] = useState([]);   // Eligible Modules
+const [loading, setLoading] = useState(false);
 
+useEffect(() => {
+  fetchInitialData();
+}, [departmentId, intakeId, semesterId]);
+
+const fetchInitialData = async () => {
+  setLoading(true);
+  try {
+    const token = localStorage.getItem('token') || localStorage.getItem('auth-token');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+    const moduleResponse = await instance.get(`/module/semester/{departmentAndIntakeAndSemesterId}`, {
+      params: { departmentId, intakeId, semesterId },
+      headers
+    });
+
+    const modules = Array.isArray(moduleResponse.data) ? moduleResponse.data : [];
+
+    const selectedCMModules = modules
+      .filter(m => m.moduleType === 'CM')
+      .map((m, i) => ({
+        key: m.id, // use the actual moduleId
+        moduleId: m.id,
+        code: m.moduleCode,
+        name: m.moduleName,
+        gpa: 'GPA',
+        moduleType: 'CM',
+      }));
+
+    const eligibleModules = modules
+      .filter(m => m.moduleType !== 'CM') // Only GE and TE
+      .map((m, i) => ({
+        key: m.id, // use the actual moduleId
+        moduleId: m.id,
+        code: m.moduleCode,
+        name: m.moduleName,
+        gpa: false,        // for checkbox
+        ngpa: m.moduleType === 'GE' ? true : false, // GE defaults to NGPA
+        moduleType: m.moduleType,
+      }));
+
+    setData(selectedCMModules);  // Selected modules
+    setData2(eligibleModules);   // Eligible modules
+    console.log('Selected Modules:', selectedCMModules);
+    console.log('Eligible Modules:', eligibleModules);
+
+  } catch (error) {
+    console.error('Error fetching modules:', error);
+    message.error('Failed to load modules.');
+  } finally {
+    setLoading(false);
+  }
+};
  // Function to handle record deletion
   const handleDelete = (key) => {
-    setData(data.filter((item) => item.key !== key));
-    message.success('Module removed successfully!');
-  };
-// Toggle GPA / NGPA checkboxes for eligible modules
-  const handleCheckboxChange = (key, type) => {
-    setData2(prev =>
-      prev.map(item => {
-        if (item.key === key) {
-          if (type === 'gpa') {
-            return { ...item, gpa: !item.gpa, ngpa: item.gpa ? false : item.ngpa };
-          } else {
-            return { ...item, ngpa: !item.ngpa, gpa: item.ngpa ? false : item.gpa };
-          }
+  const moduleToRemove = data.find((item) => item.key === key);
+  if (moduleToRemove) {
+    setData(prev => prev.filter((item) => item.key !== key));
+
+    if (moduleToRemove.moduleType !== 'CM') {
+      // Re-add to eligible modules
+      setData2(prev => [
+        ...prev,
+        {
+          key: moduleToRemove.moduleId,
+          moduleId: moduleToRemove.moduleId, 
+          code: moduleToRemove.code,
+          name: moduleToRemove.name,
+          gpa: moduleToRemove.gpa === 'GPA',
+          ngpa: moduleToRemove.gpa === 'NGPA',
+          moduleType: moduleToRemove.moduleType
         }
-        return item;
-      })
-    );
-  };
+      ]);
+    }
+
+    message.success('Module removed successfully!');
+  }
+};
+
+ // Toggle GPA / NGPA checkboxes for eligible modules
+  const handleCheckboxChange = (key, type) => {
+  setData2(prev =>
+    prev.map(item => {
+      if (item.key === key) {
+        const updatedItem = { ...item };
+        if (type === 'gpa') {
+          updatedItem.gpa = !item.gpa;
+          updatedItem.ngpa = false;
+        } else if (type === 'ngpa') {
+          updatedItem.ngpa = !item.ngpa;
+          updatedItem.gpa = false;
+        }
+        return updatedItem;
+      }
+      return item;
+    })
+  );
+};
 
  // Add a module from eligible modules to selected modules
-  const handleAdd = (key) => {
-    const moduleToAdd = data2.find(item => item.key === key);
-    if (moduleToAdd) {
-      // Determine GPA status: 'G' if gpa true, 'N' if ngpa true, else 'N'
-      const gpaStatus = moduleToAdd.gpa ? 'G' : moduleToAdd.ngpa ? 'N' : 'N';
-
-      // Check if already added to avoid duplicates (optional)
-      const alreadyAdded = data.some(item => item.code === moduleToAdd.code && item.name === moduleToAdd.name);
-      if (alreadyAdded) {
-        message.warning('Module already selected!');
-        return;
-      }
-
-      setData([...data, { key: Date.now(), code: moduleToAdd.code, name: moduleToAdd.name, gpa: gpaStatus }]);
-      message.success(`${moduleToAdd.name} added to selected modules!`);
+ const handleAdd = (key) => {
+  const moduleToAdd = data2.find(item => item.key === key);
+  if (moduleToAdd) {
+    let gpaStatus = 'NGPA';
+    if (moduleToAdd.moduleType === 'TE') {
+      gpaStatus = moduleToAdd.gpa ? 'GPA' : moduleToAdd.ngpa ? 'NGPA' : 'NGPA';
+    } else if (moduleToAdd.moduleType === 'GE') {
+      gpaStatus = 'NGPA';
     }
-  }; 
-  
+
+    const alreadyAdded = data.some(item => item.code === moduleToAdd.code && item.name === moduleToAdd.name);
+    if (alreadyAdded) {
+      message.warning('Module already selected!');
+      return;
+    }
+
+    // Add to selected modules (with moduleId!)
+    setData(prev => [
+      ...prev,
+      {
+        key: moduleToAdd.moduleId,
+        moduleId: moduleToAdd.moduleId, 
+        code: moduleToAdd.code,
+        name: moduleToAdd.name,
+        gpa: gpaStatus,
+        moduleType: moduleToAdd.moduleType
+      }
+    ]);
+
+    // Remove from eligible modules
+    setData2(prev => prev.filter(item => item.key !== key));
+
+    message.success(`${moduleToAdd.name} added to selected modules!`);
+  }
+};
+
+
+const handleSaveAndRedirect = async () => {
+  const takenModules = data.map((item) => ({
+    moduleId: item.moduleId,
+    gpaStatus: item.gpa,
+    moduleType: item.moduleType
+  }));
+
+  const payload = {
+    studentId: studentId,
+    semesterId: semesterId,
+    intakeId: intakeId,
+    departmentId: departmentId,
+    takenModules: takenModules
+  };
+
+  try {
+    const response = await fetch('/module-registration', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      message.success('Modules saved successfully!');
+      window.location.href = `/registration/${studentId}`;
+    } else {
+      const error = await response.json();
+      message.error(`Failed to save: ${error.message || 'Unknown error'}`);
+    }
+  } catch (err) {
+    console.error(err);
+    message.error('Error while saving modules');
+  }
+};
+
+
  // Columns for selected modules table
-const columns = [
+  const columns = [
   {
     title: 'Module Code',
     dataIndex: 'code',
@@ -88,15 +216,18 @@ const columns = [
     key: 'action',
     align: 'center',
     render: (_, record) => (
-      <Button
-        type="text"  // Use text type to have a flat button style
-        icon={<MinusCircleFilled style={{ color: '#172554', fontSize: '20px' }} />}  // Blue color
-        onClick={() => handleDelete(record.key)}
-      />
+      record.moduleType !== 'CM' ? (
+        <Button
+          type="text"
+          icon={<MinusCircleFilled style={{ color: '#172554', fontSize: '20px' }} />}
+          onClick={() => handleDelete(record.key)}
+        />
+      ) : null
     ),
+
   },
 ];
-  // Columns for eligible modules table
+ // Columns for eligible modules table
   const columns2 = [
     {
       title: 'Module Code',
@@ -119,6 +250,7 @@ const columns = [
       render: (_, record) => (
         <Checkbox
           checked={record.gpa}
+          disabled={record.moduleType === 'GE'}
           onChange={() => handleCheckboxChange(record.key, 'gpa')}
         />
       ),
@@ -131,10 +263,12 @@ const columns = [
       render: (_, record) => (
         <Checkbox
           checked={record.ngpa}
+          disabled={record.moduleType === 'GE'}
           onChange={() => handleCheckboxChange(record.key, 'ngpa')}
         />
       ),
     },
+
     {
       title: 'Action',
       key: 'action',
@@ -147,7 +281,8 @@ const columns = [
         />
       ),
     },
-  ];
+];
+  
   return (
   <div>
     <Header />
@@ -177,7 +312,7 @@ const columns = [
         </span>
         <button
           className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 ml-4"
-          onClick={() => window.location.href = `/registration/${studentId}`}
+          onClick={handleSaveAndRedirect}
         >
           Download
         </button>
