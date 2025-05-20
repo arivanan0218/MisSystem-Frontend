@@ -12,7 +12,8 @@ export const ModuleRegistrationForm = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const componentRef = useRef();
-
+  // Get the user role from localStorage
+  const userRole = localStorage.getItem("userRole");
   useEffect(() => {
     // First try to get data from localStorage (set by ModuleRegistrationPage)
     const storedData = localStorage.getItem('currentStudentData');
@@ -250,37 +251,41 @@ export const ModuleRegistrationForm = () => {
       </div>
 
       {/* Interactive version */}
-      <h1 className="text-2xl font-bold mb-4">Module Registration Details</h1>
-
-      {studentData && (
-        <div className="mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Student Name</h3>
-              <p className="text-lg font-semibold">{studentData.studentName}</p>
+      {userRole === "ROLE_AR" && (
+      <div>
+        <h1 className="text-2xl font-bold mb-4">Module Registration Details</h1>
+        {studentData && (
+          <div className="mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Student Name</h3>
+                <p className="text-lg font-semibold">{studentData.studentName}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Registration No</h3>
+                <p className="text-lg font-semibold">{studentData.studentRegNo}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Department</h3>
+                <p className="text-lg font-semibold">{studentData.departmentName}</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Registration No</h3>
-              <p className="text-lg font-semibold">{studentData.studentRegNo}</p>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Department</h3>
-              <p className="text-lg font-semibold">{studentData.departmentName}</p>
-            </div>
+            <Table
+              dataSource={studentData.modules}
+              columns={columns}
+              rowKey={(record) => record.id || record.moduleId}
+              pagination={false}
+              className="mb-6"
+            />
           </div>
-
-          <Table
-            dataSource={studentData.modules}
-            columns={columns}
-            rowKey={(record) => record.id || record.moduleId}
-            pagination={false}
-            className="mb-6"
-          />
-        </div>
+        )}
+      </div>
       )}
 
       {/* Printable version (hidden until print is triggered) */}
-      <div className="hidden">
+      {/* <div className="hidden"> */}
+      {userRole === "ROLE_STUDENT" && (
+
         <div
           ref={componentRef}
           className="bg-white p-8 border border-gray-300 max-w-[800px] mx-auto"
@@ -355,7 +360,8 @@ export const ModuleRegistrationForm = () => {
             </>
           )}
         </div>
-      </div>
+      )}
+      {/* </div> */}
     </div>
   );
 };

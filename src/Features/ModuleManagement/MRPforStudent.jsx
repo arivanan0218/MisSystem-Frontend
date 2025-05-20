@@ -1,8 +1,6 @@
 import React, {useState, useRef } from 'react';
 import { Card, Table, Typography, Button, message, Checkbox } from 'antd';
 import { MinusCircleFilled, PlusCircleFilled } from '@ant-design/icons';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import Header from "../../Components/Header";
 import Breadcrumb from "../../Components/Breadcrumb";
 import Footer from "../../Components/Footer";
@@ -10,9 +8,7 @@ import Footer from "../../Components/Footer";
 const { Title } = Typography;
 
 export const MRPforStudent = () => {
-
-  const componentRef = useRef(null);
-
+const studentId = localStorage.getItem("selectedStudentId");
 // Initial data state
   const [data, setData] = useState([
     { key: 1, code: 'EE 4133', name: 'Module 1', gpa: 'N' },
@@ -67,27 +63,7 @@ export const MRPforStudent = () => {
       message.success(`${moduleToAdd.name} added to selected modules!`);
     }
   }; 
-  const handleDownloadPDF = async () => {
-    try {
-      message.loading("Generating PDF...");
-      
-      const element = componentRef.current;
-      const canvas = await html2canvas(element);
-      const imgData = canvas.toDataURL("image/png");
-
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save("Module_Registration_Form.pdf");
-      
-      message.success("PDF downloaded successfully!");
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      message.error("Failed to generate PDF. Please try again.");
-    }
-  };
+  
  // Columns for selected modules table
 const columns = [
   {
@@ -199,15 +175,15 @@ const columns = [
         <span className="text-blue-950 text-xl font-medium font-['Poppins']">
           Module Selection
         </span>
-        <button className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 ml-4"
-        onClick={() => handleDownloadPDF()}
+        <button
+          className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 ml-4"
+          onClick={() => window.location.href = `/registration/${studentId}`}
         >
           Download
         </button>
         </div>
       </div>
       <div className="w-full h-0.1 bg-[#d9d9d9] outline outline-1 outline-offset-[-0.5px] outline-blue-950 mt-4 mb-4"></div>
-      <div ref={componentRef}>  
         <div className="text-blue-950 text-xl font-medium font-['Poppins'] mb-4">
           Selected&nbsp;Modules        
         </div>
@@ -219,7 +195,6 @@ const columns = [
           size="middle"
           rowClassName={() => 'text-blue-950'}
         />
-      </div>
       <div>  
         <div className="text-blue-950 text-xl font-medium font-['Poppins'] mb-4 mt-4">
           Eligible&nbsp;Modules      
