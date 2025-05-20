@@ -8,6 +8,7 @@ import ModuleCreation from "../ModuleManagement/ModuleCreation";
 import axios from "../../axiosConfig";
 import edit from "../../assets/img/edit.svg";
 import deleteIcon from "../../assets/img/delete.svg";
+import { use } from "react";
 
 const Modules = () => {
   const navigate = useNavigate();
@@ -197,32 +198,32 @@ const Modules = () => {
           />
           {userRole === "ROLE_AR" && (
             <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mt-4">
-  <button
-    onClick={openForm}
-    className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
-    aria-label="Add Module"
-  >
-    Add Module +
-  </button>
+              <button
+                onClick={openForm}
+                className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
+                aria-label="Add Module"
+              >
+                Add Module +
+              </button>
 
-  <button
-    onClick={() => navigate("/moduleRegistration")}
-    className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
-    aria-label="Register Module"
-  >
-    Register your module
-  </button>
+              <button
+                onClick={() => navigate("/moduleRegistration")}
+                className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
+                aria-label="Register Module"
+              >
+                Register your module
+              </button>
 
-  <Link to={"/semesterResults"} className="w-full sm:w-auto">
-    <button
-      className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
-    >
-      View semester Results
-    </button>
-  </Link>
+              <Link to={"/semesterResults"} className="w-full sm:w-auto">
+                <button
+                  className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
+                >
+                  View semester Results
+                </button>
+              </Link>
 
- 
-  <Link to={"/semesterResults"}>
+            
+              <Link to={"/semesterResults"}>
                 <button className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 ml-4">
                   View semester Results
                 </button>
@@ -235,6 +236,15 @@ const Modules = () => {
 
           )}
         </div>
+        {userRole === "ROLE_STUDENT" && (
+          <div className="flex justify-between items-center mb-4"> 
+           <Link to={"/ModuleRegistrationFormViewForStudent"}>
+              <button className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 ml-4">
+                Module Registration
+              </button>
+            </Link>
+          </div>
+        )}
 
         <div className="mt-[80px]">
           {error && (
