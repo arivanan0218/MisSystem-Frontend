@@ -257,7 +257,7 @@ const Modules = () => {
                   <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-[95%] p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
                     <div className="flex flex-col">
                       <div>
-                        <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis w-0 flex-1">
+                        <span className="sm:w-auto w-0 flex-1 sm:truncate truncate whitespace-nowrap overflow-hidden text-ellipsis">
                           {module.moduleName}
                         </span>
                         <span>
@@ -269,11 +269,11 @@ const Modules = () => {
                         <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md mr-2">
                           {getModuleTypeLabel(module.moduleType)}
                         </span>
-                        <span className={`px-2 py-1 rounded-md ${module.gpaStatus === 'G' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} truncate whitespace-nowrap overflow-hidden text-ellipsis w-0 flex-1`}>
+                        <span className={`px-2 py-1 rounded-md ${module.gpaStatus === 'G' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} sm:w-auto w-0 flex-1 sm:truncate truncate whitespace-nowrap overflow-hidden text-ellipsis`}>
                           {getGpaStatusLabel(module.gpaStatus)}
                         </span>
                         {(module.moduleType === 'CM' || module.moduleType === 'TE') && module.credit && (
-                          <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-md ml-2 truncate whitespace-nowrap overflow-hidden text-ellipsis w-0 flex-1">
+                          <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-md ml-2 truncate sm:truncate-none">
                             {module.credit} Credits
                           </span>
                         )}
