@@ -157,39 +157,36 @@ const fetchInitialData = async () => {
 const handleSaveAndRedirect = async () => {
   const takenModules = data.map((item) => ({
     moduleId: item.moduleId,
-    gpaStatus: item.gpa,
+    gpaStatus: item.gpa === "GPA" ? "G" : item.gpa === "NGPA" ? "N" : item.gpa,
     moduleType: item.moduleType
   }));
 
   const payload = {
-    studentId: studentId,
-    semesterId: semesterId,
-    intakeId: intakeId,
-    departmentId: departmentId,
-    takenModules: takenModules
+    studentId,
+    semesterId,
+    intakeId,
+    departmentId,
+    takenModules
   };
 
   try {
-    const response = await fetch('/module-registration', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    const token = localStorage.getItem('token') || localStorage.getItem('auth-token');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    if (response.ok) {
+    const response = await instance.post('/module-registration', payload, { headers });
+
+    if (response.status === 200 || response.status === 201) {
       message.success('Modules saved successfully!');
       window.location.href = `/registration/${studentId}`;
     } else {
-      const error = await response.json();
-      message.error(`Failed to save: ${error.message || 'Unknown error'}`);
+      message.error(`Failed to save modules. Status code: ${response.status}`);
     }
   } catch (err) {
-    console.error(err);
-    message.error('Error while saving modules');
+    console.error('Error while saving modules:', err);
+    message.error('Error while saving modules.');
   }
 };
+
 
 
  // Columns for selected modules table
@@ -310,12 +307,7 @@ const handleSaveAndRedirect = async () => {
         <span className="text-blue-950 text-xl font-medium font-['Poppins']">
           Module Selection
         </span>
-        <button
-          className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 ml-4"
-          onClick={handleSaveAndRedirect}
-        >
-          Download
-        </button>
+        
         </div>
       </div>
       <div className="w-full h-0.1 bg-[#d9d9d9] outline outline-1 outline-offset-[-0.5px] outline-blue-950 mt-4 mb-4"></div>
@@ -344,6 +336,15 @@ const handleSaveAndRedirect = async () => {
             rowClassName={() => 'text-blue-950'}
             scroll={{ x: '100%' }}
           />
+        </div>
+        <div className="flex justify-end mt-4">
+          <button
+            className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 ml-4"
+            style={{ minWidth: 180 }}
+            onClick={handleSaveAndRedirect}
+          >
+            Next
+          </button>
         </div>
       </div>
       
