@@ -163,7 +163,6 @@ const Semesters = () => {
     <div>
       <Header />
       <Breadcrumb breadcrumb={[
-         { label: 'Home', link: '/departments' },
          { label: 'Degree Programs', link: `/departments` },
          { label: 'Intakes', link: `/departments/${departmentId}/intakes` },
          { label: 'Semesters', link: `/departments/${departmentId}/intakes/${intakeId}/semesters` },

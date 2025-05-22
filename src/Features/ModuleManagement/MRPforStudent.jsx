@@ -309,16 +309,23 @@ const handleSaveAndRedirect = async () => {
   <div>
     <Header />
     <Breadcrumb
-    breadcrumb={[
-      { label: 'Home', link: '' },
-      { label: 'Dashboard', link: '' },
-      { label: 'Department of Computer Engineering', link: '' },
-      { label: 'E 2017 Batch (19th Intake)', link: '' },
-      { label: 'Semester 4', link: '' },
-      { label: 'Modules', link: '' },
-      { label: 'Module Registration', link: '' }
-    ]}
-    />
+        breadcrumb={[
+          { label: "Degree Programs", link: `/departments` },
+          { label: "Intakes", link: `/departments/${departmentId}/intakes` },
+          {
+            label: "Semesters",
+            link: `/departments/${departmentId}/intakes/${intakeId}/semesters`,
+          },
+          {
+            label: "Modules",
+            link: `/departments/${departmentId}/intakes/semesters/modules`,
+          },
+          {
+            label: "Module Registration",
+            link: `/ModuleRegistrationFormViewForStudent`,
+          },
+        ]}
+      />
     <div className="mx-4 mr-[20%] ml-[10%] px-8 font-poppins">
       <div className="py-8 flex items-center justify-between">
         <input

@@ -102,7 +102,6 @@ const Intakes = () => {
     <div className="flex flex-col min-h-screen">
       <Header />
       <Breadcrumb breadcrumb={[
-        { label: 'Home', link: '/departments' },
         { label: 'Degree Programs', link: `/departments` },
         { label: 'Intakes', link: `/departments/${departmentId}/intakes` }
       ]} />

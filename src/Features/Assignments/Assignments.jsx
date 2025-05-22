@@ -168,7 +168,6 @@ const Assignments = () => {
       <Header />
       <Breadcrumb
         breadcrumb={[
-          { label: "Home", link: "/departments" },
           { label: "Degree Programs", link: `/departments` },
           { label: "Intakes", link: `/departments/${departmentId}/intakes` },
           {
