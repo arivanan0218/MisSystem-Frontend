@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Table, Button, Select, Tag, message, Spin, Alert, Modal, Input, Tabs } from "antd";
+import { Table, Button, Select, Tag, message, Spin, Alert, Modal, Input, Tabs, Breadcrumb } from "antd";
 import instance from "../../axiosConfig";
 import Header from "../../Components/Header";
 import Footer from "../../Components/Footer";
+import BreadcrumbItem from "../../Components/Breadcrumb";
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -24,6 +25,8 @@ export const ModuleRegistrationPage = () => {
     semesterId: localStorage.getItem("semesterId") || ""
   });
   const [error, setError] = useState(null);
+  const departmentId = localStorage.getItem("departmentId");
+  const intakeId = localStorage.getItem("intakeId");  
 
   useEffect(() => {
     // Load filter options
@@ -369,6 +372,25 @@ export const ModuleRegistrationPage = () => {
   return (
     <div>
       <Header />
+      <BreadcrumbItem
+        breadcrumb={[
+          { label: "Home", link: "/departments" },
+          { label: "Degree Programs", link: `/departments` },
+          { label: "Intakes", link: `/departments/${departmentId}/intakes` },
+          {
+            label: "Semesters",
+            link: `/departments/${departmentId}/intakes/${intakeId}/semesters`,
+          },
+          {
+            label: "Modules",
+            link: `/departments/${departmentId}/intakes/semesters/modules`,
+          },
+          {
+            label: "Module Registration",
+            link: `/moduleRegistration`,
+          },
+        ]}
+      />
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-4">Module Registration Administration</h1>
         

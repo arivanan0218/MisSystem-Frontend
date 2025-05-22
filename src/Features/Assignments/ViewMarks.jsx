@@ -17,6 +17,10 @@ const ViewMarks = () => {
   const navigate = useNavigate();
 
   const moduleId = localStorage.getItem("moduleId");
+  // Get departmentId, intakeId, and semesterId from localStorage
+      const departmentId = localStorage.getItem("departmentId") || 1;
+      const intakeId = localStorage.getItem("intakeId") || 1;
+      const semesterId = localStorage.getItem("semesterId") || 1;
   const token = localStorage.getItem("auth-token");
 
   // Function to fetch module results
@@ -28,11 +32,7 @@ const ViewMarks = () => {
     }
 
     try {
-      // Get departmentId, intakeId, and semesterId from localStorage
-      const departmentId = localStorage.getItem("departmentId") || 1;
-      const intakeId = localStorage.getItem("intakeId") || 1;
-      const semesterId = localStorage.getItem("semesterId") || 1;
-
+      
       // Fetch module results
       const response = await axios.get(
         `http://localhost:8081/api/module-results/module?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}&moduleId=${moduleId}`,
@@ -270,7 +270,29 @@ const ViewMarks = () => {
   return (
     <div>
       <Header />
-      <Breadcrumb />
+      <Breadcrumb
+        breadcrumb={[
+          { label: "Home", link: "/departments" },
+          { label: "Degree Programs", link: `/departments` },
+          { label: "Intakes", link: `/departments/${departmentId}/intakes` },
+          {
+            label: "Semesters",
+            link: `/departments/${departmentId}/intakes/${intakeId}/semesters`,
+          },
+          {
+            label: "Modules",
+            link: `/departments/${departmentId}/intakes/semesters/modules`,
+          },
+          {
+            label: "Module Assessments",
+            link: `/departments/${moduleId}/intakes/semesters/modules/assignments`,
+          },
+          {
+            label: "Module Marks",
+            link: `/viewMarks`,
+          },
+        ]}
+      />
       <div className="mr-[10%] ml-[10%] px-8 font-poppins">
         <div className="py-8 text-center">
           <h1 className="text-2xl font-bold text-blue-950">Module Marks</h1>

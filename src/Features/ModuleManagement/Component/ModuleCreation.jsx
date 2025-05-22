@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from '../../axiosConfig';
+import axios from '../../../axiosConfig';
 
 const ModuleCreation = ({ closeForm, addModule, isEditing, currentModule }) => {
   const [moduleName, setModuleName] = useState('');

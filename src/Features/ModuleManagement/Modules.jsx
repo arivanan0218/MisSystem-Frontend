@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import Header from "../../Components/Header";
 import Breadcrumb from "../../Components/Breadcrumb";
 import Footer from "../../Components/Footer";
-import ModuleCreation from "../ModuleManagement/ModuleCreation";
+import ModuleCreation from "./Component/ModuleCreation";
 import axios from "../../axiosConfig";
 import edit from "../../assets/img/edit.svg";
 import deleteIcon from "../../assets/img/delete.svg";

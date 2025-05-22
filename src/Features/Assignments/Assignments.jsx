@@ -166,7 +166,26 @@ const Assignments = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <Breadcrumb />
+      <Breadcrumb
+        breadcrumb={[
+          { label: "Home", link: "/departments" },
+          { label: "Degree Programs", link: `/departments` },
+          { label: "Intakes", link: `/departments/${departmentId}/intakes` },
+          {
+            label: "Semesters",
+            link: `/departments/${departmentId}/intakes/${intakeId}/semesters`,
+          },
+          {
+            label: "Modules",
+            link: `/departments/${departmentId}/intakes/semesters/modules`,
+          },
+          {
+            label: "Module Assessments",
+            link: `/departments/${moduleId}/intakes/semesters/modules/assignments`,
+          },
+        ]}
+      />
+      
       <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins justify-center lg:mr-[4%] lg:ml-[2%] 2xl:mr-[10%] 2xl:ml-[5%]">
         <div className="py-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <input

@@ -278,7 +278,29 @@ const Marks = () => {
   return (
     <div>
       <Header />
-      <Breadcrumb breadcrumb={[{ label: "Home", link: "/" }, { label: "Marks", link: "/marks" }]} />
+      <Breadcrumb
+        breadcrumb={[
+          { label: "Home", link: "/departments" },
+          { label: "Degree Programs", link: `/departments` },
+          { label: "Intakes", link: `/departments/${departmentId}/intakes` },
+          {
+            label: "Semesters",
+            link: `/departments/${departmentId}/intakes/${intakeId}/semesters`,
+          },
+          {
+            label: "Modules",
+            link: `/departments/${departmentId}/intakes/semesters/modules`,
+          },
+          {
+            label: "Module Assessments",
+            link: `/departments/${moduleId}/intakes/semesters/modules/assignments`,
+          },
+          {
+            label: "Assessments Marks",
+            link: `/departments/${moduleId}/intakes/semesters/modules/assignments/marks`,
+          },
+        ]}
+      />
       <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins justify-center md:mr-[20%] md:ml-[10%]">
         {/* Search and Add Marks */}
         <div className="py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">

@@ -5,6 +5,9 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { Button, Table, Tag, Spin, Alert, message } from "antd";
 import instance from "../../axiosConfig";
+import Header from "../../Components/Header";
+import Footer from "../../Components/Footer";
+import BreadcrumbItem from "../../Components/Breadcrumb";
 
 export const ModuleRegistrationForm = () => {
   const { studentId } = useParams();
@@ -14,6 +17,9 @@ export const ModuleRegistrationForm = () => {
   const componentRef = useRef();
   // Get the user role from localStorage
   const userRole = localStorage.getItem("userRole");
+  const semesterId = localStorage.getItem("semesterId");
+  const intakeId = localStorage.getItem("intakeId");
+  const departmentId = localStorage.getItem("departmentId");
   useEffect(() => {
     // First try to get data from localStorage (set by ModuleRegistrationPage)
     const storedData = localStorage.getItem('currentStudentData');
@@ -41,11 +47,6 @@ export const ModuleRegistrationForm = () => {
   const fetchStudentData = async () => {
     setLoading(true);
     setError(null);
-    
-    const semesterId = localStorage.getItem("semesterId");
-    const intakeId = localStorage.getItem("intakeId");
-    const departmentId = localStorage.getItem("departmentId");
-
     try {
       console.log("ModuleRegistrationForm - Fetching data from API");
       const res = await instance.get(`/module-registration/student`, {
@@ -227,143 +228,160 @@ export const ModuleRegistrationForm = () => {
   ];
 
   return (
-    <div className="p-6">
-      <div className="flex justify-end space-x-4 mb-6">
-        {userRole === 'ROLE_AR' && (
+    <div>
+      <Header />
+      <BreadcrumbItem
+        breadcrumb={[
+          { label: "Home", link: "/departments" },
+          { label: "Degree Programs", link: `/departments` },
+          { label: "Intakes", link: `/departments/${departmentId}/intakes` },
+          {
+            label: "Semesters",
+            link: `/departments/${departmentId}/intakes/${intakeId}/semesters`,
+          },
+          {
+            label: "Modules",
+            link: `/departments/${departmentId}/intakes/semesters/modules`,
+          },
+          {
+            label: "Module Registration",
+            link: `/registration/${studentId}`,
+          },
+        ]}
+      />
+      <div className="p-6">
+        <div className="flex justify-end space-x-4 mb-6">
+          {userRole === 'ROLE_AR' && (
+            <Button
+              type="primary"
+              onClick={handlePrint}
+              className="bg-blue-600"
+            >
+              Print Form
+            </Button>
+          )}
           <Button
-            type="primary"
-            onClick={handlePrint}
-            className="bg-blue-600"
+            onClick={handleDownloadPDF}
+            className="bg-green-600 text-white"
           >
-            Print Form
+            Download PDF
           </Button>
-        )}
-        <Button
-          onClick={handleDownloadPDF}
-          className="bg-green-600 text-white"
-        >
-          Download PDF
-        </Button>
-        <Button
-          onClick={fetchStudentData}
-          className="bg-gray-200"
-        >
-          Refresh Data
-        </Button>
-      </div>
-
-      {/* Interactive version */}
-      {userRole === "ROLE_AR" && (
-      <div>
-        <h1 className="text-2xl font-bold mb-4">Module Registration Details</h1>
-        {studentData && (
-          <div className="mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Student Name</h3>
-                <p className="text-lg font-semibold">{studentData.studentName}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Registration No</h3>
-                <p className="text-lg font-semibold">{studentData.studentRegNo}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Department</h3>
-                <p className="text-lg font-semibold">{studentData.departmentName}</p>
-              </div>
-            </div>
-            <Table
-              dataSource={studentData.modules}
-              columns={columns}
-              rowKey={(record) => record.id || record.moduleId}
-              pagination={false}
-              className="mb-6"
-            />
-          </div>
-        )}
-      </div>
-      )}
-
-      {/* Printable version (hidden until print is triggered) */}
-      {/* <div className="hidden"> */}
-      {userRole === "ROLE_STUDENT" && (
-
-        <div
-          ref={componentRef}
-          className="bg-white p-8 border border-gray-300 max-w-[800px] mx-auto"
-        >
+          <Button
+            onClick={fetchStudentData}
+            className="bg-gray-200"
+          >
+            Refresh Data
+          </Button>
+        </div>
+        {/* Interactive version */}
+        {userRole === "ROLE_AR" && (
+        <div>
+          <h1 className="text-2xl font-bold mb-4">Module Registration Details</h1>
           {studentData && (
-            <>
-              <h2 className="text-center text-xl font-bold mb-4">
-                Registration for {" "}
-                {localStorage.getItem("semesterName") || "Current"} Modules for End Semester Examination{" "}
-                {studentData.departmentName}
-              </h2>
-
-              <div className="mb-4">
-                <p className="mb-1">
-                  <strong>Name:</strong> {studentData.studentName}
-                </p>
-                <p className="mb-1">
-                  <strong>Registration No:</strong> {studentData.studentRegNo}
-                </p>
-                <p className="mb-1">
-                  <strong>Department:</strong> {studentData.departmentName}
-                </p>
+            <div className="mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Student Name</h3>
+                  <p className="text-lg font-semibold">{studentData.studentName}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Registration No</h3>
+                  <p className="text-lg font-semibold">{studentData.studentRegNo}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Department</h3>
+                  <p className="text-lg font-semibold">{studentData.departmentName}</p>
+                </div>
               </div>
-
-              <table className="w-full border-collapse border border-gray-400 mt-4">
-                <thead>
-                  <tr className="bg-gray-200">
-                    {printColumns.map((column) => (
-                      <th key={column.key} className="border border-gray-400 p-2 text-left">
-                        {column.title}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {studentData.modules.map((module) => (
-                    <tr key={module.id || module.moduleId}>
-                      <td className="border border-gray-400 p-2">
-                        {module.code || module.moduleCode}
-                      </td>
-                      <td className="border border-gray-400 p-2">
-                        {module.name || module.moduleName}
-                      </td>
-                      <td className="border border-gray-400 p-2">
-                        {module.type || ""}
-                      </td>
-                      <td className="border border-gray-400 p-2 text-center">
-                        {module.status === "Taken" ? "✓" : "✗"}
-                      </td>
-                      <td className="border border-gray-400 p-2 text-center">
-                        {module.grade}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <div className="mt-6 space-y-4">
-                <p>
-                  <strong>Signature of the Student:</strong> ____________________ <strong>Date:</strong> ____________________
-                </p>
-                <p>
-                  <strong>Recommendation of the Advisor:</strong> ____________________
-                </p>
-                <p>
-                  <strong>Signature of the Advisor:</strong> ____________________ <strong>Date:</strong> ____________________
-                </p>
-                <p>
-                  <strong>AR Approval:</strong> ____________________ <strong>Date:</strong> ____________________
-                </p>
-              </div>
-            </>
+              <Table
+                dataSource={studentData.modules}
+                columns={columns}
+                rowKey={(record) => record.id || record.moduleId}
+                pagination={false}
+                className="mb-6"
+              />
+            </div>
           )}
         </div>
-      )}
-      {/* </div> */}
+        )}
+        {/* Printable version (hidden until print is triggered) */}
+        {/* <div className="hidden"> */}
+        {(userRole === "ROLE_STUDENT" || userRole === "ROLE_AR") && (
+          <div
+            ref={componentRef}
+            className="bg-white p-8 border border-gray-300 max-w-[800px] mx-auto"
+          >
+            {studentData && (
+              <>
+                <h2 className="text-center text-xl font-bold mb-4">
+                  Registration for {" "}
+                  {localStorage.getItem("semesterName") || "Current"} Modules for End Semester Examination{" "}
+                  {studentData.departmentName}
+                </h2>
+                <div className="mb-4">
+                  <p className="mb-1">
+                    <strong>Name:</strong> {studentData.studentName}
+                  </p>
+                  <p className="mb-1">
+                    <strong>Registration No:</strong> {studentData.studentRegNo}
+                  </p>
+                  <p className="mb-1">
+                    <strong>Department:</strong> {studentData.departmentName}
+                  </p>
+                </div>
+                <table className="w-full border-collapse border border-gray-400 mt-4">
+                  <thead>
+                    <tr className="bg-gray-200">
+                      {printColumns.map((column) => (
+                        <th key={column.key} className="border border-gray-400 p-2 text-left">
+                          {column.title}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {studentData.modules.map((module) => (
+                      <tr key={module.id || module.moduleId}>
+                        <td className="border border-gray-400 p-2">
+                          {module.code || module.moduleCode}
+                        </td>
+                        <td className="border border-gray-400 p-2">
+                          {module.name || module.moduleName}
+                        </td>
+                        <td className="border border-gray-400 p-2">
+                          {module.type || ""}
+                        </td>
+                        <td className="border border-gray-400 p-2 text-center">
+                          {module.status === "Taken" ? "✓" : "✗"}
+                        </td>
+                        <td className="border border-gray-400 p-2 text-center">
+                          {module.grade}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="mt-6 space-y-4">
+                  <p>
+                    <strong>Signature of the Student:</strong> ____________________ <strong>Date:</strong> ____________________
+                  </p>
+                  <p>
+                    <strong>Recommendation of the Advisor:</strong> ____________________
+                  </p>
+                  <p>
+                    <strong>Signature of the Advisor:</strong> ____________________ <strong>Date:</strong> ____________________
+                  </p>
+                  <p>
+                    <strong>AR Approval:</strong> ____________________ <strong>Date:</strong> ____________________
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+        {/* </div> */}
+      </div>
+      <Footer />
     </div>
   );
 };

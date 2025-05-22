@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Header from '../../Components/Header';
 import Breadcrumb from '../../Components/Breadcrumb';
 import Footer from '../../Components/Footer';
-import SemesterCreation from './SemesterCreation';
+import SemesterCreation from './Component/SemesterCreation';
 import axios from '../../axiosConfig'; // Import axios for HTTP requests
 import edit from '../../assets/img/edit.svg';
 import deleteIcon from '../../assets/img/delete.svg';
@@ -165,8 +165,8 @@ const Semesters = () => {
       <Breadcrumb breadcrumb={[
          { label: 'Home', link: '/departments' },
          { label: 'Degree Programs', link: `/departments` },
-         { label: 'Intakes', link: `/departments/${departmentId}/intakes` },// Correct path with intakeName
-         // Correct path with intakeName
+         { label: 'Intakes', link: `/departments/${departmentId}/intakes` },
+         { label: 'Semesters', link: `/departments/${departmentId}/intakes/${intakeId}/semesters` },
       ]} />
 
       <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins justify-center md:mr-[20%] md:ml-[10%]">
