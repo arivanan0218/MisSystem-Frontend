@@ -158,7 +158,7 @@ const Departments = () => {
                 className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-full md:w-[144px] h-[41px]"
                 aria-label="Add Degree Program"
               >
-                Add Degree +
+                + Degree
               </button>
               {formOpen && <DegreeProgramCreation closeForm={closeForm} addDepartment={addDepartment} />}
             </div>

@@ -27,7 +27,9 @@ const Modules = () => {
   const token = localStorage.getItem("auth-token");
   const semesterId = localStorage.getItem("semesterId");
   const departmentId = localStorage.getItem("departmentId");
-  const intakeId = localStorage.getItem("intakeId");
+  const intakeId = localStorage.getItem("intakeId");  
+  // const studentId = localStorage.getItem("selectedStudentId");
+  const studentId = 1; // Replace with the actual student ID or fetch it from localStorage if needed
 
   const openForm = () => setFormOpen(true);
   const closeForm = () => setFormOpen(false);
@@ -90,9 +92,8 @@ const Modules = () => {
       setError(err.response?.data?.message || "Could not delete module. Please try again later.");
     }
   };
-
   useEffect(() => {
-    const fetchModules = async () => {
+    const fetchModulesForAR = async () => {
       try {
         if (!departmentId || !intakeId || !semesterId) {
           setError("Required data missing from localStorage.");
@@ -107,22 +108,15 @@ const Modules = () => {
           return;
         }
 
-        // The backend endpoint expects a path variable that's not actually used, but is required by the URL pattern
-        // We'll use a placeholder value for the path variable and pass the actual values as query parameters
-        const pathVariable = "query"; // This is just a placeholder, the actual values are passed as query params
-        
-        // Construct the endpoint URL to match exactly what the backend expects
+        const pathVariable = "query";
         const endpoint = `module/semester/${pathVariable}?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
         console.log("Calling API endpoint:", endpoint);
-        
-        const response = await axios.get(
-          endpoint,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+
+        const response = await axios.get(endpoint, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (response.status !== 200) {
           throw new Error(`Failed to fetch modules: ${response.statusText}`);
@@ -132,7 +126,7 @@ const Modules = () => {
         console.log("Fetched modules:", data);
 
         if (Array.isArray(data)) {
-          setModules(data); // Set the modules directly
+          setModules(data);
         } else {
           throw new Error("Invalid data structure from API");
         }
@@ -149,8 +143,80 @@ const Modules = () => {
       }
     };
 
-    fetchModules();
-  }, [departmentId, intakeId, semesterId, token]);
+    const fetchModulesForStudent = async () => {
+  try {
+    if (!departmentId || !intakeId || !semesterId || !studentId) {
+      setError("Required data missing from localStorage.");
+      return;
+    }
+
+    if (!token) {
+      setError("Authentication required. Please log in again.");
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 2000);
+      return;
+    }
+
+    // STEP 1: Fetch registered module IDs for the student
+    const registeredEndpoint = `module-registration/student?studentId=${studentId}&semesterId=${semesterId}&intakeId=${intakeId}&departmentId=${departmentId}`;
+    console.log("Fetching registered module IDs from:", registeredEndpoint);
+
+    const registeredResponse = await axios.get(registeredEndpoint, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (registeredResponse.status !== 200) {
+      throw new Error("Failed to fetch registered module IDs.");
+    }
+
+    const registeredData = registeredResponse.data;
+    const registeredModuleIds = registeredData.modules.map((mod) => mod.id); // Adjust key if needed
+    console.log("Registered Module IDs:", registeredModuleIds);
+
+    // STEP 2: Fetch all available modules for the semester
+    const pathVariable = "query";
+    const modulesEndpoint = `module/semester/${pathVariable}?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
+    console.log("Fetching all semester modules from:", modulesEndpoint);
+
+    const modulesResponse = await axios.get(modulesEndpoint, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (modulesResponse.status !== 200) {
+      throw new Error("Failed to fetch semester modules.");
+    }
+
+    const allModules = modulesResponse.data;
+    console.log("All Semester Modules:", allModules);
+
+    // STEP 3: Filter semester modules by registered module IDs
+    const filteredModules = allModules.filter(module =>
+      registeredModuleIds.includes(module.id.toString())
+    );
+
+    console.log("Filtered Modules for Student:", filteredModules);
+    setModules(filteredModules);
+
+  } catch (error) {
+    console.error("Error in fetchModulesForStudent:", error);
+    setError(
+      error.response?.data?.message || "Could not fetch modules. Please try again later."
+    );
+  }
+};
+
+
+    if (userRole === "ROLE_AR") {
+      fetchModulesForAR();
+    } else if (userRole === "ROLE_STUDENT") {
+      fetchModulesForStudent();
+    }
+  }, [userRole, departmentId, intakeId, semesterId, studentId, token]);
 
   // Helper function to get module type label
   const getModuleTypeLabel = (type) => {
@@ -189,15 +255,15 @@ const Modules = () => {
           },
         ]}
       />
-      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins justify-center md:mr-[20%] md:ml-[10%]">
-        <div className="py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins justify-center lg:mr-[4%] lg:ml-[2%] 2xl:mr-[10%] 2xl:ml-[5%]">
+        <div className="py-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
           <input
             type="text"
             placeholder="Search"
             className="bg-gray-200 rounded-full w-full max-w-[405px] h-[41px] px-3 cursor-pointer text-md"
           />
           {userRole === "ROLE_AR" && (
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 ">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4  ">
               <button
                 onClick={openForm}
                 className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"

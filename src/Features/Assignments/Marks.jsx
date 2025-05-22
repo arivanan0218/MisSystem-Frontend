@@ -279,9 +279,9 @@ const Marks = () => {
     <div>
       <Header />
       <Breadcrumb breadcrumb={[{ label: "Home", link: "/" }, { label: "Marks", link: "/marks" }]} />
-      <div className="mr-[20%] ml-[10%] px-8 font-poppins">
+      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins justify-center md:mr-[20%] md:ml-[10%]">
         {/* Search and Add Marks */}
-        <div className="py-8 flex items-center justify-between">
+        <div className="py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <input
             type="text"
             placeholder="Search by student name or registration number"
@@ -299,7 +299,7 @@ const Marks = () => {
               className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-[144px] h-[41px] ml-4"
               aria-label="Add Marks"
             >
-              Add Marks +
+              + Marks
             </button>
           )}
         </div>

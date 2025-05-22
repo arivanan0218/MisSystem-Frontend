@@ -1,5 +1,5 @@
 import React, {useState, useRef, useEffect } from 'react';
-import { Card, Table, Typography, Button, message, Checkbox } from 'antd';
+import { Card, Table, Typography, Button, message, Checkbox, Modal } from 'antd';
 import { MinusCircleFilled, PlusCircleFilled } from '@ant-design/icons';
 import Header from "../../Components/Header";
 import Breadcrumb from "../../Components/Breadcrumb";
@@ -10,7 +10,8 @@ import instance from "../../axiosConfig";
 const { Title } = Typography;
 
 export const MRPforStudent = () => {
-const studentId = localStorage.getItem("selectedStudentId");
+// const studentId = localStorage.getItem("studentId");
+const studentId = 1;
 const departmentId = localStorage.getItem('departmentId');
 const intakeId = localStorage.getItem('intakeId');
 const semesterId = localStorage.getItem('semesterId');
@@ -153,28 +154,45 @@ const fetchInitialData = async () => {
   }
 };
 
+const showConfirmationBeforeSubmit = () => {
+  Modal.confirm({
+    title: 'Are you sure you want to submit?',
+    content: 'Once submitted, changes will be saved. You CAN NOT modify them later.',
+    okText: 'Yes, Submit',
+    cancelText: 'Cancel',
+    onOk: handleSaveAndRedirect,
+  });
+};
 
 const handleSaveAndRedirect = async () => {
+  // Prepare takenModules array
   const takenModules = data.map((item) => ({
-    moduleId: item.moduleId,
+    moduleId: Number(item.moduleId),
     gpaStatus: item.gpa === "GPA" ? "G" : item.gpa === "NGPA" ? "N" : item.gpa,
     moduleType: item.moduleType
   }));
 
+  // Prepare the full payload
   const payload = {
-    studentId,
-    semesterId,
-    intakeId,
-    departmentId,
+    studentId: Number(studentId),
+    semesterId: Number(semesterId),
+    intakeId: Number(intakeId),
+    departmentId: Number(departmentId),
     takenModules
   };
 
   try {
+    // Prepare authorization header
     const token = localStorage.getItem('token') || localStorage.getItem('auth-token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
+    // Make the POST request
+    console.log('Payload:', payload);
+    console.log('Headers:', headers);
+
     const response = await instance.post('/module-registration', payload, { headers });
 
+    // Handle response
     if (response.status === 200 || response.status === 201) {
       message.success('Modules saved successfully!');
       window.location.href = `/registration/${studentId}`;
@@ -182,10 +200,17 @@ const handleSaveAndRedirect = async () => {
       message.error(`Failed to save modules. Status code: ${response.status}`);
     }
   } catch (err) {
-    console.error('Error while saving modules:', err);
-    message.error('Error while saving modules.');
+    // Error logging
+    if (err.response) {
+      console.error('Server responded with error:', err.response.data);
+      message.error(`Error: ${err.response.data.message || 'Failed to save modules.'}`);
+    } else {
+      console.error('Request error:', err.message);
+      message.error('Network or server error occurred.');
+    }
   }
 };
+
 
 
 
@@ -341,9 +366,9 @@ const handleSaveAndRedirect = async () => {
           <button
             className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 ml-4"
             style={{ minWidth: 180 }}
-            onClick={handleSaveAndRedirect}
+            onClick={showConfirmationBeforeSubmit}
           >
-            Next
+            Submit
           </button>
         </div>
       </div>

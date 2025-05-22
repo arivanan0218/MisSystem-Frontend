@@ -170,7 +170,7 @@ const Semesters = () => {
       ]} />
 
       <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins justify-center md:mr-[20%] md:ml-[10%]">
-        <div className="py-8 flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+        <div className="py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <input
             type="text"
             placeholder="Search"
@@ -184,14 +184,18 @@ const Semesters = () => {
                 className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-full sm:w-[144px] h-[41px]"
                 aria-label="Add Semester"
               >
-                Add Semester +
+               + Semester
               </button>
 
               <Link to="/viewFinalResults">
                 <button className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 w-full sm:w-auto">
-                  View Final Results
+                  Final Results
                 </button>
               </Link>
+
+              {formOpen && (
+                <SemesterCreation closeForm={closeForm} addSemester={addSemester} />
+              )}
             </div>
           )}
         </div>

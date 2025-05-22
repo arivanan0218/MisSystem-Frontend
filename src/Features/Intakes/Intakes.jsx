@@ -120,7 +120,7 @@ const Intakes = () => {
                 onClick={openForm}
                 className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-full md:w-[144px] h-[41px]"
               >
-                Add Intake +
+                + Intake
               </button>
               {formOpen && <IntakeCreation closeForm={closeForm} addIntake={addIntake} />}
             </div>

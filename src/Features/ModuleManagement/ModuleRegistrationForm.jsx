@@ -228,14 +228,16 @@ export const ModuleRegistrationForm = () => {
 
   return (
     <div className="p-6">
-      <div className="flex space-x-4 mb-6">
-        <Button
-          type="primary"
-          onClick={handlePrint}
-          className="bg-blue-600"
-        >
-          Print Form
-        </Button>
+      <div className="flex justify-end space-x-4 mb-6">
+        {userRole === 'ROLE_AR' && (
+          <Button
+            type="primary"
+            onClick={handlePrint}
+            className="bg-blue-600"
+          >
+            Print Form
+          </Button>
+        )}
         <Button
           onClick={handleDownloadPDF}
           className="bg-green-600 text-white"
