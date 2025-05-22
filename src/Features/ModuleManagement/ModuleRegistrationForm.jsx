@@ -20,6 +20,8 @@ export const ModuleRegistrationForm = () => {
   const semesterId = localStorage.getItem("semesterId");
   const intakeId = localStorage.getItem("intakeId");
   const departmentId = localStorage.getItem("departmentId");
+  const today = new Date();
+const formattedDate = today.toISOString().slice(0, 10); // "2025-05-22"
   useEffect(() => {
     // First try to get data from localStorage (set by ModuleRegistrationPage)
     const storedData = localStorage.getItem('currentStudentData');
@@ -123,6 +125,12 @@ export const ModuleRegistrationForm = () => {
       case 'Pending': return { text: 'Pending Approval', color: 'gold' };
       default: return { text: status || 'Unknown', color: 'default' };
     }
+  };
+
+   // Function to check if all modules are approved
+  const areAllModulesApproved = () => {
+    if (!studentData || !studentData.modules) return false;
+    return studentData.modules.every(module => module.registrationStatus === "Approved");
   };
 
   if (loading) {
@@ -363,7 +371,7 @@ export const ModuleRegistrationForm = () => {
                 </table>
                 <div className="mt-6 space-y-4">
                   <p>
-                    <strong>Signature of the Student:</strong> ____________________ <strong>Date:</strong> ____________________
+                    <strong>Signature of the Student:</strong>__{studentData.studentName}__<strong>Date:</strong>__{formattedDate}__
                   </p>
                   <p>
                     <strong>Recommendation of the Advisor:</strong> ____________________
@@ -372,7 +380,7 @@ export const ModuleRegistrationForm = () => {
                     <strong>Signature of the Advisor:</strong> ____________________ <strong>Date:</strong> ____________________
                   </p>
                   <p>
-                    <strong>AR Approval:</strong> ____________________ <strong>Date:</strong> ____________________
+                    <strong>AR Approval:</strong> {areAllModulesApproved() ? "________Approved________" : "____________________"} <strong>Date:</strong> {areAllModulesApproved() ? `__${formattedDate}__` : "____________________"}
                   </p>
                 </div>
               </>

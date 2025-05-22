@@ -51,7 +51,7 @@ const Sidebar = ({ children, setBreadcrumb }) => {
 
   return (
     <div className='flex font-poppins'>
-      <div className={`flex flex-row md:flex-col justify-between ${open ? '' : 'w-20'} md:h-screen
+      <div className={`z-10 flex flex-row md:flex-col justify-between ${open ? '' : 'w-20'} md:h-screen
       h-12 w-full md:w-auto bg-[#f4f8ff] font-poppins fixed top-0 left-0`}>
         <div className=''>
           <div className={`hidden md:flex  items-center mt-10 mb-10 text-blue-950`}>
@@ -117,7 +117,7 @@ const Sidebar = ({ children, setBreadcrumb }) => {
         </div>
       </div>
 
-      <div className={`${open ? 'md:ml-56' : 'md:ml-20'} flex-1 mt-12 md:mt-0`}>
+      <div className={`z-0 ${open ? 'md:ml-56' : 'md:ml-20'} flex-1 mt-12 md:mt-0`}>
         {children}
       </div>
     </div>

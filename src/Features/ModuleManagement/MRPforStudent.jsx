@@ -160,11 +160,11 @@ const showConfirmationBeforeSubmit = () => {
     content: 'Once submitted, changes will be saved. You CAN NOT modify them later.',
     okText: 'Yes, Submit',
     cancelText: 'Cancel',
-    onOk: handleSaveAndRedirect,
+    onOk: handleSave,
   });
 };
 
-const handleSaveAndRedirect = async () => {
+const handleSave = async () => {
   // Prepare takenModules array
   const takenModules = data.map((item) => ({
     moduleId: Number(item.moduleId),
@@ -195,7 +195,12 @@ const handleSaveAndRedirect = async () => {
     // Handle response
     if (response.status === 200 || response.status === 201) {
       message.success('Modules saved successfully!');
-      window.location.href = `/registration/${studentId}`;
+      
+      // Store submission time for signature
+      localStorage.setItem('submissionTime', new Date().toISOString());
+      
+      // Call navigate function after successful save
+      handleNavigate();
     } else {
       message.error(`Failed to save modules. Status code: ${response.status}`);
     }
@@ -209,6 +214,10 @@ const handleSaveAndRedirect = async () => {
       message.error('Network or server error occurred.');
     }
   }
+};
+
+const handleNavigate = () => {
+  window.location.href = `/registration/${studentId}`;
 };
 
 
@@ -369,7 +378,14 @@ const handleSaveAndRedirect = async () => {
             scroll={{ x: '100%' }}
           />
         </div>
-        <div className="flex justify-end mt-4">
+        <div className="flex flex-col md:flex-row md:justify-end justify-center items-center mt-4">
+          <button
+                onClick={handleNavigate}
+                className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-64 px-4 py-2 my-2"
+                aria-label="Add Degree Program"
+              >
+                Module Registration Form
+          </button>
           <button
             className="bg-blue-950 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-900 ml-4"
             style={{ minWidth: 180 }}
