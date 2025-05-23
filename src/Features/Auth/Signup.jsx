@@ -55,7 +55,7 @@ const Signup = () => {
       };
 
       const response = await axios.post(
-        "http://localhost:8081/api/auth/signup",
+        "http://13.203.223.91:8084/api/auth/signup",
         payload
       );
 
