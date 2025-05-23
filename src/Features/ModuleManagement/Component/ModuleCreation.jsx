@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import axios from '../../axiosConfig';
+import axios from '../../../axiosConfig';
 
 const ModuleCreation = ({ closeForm, addModule, isEditing, currentModule }) => {
   const [moduleName, setModuleName] = useState('');
   const [moduleCode, setModuleCode] = useState('');
   const [credit, setCredit] = useState('');
   const [moduleCoordinator, setModuleCoordinator] = useState('');
+  const [moduleType, setModuleType] = useState('');
   const [gpaStatus, setGpaStatus] = useState('');
   const [semesterId, setSemesterId] = useState('');
   const [error, setError] = useState(null);
+  const [gpaDisabled, setGpaDisabled] = useState(false);
 
   useEffect(() => {
     if (isEditing && currentModule) {
@@ -16,8 +18,16 @@ const ModuleCreation = ({ closeForm, addModule, isEditing, currentModule }) => {
       setModuleCode(currentModule.moduleCode);
       setCredit(currentModule.credit);
       setModuleCoordinator(currentModule.moduleCoordinator);
-      setGpaStatus(currentModule.gpa_Status);
+      setModuleType(currentModule.moduleType);
+      setGpaStatus(currentModule.gpaStatus);
       setSemesterId(currentModule.semesterId);
+      
+      // Set GPA disabled status based on module type
+      if (currentModule.moduleType === 'CM') {
+        setGpaDisabled(true);
+      } else {
+        setGpaDisabled(false);
+      }
     } else {
       const storedSemesterId = localStorage.getItem('semesterId');
       if (storedSemesterId) {
@@ -25,16 +35,26 @@ const ModuleCreation = ({ closeForm, addModule, isEditing, currentModule }) => {
       }
     }
   }, [isEditing, currentModule]);
+  
+  // Handle module type change
+  useEffect(() => {
+    if (moduleType === 'CM') {
+      setGpaStatus('GPA');
+      setGpaDisabled(true);
+    } else {
+      setGpaDisabled(false);
+    }
+  }, [moduleType]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const moduleId = localStorage.getItem('moduleId'); 
     const intakeId = localStorage.getItem('intakeId'); 
     const departmentId = localStorage.getItem('departmentId');
 
-    if (moduleName.trim() && moduleCode.trim() && credit && moduleCoordinator.trim() && gpaStatus.trim() && semesterId) {
-      const newModule = {
+    if (moduleName.trim() && moduleCode.trim() && credit && moduleCoordinator.trim() && moduleType && gpaStatus && semesterId) {
+      // Create the module object
+      const moduleData = {
         semesterId,
         intakeId,
         departmentId,
@@ -42,16 +62,31 @@ const ModuleCreation = ({ closeForm, addModule, isEditing, currentModule }) => {
         moduleCode,
         credit: parseInt(credit, 10),
         moduleCoordinator,
-        gpa_Status: gpaStatus,
+        moduleType,
+        gpaStatus,
       };
 
       try {
-        const response = await axios.post('module/create', newModule);
+        let response;
+        
+        if (isEditing && currentModule) {
+          // If editing, include the module ID and use PUT request
+          moduleData.id = currentModule.id;
+          console.log('Updating module with ID:', currentModule.id);
+          response = await axios.put(`/module/${currentModule.id}`, moduleData);
+          console.log('Module updated successfully:', response.data);
+        } else {
+          // If creating new, use POST request
+          console.log('Creating new module');
+          response = await axios.post('/module/create', moduleData);
+          console.log('Module created successfully:', response.data);
+        }
+        
         addModule(response.data);
         closeForm();
       } catch (error) {
-        console.error('Error adding module:', error);
-        setError('Failed to add module. Please try again.');
+        console.error(`Error ${isEditing ? 'updating' : 'adding'} module:`, error);
+        setError(`Failed to ${isEditing ? 'update' : 'add'} module. Please try again.`);
       }
     } else {
       setError('Please fill out all fields.');
@@ -134,6 +169,31 @@ const ModuleCreation = ({ closeForm, addModule, isEditing, currentModule }) => {
           </div>
           <div className="mb-6">
             <label
+              htmlFor="moduleType"
+              className="block mb-2 text-blue-950 text-lg font-semibold"
+            >
+              Module Type
+            </label>
+            <select
+              id="moduleType"
+              value={moduleType}
+              onChange={(e) => setModuleType(e.target.value)}
+              className="border border-blue-950 p-2 rounded w-full cursor-pointer"
+            >
+              <option value="" disabled>Select Module Type</option>
+              <option value="CM">Core Module (CM)</option>
+              <option value="TE">Technical Elective (TE)</option>
+              <option value="GE">General Elective (GE)</option>
+            </select>
+            <small className="text-gray-500 mt-1 block">
+              {moduleType === 'CM' ? 'Core Modules are always GPA counted' : 
+               moduleType === 'GE' ? 'General Electives can be GPA or Non-GPA' : 
+               moduleType === 'TE' ? 'Technical Electives can be GPA or Non-GPA' : ''}
+            </small>
+          </div>
+          
+          <div className="mb-6">
+            <label
               htmlFor="gpaStatus"
               className="block mb-2 text-blue-950 text-lg font-semibold"
             >
@@ -143,12 +203,16 @@ const ModuleCreation = ({ closeForm, addModule, isEditing, currentModule }) => {
               id="gpaStatus"
               value={gpaStatus}
               onChange={(e) => setGpaStatus(e.target.value)}
-              className="border border-blue-950 p-2 rounded w-full cursor-pointer"
+              className={`border border-blue-950 p-2 rounded w-full ${gpaDisabled ? 'bg-gray-100' : 'cursor-pointer'}`}
+              disabled={gpaDisabled}
             >
               <option value="" disabled>Select GPA Status</option>
-              <option value="G">GPA (G)</option>
-              <option value="N">Non-GPA (N)</option>
+              <option value="GPA">GPA</option>
+              <option value="NGPA">Non-GPA</option>
             </select>
+            {gpaDisabled && (
+              <small className="text-gray-500 mt-1 block">GPA status is fixed for Core Modules</small>
+            )}
           </div>
           
           <div className="flex justify-end">

@@ -44,7 +44,6 @@ const StudentDepartments = () => {
       <Header />
       <Breadcrumb
         breadcrumb={[
-          { label: 'Home', link: '/departments' },
           { label: 'Student Departments', link: '/studentdepartments' },
         ]}
       />

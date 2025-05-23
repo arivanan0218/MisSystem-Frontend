@@ -2,10 +2,15 @@ import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import axios from "../axiosConfig";
 
-const UploadMarks = ({ closeForm }) => {
+const UploadMarks = ({ closeForm, onUploadSuccess, editMode = false, markToEdit = null }) => {
   const [fileData, setFileData] = useState([]);
   const [students, setStudents] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [editMark, setEditMark] = useState({
+    studentId: 0,
+    assignmentId: 0,
+    marksObtained: 0
+  });
   
   // Get module registration data from localStorage
   const moduleId = localStorage.getItem("moduleId");
@@ -16,6 +21,17 @@ const UploadMarks = ({ closeForm }) => {
   const token = localStorage.getItem("auth-token");
   const [registeredStudents, setRegisteredStudents] = useState([]);
   const [assignmentName, setAssignmentName] = useState("");
+
+  // If in edit mode, set the initial value
+  useEffect(() => {
+    if (editMode && markToEdit) {
+      setEditMark({
+        studentId: markToEdit.studentId || 0,
+        assignmentId: markToEdit.assignmentId || parseInt(assignmentId) || 0,
+        marksObtained: markToEdit.marksObtained || 0
+      });
+    }
+  }, [editMode, markToEdit, assignmentId]);
 
   // Fetch students and assignments on component mount
   useEffect(() => {
@@ -59,8 +75,7 @@ const UploadMarks = ({ closeForm }) => {
         // Direct approach: Query the module_registration table through API
         console.log(`Fetching registered students for module ID: ${moduleId}`);
         
-        // This endpoint should directly query the module_registration table
-        // and join with student table to get student details
+        // This endpoint should directly query the module_registration table using our new endpoint
         const endpoint = `/module-registration/module/${moduleId}`;
         console.log('Using endpoint:', endpoint);
         
@@ -70,21 +85,9 @@ const UploadMarks = ({ closeForm }) => {
           if (response.status === 200) {
             let studentsData = [];
             
-            // Handle different response formats
-            if (Array.isArray(response.data)) {
+            // Handle response from our new endpoint - should be an array of ModuleRegistrationDTO objects
+            if (Array.isArray(response.data) && response.data.length > 0) {
               studentsData = response.data;
-            } else if (response.data && response.data.students && Array.isArray(response.data.students)) {
-              studentsData = response.data.students;
-            } else if (response.data && typeof response.data === 'object') {
-              // Try to extract students from the response object
-              const possibleArrays = Object.values(response.data).filter(val => Array.isArray(val));
-              if (possibleArrays.length > 0) {
-                // Use the largest array found (likely the students array)
-                studentsData = possibleArrays.reduce((a, b) => a.length > b.length ? a : b, []);
-              }
-            }
-            
-            if (studentsData.length > 0) {
               console.log(`Successfully fetched ${studentsData.length} registered students`);
               setRegisteredStudents(studentsData);
               
@@ -186,10 +189,12 @@ const UploadMarks = ({ closeForm }) => {
       const enhancedData = jsonData.map(row => {
         // Make sure student_Reg_No is preserved exactly as in the Excel file
         const studentRegNo = row.student_Reg_No || row['Student Reg No'] || row['Registration Number'] || '';
+        const studentName = row.student_Name || row['Student Name'] || '';
         
         return {
           ...row,
           student_Reg_No: studentRegNo, // Ensure consistent property name
+          student_Name: studentName,    // Include student name
           assignmentName: currentAssignmentName || 'Current Assignment',
           assignmentId: currentAssignmentId
         };
@@ -200,6 +205,67 @@ const UploadMarks = ({ closeForm }) => {
     };
 
     reader.readAsArrayBuffer(file);
+  };
+
+  // Handle edit mark changes
+  const handleEditChange = (e) => {
+    const value = parseFloat(e.target.value);
+    setEditMark(prev => ({
+      ...prev,
+      marksObtained: isNaN(value) ? 0 : value
+    }));
+  };
+
+  // Handle saving edited mark
+  const handleSaveEdit = async () => {
+    try {
+      if (!markToEdit || !markToEdit.id) {
+        alert("Error: No mark selected for editing.");
+        return;
+      }
+
+      // Validate the mark
+      if (editMark.marksObtained < 0) {
+        alert("Marks cannot be negative.");
+        return;
+      }
+
+      // Create update payload - use the assignmentId from markToEdit if available
+      const updateData = {
+        studentId: markToEdit.studentId,
+        assignmentId: markToEdit.assignmentId || parseInt(assignmentId),
+        marksObtained: editMark.marksObtained
+      };
+
+      console.log("Sending update with data:", updateData);
+
+      // Send update request
+      const response = await axios.put(`/marks/${markToEdit.id}`, updateData, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (response.status === 200) {
+        alert("Mark updated successfully!");
+        if (onUploadSuccess) {
+          onUploadSuccess(); // Refresh the marks list
+        }
+        closeForm();
+      } else {
+        alert(`Error updating mark: ${response.data || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Error updating mark:", error);
+      let errorMessage = `Error updating mark: ${error.message}`;
+      
+      if (error.response && error.response.data) {
+        errorMessage = error.response.data;
+      }
+      
+      alert(errorMessage);
+    }
   };
 
   // Handle form submission
@@ -244,8 +310,8 @@ const UploadMarks = ({ closeForm }) => {
             student = students.find(s => {
               // Get all possible registration number properties from student
               const studentRegNo = (s.regNo || '').toString().trim();
-              const studentRegNo2 = (s.student_Reg_No || '').toString().trim();
-              const studentRegNo3 = (s.studentRegNo || '').toString().trim();
+              const studentRegNo2 = (s.studentRegNo || '').toString().trim();
+              const studentRegNo3 = (s.student_Reg_No || '').toString().trim();
               const studentId = (s.id || '').toString().trim();
               
               // Compare with the registration number from the Excel file
@@ -262,7 +328,7 @@ const UploadMarks = ({ closeForm }) => {
               console.warn(`No student match found for registration number: ${cleanRegNo}`);
               // Log all student reg numbers for debugging
               console.log('Available student registration numbers:', 
-                students.map(s => s.regNo || s.student_Reg_No || s.studentRegNo || s.id).filter(Boolean));
+                students.map(s => s.regNo || s.studentRegNo || s.student_Reg_No || s.id).filter(Boolean));
             }
           }
         }
@@ -279,7 +345,7 @@ const UploadMarks = ({ closeForm }) => {
           assignmentId: currentAssignmentId, // Always use the current assignment ID
           marksObtained: parseFloat(row.marksObtained),
           student_Reg_No: row.student_Reg_No, // Preserve the registration number
-          student_name: student.firstName ? `${student.firstName} ${student.lastName || ''}` : student.name || student.student_name || ''
+          student_name: student.firstName ? `${student.firstName} ${student.lastName || ''}` : student.name || student.studentName || student.student_name || ''
         });
       }
       
@@ -300,7 +366,6 @@ const UploadMarks = ({ closeForm }) => {
       }
 
       // Add authorization header
-      const token = localStorage.getItem("auth-token");
       const response = await axios.post("/marks/create-list", validData, {
         headers: {
           "Content-Type": "application/json",
@@ -310,9 +375,12 @@ const UploadMarks = ({ closeForm }) => {
 
       if (response.status === 200) {
         alert("Data uploaded successfully!");
+        if (onUploadSuccess) {
+          onUploadSuccess(); // Call callback to refresh the marks list
+        }
         closeForm();
       } else {
-        alert("Error uploading data. Please try again.");
+        alert(`Error uploading data: ${response.data || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error uploading data:", error);
@@ -320,9 +388,10 @@ const UploadMarks = ({ closeForm }) => {
       
       // Add more context to the error message
       if (error.response) {
-        errorMessage += `\nStatus: ${error.response.status}`;
         if (error.response.data) {
-          errorMessage += `\nDetails: ${JSON.stringify(error.response.data)}`;
+          errorMessage = error.response.data;
+        } else {
+          errorMessage += `\nStatus: ${error.response.status}`;
         }
       }
       
@@ -372,31 +441,16 @@ const UploadMarks = ({ closeForm }) => {
       console.log('No registered students in state, attempting to fetch from module_registration table...');
       
       try {
-        // Direct query to module_registration table
+        // Direct query to module_registration table with the new endpoint
         const endpoint = `/module-registration/module/${moduleId}`;
         console.log('Fetching from:', endpoint);
         
         const response = await axios.get(endpoint);
         
         if (response.status === 200) {
-          let fetchedStudents = [];
-          
-          // Handle different response formats
-          if (Array.isArray(response.data)) {
-            fetchedStudents = response.data;
-          } else if (response.data && response.data.students && Array.isArray(response.data.students)) {
-            fetchedStudents = response.data.students;
-          } else if (response.data && typeof response.data === 'object') {
-            // Try to extract students from the response object
-            const possibleArrays = Object.values(response.data).filter(val => Array.isArray(val));
-            if (possibleArrays.length > 0) {
-              // Use the largest array found (likely the students array)
-              fetchedStudents = possibleArrays.reduce((a, b) => a.length > b.length ? a : b, []);
-            }
-          }
-          
-          if (fetchedStudents.length > 0) {
-            registeredStudentsData = fetchedStudents;
+          // The response from our new endpoint is already an array of ModuleRegistrationDTO objects
+          if (Array.isArray(response.data) && response.data.length > 0) {
+            registeredStudentsData = response.data;
             console.log(`Successfully fetched ${registeredStudentsData.length} registered students from module_registration`);
             
             // Update the state for future use
@@ -449,8 +503,8 @@ const UploadMarks = ({ closeForm }) => {
     // Create the data array for the Excel sheet
     const excelData = [];
     
-    // Add header row with clear column names
-    excelData.push(["student_Reg_No", "marksObtained"]);
+    // Add header row with clear column names - include student name for reference
+    excelData.push(["student_Reg_No", "student_Name", "marksObtained"]);
     
     // Track if we successfully added any students
     let studentsAdded = 0;
@@ -466,17 +520,22 @@ const UploadMarks = ({ closeForm }) => {
         let studentName = '';
         
         if (typeof student === 'object') {
-          // Extract registration number based on API response structure
-          if (student.regNo) {
+          // Handle data from our new endpoint (ModuleRegistrationDTO)
+          if (student.studentRegNo) {
+            regNo = student.studentRegNo;
+            studentName = student.studentName || '';
+          }
+          // Keep fallbacks for other possible formats 
+          else if (student.regNo) {
             regNo = student.regNo;
-            studentName = student.firstName ? `${student.firstName} ${student.lastName || ''}` : '';
+            studentName = student.firstName ? `${student.firstName} ${student.lastName || ''}` : 
+                         (student.studentName || '');
           } else if (student.student) {
             // Handle nested student object
             const studentObj = student.student;
-            regNo = studentObj.regNo || '';
-            studentName = studentObj.firstName ? `${studentObj.firstName} ${studentObj.lastName || ''}` : '';
-          } else if (student.studentRegNo) {
-            regNo = student.studentRegNo;
+            regNo = studentObj.regNo || studentObj.studentRegNo || '';
+            studentName = studentObj.studentName || 
+                         (studentObj.firstName ? `${studentObj.firstName} ${studentObj.lastName || ''}` : '');
           }
         } else if (typeof student === 'string') {
           regNo = student;
@@ -486,8 +545,9 @@ const UploadMarks = ({ closeForm }) => {
         if (regNo && regNo.trim() !== '') {
           console.log(`Adding student ${index+1}: ${regNo} ${studentName ? `(${studentName})` : ''}`);
           
-          // Add the student registration number and an empty column for marks
-          excelData.push([regNo, ""]);
+          // Add both student registration number and name to make the template more user-friendly
+          // But leave the marks column empty for the user to fill
+          excelData.push([regNo, studentName, ""]);
           studentsAdded++;
         }
       });
@@ -496,8 +556,8 @@ const UploadMarks = ({ closeForm }) => {
     // If no valid students were added, add example rows with clear indication they are examples
     if (studentsAdded === 0) {
       console.warn('No registered students found in database, adding example rows');
-      excelData.push(["EXAMPLE_REG001", ""]);
-      excelData.push(["EXAMPLE_REG002", ""]);
+      excelData.push(["EXAMPLE_REG001", "Example Student 1", ""]);
+      excelData.push(["EXAMPLE_REG002", "Example Student 2", ""]);
       
       // Add a note about examples
       alert("No registered students found for this module. Example rows have been added to the template.");
@@ -527,6 +587,72 @@ const UploadMarks = ({ closeForm }) => {
     alert("Template downloaded successfully. Please fill in the marks and upload the file.");
   };
 
+  // If in edit mode, show the edit form
+  if (editMode && markToEdit) {
+    return (
+      <div style={{ padding: "20px" }}>
+        <h2>Edit Mark</h2>
+        <div style={{ marginBottom: "20px" }}>
+          <p><strong>Student:</strong> {markToEdit.student_name || "Unknown Student"}</p>
+          <p><strong>Registration Number:</strong> {markToEdit.student_Reg_No || "Unknown"}</p>
+          <p><strong>Assignment:</strong> {markToEdit.assignmentName || assignmentName || "Unknown Assignment"}</p>
+        </div>
+        
+        <div style={{ marginBottom: "20px" }}>
+          <label htmlFor="marksObtained" style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>
+            Marks Obtained:
+          </label>
+          <input
+            type="number"
+            id="marksObtained"
+            min="0"
+            step="0.01"
+            value={editMark.marksObtained}
+            onChange={handleEditChange}
+            style={{
+              width: "100%",
+              padding: "10px",
+              border: "1px solid #ddd",
+              borderRadius: "5px",
+            }}
+          />
+        </div>
+        
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <button
+            onClick={closeForm}
+            style={{
+              marginLeft: "10px",
+              padding: "10px 20px",
+              background: "#ffffff",
+              color: "#1e3a8a",
+              border: "2px solid #1e3a8a",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSaveEdit}
+            style={{
+              marginLeft: "10px",
+              padding: "10px 20px",
+              background: "#1e3a8a",
+              color: "#fff",
+              border: "2px solid #1e3a8a",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Save Changes
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Default view for file upload
   return (
     <div style={{ padding: "20px" }}>
       <h2>Upload Marks List</h2>
@@ -562,6 +688,7 @@ const UploadMarks = ({ closeForm }) => {
             <thead>
               <tr>
                 <th style={{ border: "1px solid #ddd", padding: "8px" }}>Student Reg No</th>
+                <th style={{ border: "1px solid #ddd", padding: "8px" }}>Student Name</th>
                 <th style={{ border: "1px solid #ddd", padding: "8px" }}>Assignment Name</th>
                 <th style={{ border: "1px solid #ddd", padding: "8px" }}>Marks Obtained</th>
               </tr>
@@ -570,6 +697,7 @@ const UploadMarks = ({ closeForm }) => {
               {fileData.map((row, index) => (
                 <tr key={index}>
                   <td style={{ border: "1px solid #ddd", padding: "8px" }}>{row.student_Reg_No}</td>
+                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{row.student_Name || ""}</td>
                   <td style={{ border: "1px solid #ddd", padding: "8px" }}>{row.assignmentName}</td>
                   <td style={{ border: "1px solid #ddd", padding: "8px" }}>{row.marksObtained}</td>
                 </tr>
@@ -606,6 +734,7 @@ const UploadMarks = ({ closeForm }) => {
             border: "2px solid #1e3a8a",
             borderRadius: "5px",
             cursor: "pointer",
+            opacity: fileData.length === 0 ? 0.5 : 1,
           }}
         >
           Submit
