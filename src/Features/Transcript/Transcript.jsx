@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import logo from '../../assets/img/logo.png';
+
+import logo from './logo.png';
 import axios from 'axios';
 import html2pdf from 'html2pdf.js';
 
@@ -105,11 +106,16 @@ const RuhunaTranscript = ({ previewMode, studentId: propStudentId }) => {
           setLoading(false);
           return;
         }
-        
-        console.log('Attempting to fetch transcript data for ID:', studentIdToUse);
-        const response = await axios.get(`http://localhost:8081/public/transcripts/student/${studentIdToUse}`);
-        console.log('Transcript Response data:', response.data);
-        
+console.log('Attempting to fetch transcript data for ID:', studentIdToUse);
+
+const response = await axios.get('http://localhost:8081/public/transcripts/student/reg', {
+  params: {
+    studentRegNo: studentIdToUse
+  }
+});
+
+console.log('Transcript Response data:', response.data);
+
         if (response.data) {
           // Look up additional student details from our local cache
           const studentDetails = localStudentData[studentIdToUse] || {};
