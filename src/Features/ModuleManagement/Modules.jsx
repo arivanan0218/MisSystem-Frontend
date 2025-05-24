@@ -171,9 +171,12 @@ const Modules = () => {
     }
 
     const registeredData = registeredResponse.data;
-    const registeredModuleIds = registeredData.modules.map((mod) => mod.id); // Adjust key if needed
-    console.log("Registered Module IDs:", registeredModuleIds);
 
+    const registeredModuleIds = registeredData.modules
+      .filter(mod => mod.registrationStatus === 'Approved')
+      .map(mod => mod.id);
+    // console.log("Registered Module IDs:", registeredModuleIds);
+    // console.log("registeredData :", registeredData);
     // STEP 2: Fetch all available modules for the semester
     // const pathVariable = "query";
       const modulesEndpoint = `module/semester?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
