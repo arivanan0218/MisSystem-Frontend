@@ -18,7 +18,7 @@ const ViewFinalResults = () => {
   // Get IDs from localStorage
   const departmentId = localStorage.getItem("departmentId") || 1;
   const intakeId = localStorage.getItem("intakeId") || 1;
-  const token = localStorage.getItem("auth-token");
+  const token = localStorage.getItem("auth-token");  
 
   // Function to fetch final results
   const fetchFinalResults = async () => {
