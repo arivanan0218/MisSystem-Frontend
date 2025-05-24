@@ -300,6 +300,7 @@ const Modules = () => {
                 Module Registration
               </button>
             </Link>
+            
           </div>
         )}
 
@@ -345,9 +346,22 @@ const Modules = () => {
                         )}
                       </div>
                     </div>
+                   
                   </div>
                 </Link>
-
+                  {userRole === "ROLE_STUDENT" && (
+                    <div className="flex space-x-2">
+                      {/* <div className="bg-white text-blue-950 border-blue-950 min-h-[77px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center"> */}
+                        <button
+                          onClick={() => navigate("/moduleMarks")}
+                          className=" text-blue-950 hover:text-blue-500  border-blue-950 min-h-[77px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center"
+                          aria-label="Edit Module"
+                        >
+                          Marks
+                        </button>
+                      {/* </div> */}
+                    </div>
+                  )}
                 {userRole === "ROLE_AR" && (
                   <div className="flex space-x-2">
                     <div className="bg-white text-blue-950 border-blue-950 min-h-[77px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
