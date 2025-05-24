@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef  } from "react";
 import { Table, Button, Select, Tag, message, Spin, Alert, Modal, Input, Tabs, Breadcrumb } from "antd";
 import instance from "../../axiosConfig";
 import Header from "../../Components/Header";
 import Footer from "../../Components/Footer";
 import BreadcrumbItem from "../../Components/Breadcrumb";
+import { UpOutlined } from "@ant-design/icons";
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -26,7 +27,13 @@ export const ModuleRegistrationPage = () => {
   });
   const [error, setError] = useState(null);
   const departmentId = localStorage.getItem("departmentId");
-  const intakeId = localStorage.getItem("intakeId");  
+  const intakeId = localStorage.getItem("intakeId");  const [approvedData, setApprovedData] = useState([]);
+  const [showApproved, setShowApproved] = useState(false);
+  const registrationTableRef = useRef(null);
+  const approvedTableRef = useRef(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+
 
   useEffect(() => {
     // Load filter options
@@ -37,7 +44,25 @@ export const ModuleRegistrationPage = () => {
       fetchPendingRegistrations();
       fetchModuleList();
     }
+
+    // Scroll event listener for scroll-to-top button
+  const handleScroll = () => {
+    setShowScrollTop(window.scrollY > 300);
+  };
+
+  window.addEventListener("scroll", handleScroll);
+
+  // Cleanup function
+  return () => {
+    window.removeEventListener("scroll", handleScroll);
+  };
+
   }, []);
+
+  const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
 
   const fetchFilterOptions = async () => {
     setLoading(true);
@@ -118,6 +143,11 @@ export const ModuleRegistrationPage = () => {
       setModuleRegistrations(response.data);
       setSelectedModule(moduleId);
       setLoading(false);
+
+      // Scroll to table
+      setTimeout(() => {
+        registrationTableRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);                
     } catch (error) {
       console.error("Error fetching module registrations:", error);
       message.error("Failed to load module registrations.");
@@ -232,6 +262,26 @@ export const ModuleRegistrationPage = () => {
       case 'TE': return { text: 'Technical Elective', color: 'green' };
       case 'GE': return { text: 'General Elective', color: 'orange' };
       default: return { text: type || 'Unknown', color: 'default' };
+    }
+  };
+
+  const fetchApprovedRegistrations = async (moduleId) => {
+    setLoading(true);
+    try {
+      const response = await instance.get(`/module-registration/module/${moduleId}`);
+      setApprovedData(response.data);
+      setShowApproved(true);
+      setSelectedModule(moduleId);
+      // Scroll to table
+      setTimeout(() => {
+        approvedTableRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+
+    } catch (error) {
+      console.error("Error fetching approved registrations:", error);
+      message.error("Failed to load approved registrations.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -355,23 +405,35 @@ export const ModuleRegistrationPage = () => {
       render: (credit, record) => record.moduleType === 'GE' ? 'N/A' : credit
     },
     {
-      title: "Actions",
-      key: "actions",
-      render: (_, record) => (
-        <Button 
-          type="primary" 
-          onClick={() => fetchModuleRegistrations(record.id)}
-          loading={loading}
-        >
-          View Registrations
-        </Button>
-      )
-    }
+  title: "Actions",
+  key: "actions",
+  render: (_, record) => (
+    <div className="flex space-x-2">
+      <Button
+        type="primary"
+        size="small"
+        onClick={() => fetchModuleRegistrations(record.id)}
+        loading={loading}
+      >
+        View Registration
+      </Button>
+      <Button
+        size="small"
+        onClick={() => fetchApprovedRegistrations(record.id)}
+        loading={loading}
+      >
+        View Approved
+      </Button>
+    </div>
+  )
+}
+
   ];
 
   return (
-    <div>
-      <Header />
+  <div>
+    <Header />
+    <div className="p-4">
       <BreadcrumbItem
         breadcrumb={[
           { label: "Home", link: "/departments" },
@@ -391,211 +453,162 @@ export const ModuleRegistrationPage = () => {
           },
         ]}
       />
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Module Registration Administration</h1>
-        
-        {error && (
-          <Alert 
-            message="Error" 
-            description={error}
-            type="error" 
-            showIcon
-            className="mb-4"
-          />
-        )}
-        
-        <div className="bg-gray-100 p-4 rounded mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-              <Select
-                placeholder="Select Department"
-                value={selectedFilters.departmentId || undefined}
-                onChange={(value) => handleFilterChange('departmentId', value)}
-                className="w-full"
-                loading={loading}
-              >
-                {departments.map(dept => (
-                  <Option key={dept.id} value={dept.id.toString()}>
-                    {dept.departmentName}
-                  </Option>
-                ))}
-              </Select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Intake</label>
-              <Select
-                placeholder="Select Intake"
-                value={selectedFilters.intakeId || undefined}
-                onChange={(value) => handleFilterChange('intakeId', value)}
-                className="w-full"
-                loading={loading}
-              >
-                {intakes.map(intake => (
-                  <Option key={intake.id} value={intake.id.toString()}>
-                    {intake.intakeName}
-                  </Option>
-                ))}
-              </Select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
-              <Select
-                placeholder="Select Semester"
-                value={selectedFilters.semesterId || undefined}
-                onChange={(value) => handleFilterChange('semesterId', value)}
-                className="w-full"
-                loading={loading}
-              >
-                {semesters.map(semester => (
-                  <Option key={semester.id} value={semester.id.toString()}>
-                    {semester.semesterName}
-                  </Option>
-                ))}
-              </Select>
-            </div>
-            
-            <div className="flex items-end">
-              <Button 
-                type="primary" 
-                onClick={applyFilters}
-                loading={loading}
-                disabled={!selectedFilters.departmentId || !selectedFilters.intakeId || !selectedFilters.semesterId}
-                className="w-full"
-              >
-                Apply Filters
-              </Button>
-            </div>
-          </div>
-        </div>
-        
+      <h2 className="text-xl font-semibold mb-4">Module Registration Approval</h2>
+
+      <div className="flex flex-wrap gap-4 mb-4">
+        Select Department
+        <Select
+          placeholder="Select Department"
+          value={selectedFilters.departmentId}
+          onChange={(value) => handleFilterChange("departmentId", value)}
+          style={{ width: 200 }}
+        >
+          {departments.map((dept) => (
+            <Option key={dept.id} value={dept.id}>
+              {dept.name}
+            </Option>
+          ))}
+        </Select>
+        Select Intake
+        <Select
+          placeholder="Select Intake"
+          value={selectedFilters.intakeId}
+          onChange={(value) => handleFilterChange("intakeId", value)}
+          style={{ width: 200 }}
+        >
+          {intakes.map((intake) => (
+            <Option key={intake.id} value={intake.id}>
+              {intake.name}
+            </Option>
+          ))}
+        </Select>
+        Select Semester
+        <Select
+          placeholder="Select Semester"
+          value={selectedFilters.semesterId}
+          onChange={(value) => handleFilterChange("semesterId", value)}
+          style={{ width: 200 }}
+        >
+          {semesters.map((sem) => (
+            <Option key={sem.id} value={sem.id}>
+              {sem.name}
+            </Option>
+          ))}
+        </Select>
+        <Button type="primary" onClick={applyFilters}>
+          Apply Filters
+        </Button>
+      </div>
+
+      {error && (
+        <Alert message={error} type="error" showIcon className="mb-4" />
+      )}
+
+      <Spin spinning={loading}>
         <Tabs defaultActiveKey="1">
-          <TabPane tab="All Pending Registrations" key="1">
-            {loading && pendingRegistrations.length === 0 ? (
-              <div className="flex justify-center my-8">
-                <Spin size="large" tip="Loading pending registrations..." />
-              </div>
-            ) : (
-              <Table
-                dataSource={pendingRegistrations}
-                columns={pendingColumns}
-                rowKey="id"
-                pagination={{ pageSize: 10 }}
-                locale={{ emptyText: 'No pending registrations found' }}
-              />
-            )}
+          <TabPane tab="Pending Registrations" key="1">
+            <Table
+              dataSource={pendingRegistrations}
+              columns={pendingColumns}
+              rowKey="id"
+              pagination={{ pageSize: 8 }}
+            />
           </TabPane>
-          
-          <TabPane tab="By Module" key="2">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-1">
-                <h3 className="text-lg font-medium mb-2">Modules</h3>
-                {loading && moduleList.length === 0 ? (
-                  <div className="flex justify-center my-8">
-                    <Spin size="large" tip="Loading modules..." />
-                  </div>
-                ) : (
+          <TabPane tab="Module Wise View" key="2">
+            <Table
+              dataSource={moduleList}
+              columns={moduleColumns}
+              rowKey="id"
+              pagination={{ pageSize: 8 }}
+            />
+            {selectedModule && (
+              <>
+                <div ref={registrationTableRef}>
+                  <h3 className="mt-6 mb-2 text-lg font-medium">
+                    Registrations for Selected Module
+                  </h3>
                   <Table
-                    dataSource={moduleList}
-                    columns={moduleColumns}
+                    dataSource={moduleRegistrations}
+                    columns={pendingColumns}
                     rowKey="id"
-                    pagination={{ pageSize: 10 }}
-                    locale={{ emptyText: 'No modules found' }}
-                    rowClassName={(record) => record.id === selectedModule ? 'bg-blue-50' : ''}
+                    pagination={{ pageSize: 8 }}
                   />
-                )}
-              </div>
-              
-              <div className="md:col-span-2">
-                <h3 className="text-lg font-medium mb-2">Module Registrations</h3>
-                {selectedModule ? (
-                  loading && moduleRegistrations.length === 0 ? (
-                    <div className="flex justify-center my-8">
-                      <Spin size="large" tip="Loading registrations..." />
-                    </div>
-                  ) : (
+                </div>
+
+                {showApproved && (
+                  <div ref={approvedTableRef} className="mt-6">
+                    <h3 className="mb-2 text-lg font-medium">
+                      Approved Registrations for Module {selectedModule}
+                    </h3>
                     <Table
-                      dataSource={moduleRegistrations}
+                      dataSource={approvedData}
                       columns={pendingColumns}
                       rowKey="id"
-                      pagination={{ pageSize: 10 }}
-                      locale={{ emptyText: 'No registrations found for this module' }}
+                      pagination={{ pageSize: 8 }}
+                      loading={loading}
                     />
-                  )
-                ) : (
-                  <div className="border border-dashed border-gray-300 rounded-md p-8 text-center text-gray-500">
-                    Select a module to view registrations
                   </div>
                 )}
-              </div>
-            </div>
+              </>
+            )}
+
           </TabPane>
         </Tabs>
-        
-        {/* Edit Registration Modal */}
-        <Modal
-          title="Edit Registration"
-          open={editModalVisible}
-          onCancel={() => setEditModalVisible(false)}
-          onOk={handleEditSubmit}
-          confirmLoading={loading}
-        >
-          {currentRegistration && (
-            <div className="space-y-4">
-              <div>
-                <p><strong>Student:</strong> {currentRegistration.studentName}</p>
-                <p><strong>Reg No:</strong> {currentRegistration.studentRegNo}</p>
-                <p><strong>Module:</strong> {currentRegistration.moduleCode} - {currentRegistration.moduleName}</p>
-                <p><strong>Module Type:</strong> {currentRegistration.moduleType}</p>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <Select
-                  value={currentRegistration.status}
-                  onChange={(value) => setCurrentRegistration({ ...currentRegistration, status: value })}
-                  className="w-full"
-                >
-                  <Option value="Taken">Taken</Option>
-                  <Option value="Not-Taken">Not Taken</Option>
-                </Select>
-              </div>
-              
-              {(currentRegistration.moduleType === 'TE' && currentRegistration.status === 'Taken') && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">GPA Status</label>
-                  <Select
-                    value={currentRegistration.gpaStatus}
-                    onChange={(value) => setCurrentRegistration({ ...currentRegistration, gpaStatus: value })}
-                    className="w-full"
-                  >
-                    <Option value="GPA">GPA</Option>
-                    <Option value="NGPA">NGPA</Option>
-                  </Select>
-                </div>
-              )}
-              
-              <Alert
-                message="Note"
-                description={
-                  <ul className="list-disc pl-5">
-                    <li>Core Modules (CM) are always taken as GPA</li>
-                    <li>Technical Electives (TE) can be taken as GPA or NGPA</li>
-                    <li>General Electives (GE) are always taken as NGPA</li>
-                  </ul>
-                }
-                type="info"
-                showIcon
-              />
-            </div>
-          )}
-        </Modal>
-      </div>
-      <Footer />
+      </Spin>
     </div>
-  );
-};
 
+    <Modal
+      title="Edit Registration"
+      visible={editModalVisible}
+      onOk={handleEditSubmit}
+      onCancel={() => setEditModalVisible(false)}
+    >
+      {currentRegistration && (
+        <>
+          <div className="mb-3">
+            <label>Status:</label>
+            <Select
+              value={currentRegistration.status}
+              onChange={(value) =>
+                setCurrentRegistration({ ...currentRegistration, status: value })
+              }
+              style={{ width: "100%" }}
+            >
+              <Option value="Taken">Taken</Option>
+              <Option value="Not Taken">Not Taken</Option>
+            </Select>
+          </div>
+          <div className="mb-3">
+            <label>GPA Status:</label>
+            <Select
+              value={currentRegistration.gpaStatus}
+              onChange={(value) =>
+                setCurrentRegistration({
+                  ...currentRegistration,
+                  gpaStatus: value,
+                })
+              }
+              style={{ width: "100%" }}
+            >
+              <Option value="GPA">GPA</Option>
+              <Option value="NGPA">NGPA</Option>
+            </Select>
+          </div>
+        </>
+      )}
+    </Modal>
+
+    <Footer />
+    {showScrollTop && (
+  <button
+    onClick={scrollToTop}
+    className="fixed bottom-6 right-6 z-50 p-3 bg-red-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition duration-300"
+  >
+    <UpOutlined style={{ fontSize: "20px" }} />
+  </button>
+)}
+
+  </div>
+);
+}
 export default ModuleRegistrationPage;

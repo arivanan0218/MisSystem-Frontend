@@ -28,8 +28,7 @@ const Modules = () => {
   const semesterId = localStorage.getItem("semesterId");
   const departmentId = localStorage.getItem("departmentId");
   const intakeId = localStorage.getItem("intakeId");  
-  // const studentId = localStorage.getItem("selectedStudentId");
-  const studentId = 1; // Replace with the actual student ID or fetch it from localStorage if needed
+  const studentId = localStorage.getItem("studentId");
 
   const openForm = () => setFormOpen(true);
   const closeForm = () => setFormOpen(false);
@@ -108,8 +107,7 @@ const Modules = () => {
           return;
         }
 
-        const pathVariable = "query";
-        const endpoint = `module/semester/${pathVariable}?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
+        const endpoint = `module/semester?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
         console.log("Calling API endpoint:", endpoint);
 
         const response = await axios.get(endpoint, {
@@ -177,9 +175,9 @@ const Modules = () => {
     console.log("Registered Module IDs:", registeredModuleIds);
 
     // STEP 2: Fetch all available modules for the semester
-    const pathVariable = "query";
-    const modulesEndpoint = `module/semester/${pathVariable}?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
-    console.log("Fetching all semester modules from:", modulesEndpoint);
+    // const pathVariable = "query";
+      const modulesEndpoint = `module/semester?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
+            console.log("Fetching all semester modules from:", modulesEndpoint);
 
     const modulesResponse = await axios.get(modulesEndpoint, {
       headers: {

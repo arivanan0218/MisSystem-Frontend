@@ -123,8 +123,8 @@ const Marks = () => {
       
       // For students, we need to get their specific marks
       if (userRole === "ROLE_STUDENT") {
-        const studentId = localStorage.getItem("userId"); // Assuming userId is stored for students
-        
+        // const studentId = localStorage.getItem("userId"); // Assuming userId is stored for students
+        const studentId = localStorage.getItem("studentId");
         if (!studentId) {
           console.error("No student ID found in localStorage");
           setLoading(false);
