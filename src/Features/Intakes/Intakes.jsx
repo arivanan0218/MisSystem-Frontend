@@ -14,9 +14,16 @@ const Intakes = () => {
   const [editFormOpen, setEditFormOpen] = useState(false);
   const [error, setError] = useState(null);
   const [editingIntake, setEditingIntake] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
 
   const departmentId = localStorage.getItem('departmentId');
   const userRole = localStorage.getItem('userRole');
+
+  const filteredIntakes = intakes.filter((intake) =>
+  `${intake.intakeYear} ${intake.batch}`.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
 
   if (!departmentId) {
     console.error('Department ID not found in localStorage');
@@ -112,6 +119,8 @@ const Intakes = () => {
           <input
             type="text"
             placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-gray-200 rounded-full w-full md:max-w-[471px] h-[41px] px-4 text-sm md:text-md"
           />
           {userRole === 'ROLE_AR' && (
@@ -129,8 +138,8 @@ const Intakes = () => {
 
         <div className="mt-10">
           {error && <div className="text-center text-red-500 mb-4">{error}</div>}
-          {intakes.length > 0 ? (
-            intakes.map((intake) => (
+          {filteredIntakes.length > 0 ? (
+            filteredIntakes.map((intake) => (
               <div key={intake.id} className="bg-white flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2">
                 <Link
                   to={`${intake.id}/semesters`}
