@@ -14,6 +14,8 @@ const Departments = () => {
   const [editFormOpen, setEditFormOpen] = useState(false);
   const [error, setError] = useState(null);
   const [editingDepartment, setEditingDepartment] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
 
   const userRole = localStorage.getItem('userRole');
 
@@ -32,6 +34,10 @@ const Departments = () => {
   const addDepartment = (newDepartment) => {
     setDepartments((prevDepartments) => [...prevDepartments, newDepartment]);
   };
+
+  const filteredDepartments = departments.filter((department) =>
+    department.departmentName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   const handleDelete = async (departmentId) => {
     try {
@@ -148,6 +154,8 @@ const Departments = () => {
           <input
             type="text"
             placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="bg-gray-200 rounded-full w-full md:max-w-[471px] h-[41px] px-4 text-sm md:text-md"
           />
           {userRole === 'ROLE_AR' && (
@@ -166,8 +174,8 @@ const Departments = () => {
 
         <div className="mt-10">
           {error && <div className="text-center text-red-500 mb-4">{error}</div>}
-          {departments.length > 0 ? (
-            departments.map((department) => (
+          {filteredDepartments.length > 0 ? (
+            filteredDepartments.map((department) => (
               <div
                 key={department.id}
                 className="bg-white flex md:w-full justify-between items-center gap-2"
