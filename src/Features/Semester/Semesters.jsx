@@ -14,6 +14,7 @@ const Semesters = () => {
   const [editFormOpen, setEditFormOpen] = useState(false);
   const [error, setError] = useState(null);
   const [editingSemester, setEditingSemester] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const token = localStorage.getItem('auth-token');
 
@@ -39,6 +40,12 @@ const Semesters = () => {
     setEditFormOpen(false);
   };
  */
+
+  const filteredSemesters = semesters.filter((semester) =>
+  semester.semesterName.toLowerCase().includes(searchQuery.toLowerCase())
+);
+
+
   const addSemester = (newSemester) => {
     setSemesters((prevSemesters) => {
       return Array.isArray(prevSemesters) ? [...prevSemesters, newSemester] : [newSemester];
@@ -173,6 +180,8 @@ const Semesters = () => {
           <input
             type="text"
             placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="bg-gray-200 rounded-full w-full md:max-w-[471px] h-[41px] px-4 text-md"
           />
 
@@ -201,8 +210,8 @@ const Semesters = () => {
 
         <div className="mt-[80px]">
           {error && <div className="text-center text-red-500 mb-4">{error}</div>}
-          {semesters.length > 0 ? (
-        semesters.map((semester) => (
+          {filteredSemesters.length > 0 ? (
+        filteredSemesters.map((semester) => (
           <div key={semester.id} className="bg-white flex md:w-full justify-between items-center gap-2">
             <Link
           to={`/departments/${semester.id}/intakes/semesters/modules`}
