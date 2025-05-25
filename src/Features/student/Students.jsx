@@ -62,6 +62,7 @@ const Students = () => {
   const handleUploadSuccess = (newStudents) => {
     setStudents(prevStudents => [...prevStudents, ...newStudents]);
     closeForm();
+    window.location.reload(); // Reload the page to reflect changes
   };
 
   return (
