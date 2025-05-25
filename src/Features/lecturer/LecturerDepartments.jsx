@@ -95,7 +95,6 @@ const LecturerDepartments = () => {
     <div>
       <Header />
       <Breadcrumb breadcrumb={[
-        { label: 'Home', link: '/departments' }, 
         { label: 'lecturer deparments', link: '/lecturersdepartments' }]} 
       />
       <div className="mr-[20%] ml-[10%] px-8 font-poppins">

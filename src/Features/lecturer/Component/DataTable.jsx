@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "../../axiosConfig";
+import axios from "../../../axiosConfig";
 import {
   useReactTable,
   getCoreRowModel,
@@ -59,9 +59,9 @@ const DataTable = ({ data = [], onRowClick = () => {}, onDelete = () => {}, onEd
   const generateColumns = () => {
     if (filteredData.length === 0) {
       return [
-        { accessorKey: "name", header: "Name" },
-        { accessorKey: "email", header: "Email" },
-        { accessorKey: "phoneNumber", header: "Phone Number" },
+        { accessorKey: "lecturerName", header: "Name" },
+        { accessorKey: "lecturerEmail", header: "Email" },
+        { accessorKey: "lecturerPhoneNumber", header: "Phone Number" },
       ];
     }
     

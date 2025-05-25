@@ -166,9 +166,27 @@ const Assignments = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <Breadcrumb />
-      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins">
-        <div className="py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <Breadcrumb
+        breadcrumb={[
+          { label: "Degree Programs", link: `/departments` },
+          { label: "Intakes", link: `/departments/${departmentId}/intakes` },
+          {
+            label: "Semesters",
+            link: `/departments/${departmentId}/intakes/${intakeId}/semesters`,
+          },
+          {
+            label: "Modules",
+            link: `/departments/${departmentId}/intakes/semesters/modules`,
+          },
+          {
+            label: "Module Assessments",
+            link: `/departments/${moduleId}/intakes/semesters/modules/assignments`,
+          },
+        ]}
+      />
+      
+      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins justify-center lg:mr-[4%] lg:ml-[2%] 2xl:mr-[10%] 2xl:ml-[5%]">
+        <div className="py-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <input
             type="text"
             placeholder="Search"
@@ -176,26 +194,26 @@ const Assignments = () => {
           />
           {userRole === "ROLE_AR" && (
             <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mt-4">
-  <button
-    onClick={openForm}
-    className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
-    aria-label="Add Assignment"
-  >
-    Add Assignment +
-  </button>
+              <button
+                onClick={openForm}
+                className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
+                aria-label="Add Assignment"
+              >
+                + Assignment
+              </button>
 
-  <Link to={"/viewMarks"} className="w-full sm:w-auto">
-    <button
-      className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
-    >
-      View Marks
-    </button>
-  </Link>
+              <Link to={"/viewMarks"} className="w-full sm:w-auto">
+                <button
+                  className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full px-4 py-2 w-full sm:w-auto"
+                >
+                  Marks
+                </button>
+              </Link>
 
-  {formOpen && (
-    <AssignmentCreation closeForm={closeForm} addAssignment={addAssignment} />
-  )}
-</div>
+              {formOpen && (
+                <AssignmentCreation closeForm={closeForm} addAssignment={addAssignment} />
+              )}
+            </div>
 
           )}
         </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
-import axios from "../../axiosConfig";
+import axios from "../../../axiosConfig";
 
 const UploadLecturers = ({ closeForm, onUploadSuccess }) => {
   const [fileData, setFileData] = useState([]);
@@ -66,7 +66,7 @@ const UploadLecturers = ({ closeForm, onUploadSuccess }) => {
   // Download Excel template
   const handleDownloadTemplate = () => {
     const templateData = [
-      ["departmentId","name", "email", "phoneNumber", "username", "password"],
+      ["departmentId","lecturerName", "lecturerEmail", "lecturerPhoneNumber", "username", "password"],
       ["{departmentId}","Dr. John Doe", "johndoe@example.com", "123456789", "john", "123456789"],
       ["{departmentId}","Prof. Jane Smith", "janesmith@example.com", "987456123", "jane", "123456789"],
     ];
@@ -105,9 +105,9 @@ const UploadLecturers = ({ closeForm, onUploadSuccess }) => {
             <thead>
               <tr className="bg-gray-100">
                 <td className="border p-2 text-left">Department ID</td>
-                <th className="border p-2 text-left">Name</th>
-                <th className="border p-2 text-left">Email</th>
-                <th className="border p-2 text-left">Phone Number</th>
+                <th className="border p-2 text-left">Lecturer Name</th>
+                <th className="border p-2 text-left">Lecturer Email</th>
+                <th className="border p-2 text-left">Lecturer Phone Number</th>
                 <th className="border p-2 text-left">Username</th>
                 <th className="border p-2 text-left">Password</th>
               </tr>
@@ -116,9 +116,9 @@ const UploadLecturers = ({ closeForm, onUploadSuccess }) => {
               {fileData.map((row, index) => (
                 <tr key={index}>
                   <td className="border p-2 text-left">{row.departmentId}</td>
-                  <td className="border p-2 text-left">{row.name}</td>
-                  <td className="border p-2 text-left">{row.email}</td>
-                  <td className="border p-2 text-left">{row.phoneNumber}</td>
+                  <td className="border p-2 text-left">{row.lecturerName}</td>
+                  <td className="border p-2 text-left">{row.lecturerEmail}</td>
+                  <td className="border p-2 text-left">{row.lecturerPhoneNumber}</td>
                   <td className="border p-2 text-left">{row.username}</td>
                   <td className="border p-2 text-left">{row.password}</td>
                 </tr>

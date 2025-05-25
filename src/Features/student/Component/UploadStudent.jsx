@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
-import axios from "../../axiosConfig";
+import axios from "../../../axiosConfig";
 
 const UploadStudent = ({ closeForm, onUploadSuccess }) => {
   const [fileData, setFileData] = useState([]);

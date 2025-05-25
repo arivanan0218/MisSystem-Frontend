@@ -51,76 +51,73 @@ const Sidebar = ({ children, setBreadcrumb }) => {
 
   return (
     <div className='flex font-poppins'>
-      <div className={`${open ? '' : 'w-20'} h-full bg-bgSidebar font-poppins fixed top-0 left-0`}>
-        
-        <div className={`flex items-center mt-10 mb-10 text-blue-950`}>
-          <h1 className={`${open ? 'text-[24px] font-bold ml-7 mr-10 duration-300' : 'scale-0 ml-0 -mr-2'}`}>
-            Menu
-          </h1>
-          <FaBackward 
-            className={`cursor-pointer transform duration-300 ${!open && 'rotate-180 mr-6'}`} 
-            onClick={toggle} 
-          />
+      <div className={`z-10 flex flex-row md:flex-col justify-between ${open ? '' : 'w-20'} md:h-screen
+      h-12 w-full md:w-auto bg-[#f4f8ff] font-poppins fixed top-0 left-0`}>
+        <div className=''>
+          <div className={`hidden md:flex  items-center mt-10 mb-10 text-blue-950`}>
+            <h1 className={`${open ? 'text-[24px] font-bold ml-7 mr-10 duration-300' : 'scale-0 ml-0 -mr-2'}`}>
+              Menu
+            </h1>
+            <FaBackward
+              className={`cursor-pointer transform duration-300 ${!open && 'rotate-180 mr-6'}`}
+              onClick={toggle}
+            />
+          </div>
+          <ul className='flex felx-row gap-x-8 md:flex-col text-blue-950 font-bold pl-2 md:pl-7 mt-1 '>
+            {/* Home icon - visible to all users */}
+            <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
+              <Link to={'/departments'} onClick={() => setBreadcrumb('Site Home')}>
+                <IoHome className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
+                {open && <span>Site Home</span>}
+              </Link>
+            </li>
+            {/* Lecturer icon - visible only to admin users */}
+            {isAdmin && (
+              <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
+                <Link to={'/LecturerDepartments'} onClick={() => setBreadcrumb('Lecturers')}>
+                  <FaChalkboardTeacher className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
+                  {open && <span>Lecturers</span>}
+                </Link>
+              </li>
+            )}
+            {/* Student icon - visible to lecturers, HODs, module coordinators, and admins */}
+            {(isLecturerOrAdmin || isAdmin) && (
+              <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
+                <Link to={'/StudentDepartments'} onClick={() => setBreadcrumb('Students')}>
+                  <PiStudentFill className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
+                  {open && <span>Students</span>}
+                </Link>
+              </li>
+            )}
+            {/* Transcript icon - visible to all users */}
+            <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
+              <Link to={'/module/endExam'} onClick={() => setBreadcrumb('Transcript')}>
+                <MdGrading className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
+                {open && <span>Transcript</span>}
+              </Link>
+            </li>
+          </ul>
         </div>
-
-        <ul className='text-blue-950 font-bold pl-7'>
-          {/* Home icon - visible to all users */}
-          <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
-            <Link to={'/departments'} onClick={() => setBreadcrumb('Site Home')}>
-              <IoHome className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
-              {open && <span>Site Home</span>}
-            </Link>
-          </li>
-
-          {/* Lecturer icon - visible only to admin users */}
-          {isAdmin && (
-            <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
-              <Link to={'/LecturerDepartments'} onClick={() => setBreadcrumb('Lecturers')}>
-                <FaChalkboardTeacher className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
-                {open && <span>Lecturers</span>}
-              </Link>
-            </li>
-          )}
-
-          {/* Student icon - visible to lecturers, HODs, module coordinators, and admins */}
-          {(isLecturerOrAdmin || isAdmin) && (
-            <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
-              <Link to={'/StudentDepartments'} onClick={() => setBreadcrumb('Students')}>
-                <PiStudentFill className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
-                {open && <span>Students</span>}
-              </Link>
-            </li>
-          )}
-
-          {/* Transcript icon - visible to all users */}
-          <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
-            <Link to={'/module/endExam'} onClick={() => setBreadcrumb('Transcript')}>
-              <MdGrading className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
-              {open && <span>Transcript</span>}
-            </Link>
-          </li>
-        </ul>
-
-        <div className={`${open ? '' : 'w-20'}`}>
-          <div className='flex justify-center mt-40'>
+        <div className={`mb-24 flex flex-row md:flex-col gap-x-8 `}>
+          <div className={`${open ? 'pl-7' : 'pl-4'} `}>
             <a href="">
-               <CgProfile className={`${open ? 'mr-5' : ''} text-blue-950 inline-block w-6 h-6`} />
+               <CgProfile className={`${open ? 'mr-5' : ''} text-blue-950 inline-block w-7 h-7 m-2`} />
               {open && <span className='text-blue-950 font-semibold'>Username</span>}           
             </a>
           </div>
 
-          <div className='flex justify-center mt-5'>
+          <div className=''>
             <button 
               onClick={logout}
-              className={`${open ? 'text-white bg-blue-950 rounded m-2 px-16 py-3 flex items-center' : 'w-20'} hover:shadow-primary-2 hover:scale-105 hover:outline-5 hover:outline-blue-600`}>
-              <IoLogOut className={`${open ? 'mr-2' : 'ml-1 text-blue-950'} inline-block w-5 h-5`} />
-              {open && <span>Logout</span>}
+              className={`${open ? 'text-white bg-blue-950 rounded m-2 px-8 py-3 flex items-center mx-5' : 'md:w-20'} hover:shadow-primary-2 hover:scale-105 hover:outline-5 hover:outline-blue-600`}>
+              <IoLogOut className={`${open ? '-ml-3 mr-5 mt-0' : 'md:ml-2 text-blue-950'} inline-block w-7 h-7 mt-2 mr-2`} />
+              {open && <span className=''>Logout</span>}
             </button>
           </div>
         </div>
       </div>
 
-      <div className={`${open ? 'ml-56' : 'ml-20'} flex-1`}>
+      <div className={`z-0 ${open ? 'md:ml-56' : 'md:ml-20'} flex-1 mt-12 md:mt-0`}>
         {children}
       </div>
     </div>

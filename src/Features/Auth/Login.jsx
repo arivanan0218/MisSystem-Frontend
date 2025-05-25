@@ -20,45 +20,63 @@ const Login = () => {
   };
 
   const handleLogin = async () => {
-    try {
-      const response = await axios.post("/auth/signin", credentials);
+  try {
+    console.log("Logging in with credentials:", credentials);
+    const response = await axios.post("/auth/signin", credentials);
+    console.log(response);
+    if (!response.data) throw new Error("Empty response from server");
 
-      if (!response.data) throw new Error("Empty response from server");
-
-      let jwtToken = null;
-      if (response.data.jwtToken) jwtToken = response.data.jwtToken;
-      else if (response.data.token) jwtToken = response.data.token;
-      else {
-        const authHeader = response.headers["authorization"];
-        if (authHeader && authHeader.startsWith("Bearer ")) {
-          jwtToken = authHeader.substring(7);
-        }
+    let jwtToken = null;
+    if (response.data.jwtToken) jwtToken = response.data.jwtToken;
+    else if (response.data.token) jwtToken = response.data.token;
+    else {
+      const authHeader = response.headers["authorization"];
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        jwtToken = authHeader.substring(7);
       }
-
-      if (jwtToken && typeof jwtToken === "string" && jwtToken.includes("=")) {
-        const tokenParts = jwtToken.split(";");
-        const tokenKeyValue = tokenParts[0].split("=");
-        if (tokenKeyValue.length > 1) {
-          jwtToken = tokenKeyValue[1];
-        }
-      }
-
-      if (!jwtToken) throw new Error("Could not extract JWT token from response");
-      if (!response.data.roles || !Array.isArray(response.data.roles) || response.data.roles.length === 0) {
-        throw new Error("No roles found in response");
-      }
-
-      const primaryRole = response.data.roles[0];
-
-      localStorage.setItem("auth-token", jwtToken);
-      localStorage.setItem("userRole", primaryRole);
-      setUserRole(primaryRole);
-
-      navigate("/departments");
-    } catch (err) {
-      setError(err.message);
     }
-  };
+
+    if (jwtToken && typeof jwtToken === "string" && jwtToken.includes("=")) {
+      const tokenParts = jwtToken.split(";");
+      const tokenKeyValue = tokenParts[0].split("=");
+      if (tokenKeyValue.length > 1) {
+        jwtToken = tokenKeyValue[1];
+      }
+    }
+
+    if (!jwtToken) throw new Error("Could not extract JWT token from response");
+    if (!response.data.roles || !Array.isArray(response.data.roles) || response.data.roles.length === 0) {
+      throw new Error("No roles found in response");
+    }
+
+    const primaryRole = response.data.roles[0];
+    localStorage.setItem("auth-token", jwtToken);
+    localStorage.setItem("userRole", primaryRole);
+    setUserRole(primaryRole);
+    console.log("User role set to:", primaryRole);
+
+    // 👉 If student, fetch student data and match by username
+    if (primaryRole === "ROLE_STUDENT") {
+      const studentResponse = await axios.get("/student/");
+      const students = studentResponse.data;
+      const matchedStudent = students.find(
+        (student) => student.username === credentials.username
+      );
+
+      if (matchedStudent) {
+        localStorage.setItem("studentId", matchedStudent.id);
+        console.log("Student ID set to:", matchedStudent.id);
+      } else {
+        throw new Error("Student not found");
+      }
+    }
+
+    navigate("/departments");
+  } catch (err) {
+    setError(err.message);
+  }
+};
+
 
   return (
     <div className="font-poppins min-h-screen flex flex-col">
