@@ -212,7 +212,7 @@ const Modules = () => {
 };
 
 
-    if (userRole === "ROLE_AR") {
+    if (userRole === "ROLE_AR" || userRole === "ROLE_LECTURER") {
       fetchModulesForAR();
     } else if (userRole === "ROLE_STUDENT") {
       fetchModulesForStudent();
@@ -322,6 +322,8 @@ const Modules = () => {
                 ? `/departments/${module.id}/intakes/semesters/modules/assignments`
                 : userRole === "ROLE_STUDENT"
                 ? `/moduleMarks`
+                : userRole === "ROLE_LECTURER"
+                ? `/departments/${module.id}/intakes/semesters/modules/assignments`
                 : "#"
             }
             className="flex-1"
