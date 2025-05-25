@@ -74,9 +74,8 @@ const Intakes = () => {
     <div>
       <Header />
       <Breadcrumb breadcrumb={[
-        { label: 'Home', link: '/departments' },
         { label: 'Student Departments', link: `/studentdepartment` },
-        { label: 'Student Intakes', link: `/studentdepartment/${departmentId}/sintakes` }
+        { label: 'Student Intakes', link: `/studentdepartments/${departmentId}/sintakes` }
       ]} />
       <div className="mr-[20%] ml-[10%] px-8 font-poppins">
         <div className="py-8 flex items-center justify-between">

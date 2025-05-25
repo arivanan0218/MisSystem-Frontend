@@ -240,7 +240,25 @@ const ViewSemiResults = () => {
   return (
     <div>
       <Header />
-      <Breadcrumb />
+      <Breadcrumb
+        breadcrumb={[
+          { label: "Home", link: "/departments" },
+          { label: "Degree Programs", link: `/departments` },
+          { label: "Intakes", link: `/departments/${departmentId}/intakes` },
+          {
+            label: "Semesters",
+            link: `/departments/${departmentId}/intakes/${intakeId}/semesters`,
+          },
+          {
+            label: "Modules",
+            link: `/departments/${departmentId}/intakes/semesters/modules`,
+          },
+          {
+            label: "Semester Results",
+            link: `/semesterResults`,
+          },
+        ]}
+      />
       <div className="mr-[10%] ml-[10%] px-8 font-poppins">
         <div className="py-8 text-center">
           <h1 className="text-2xl font-bold text-blue-950">Semester Results</h1>

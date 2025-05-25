@@ -109,12 +109,11 @@ const Intakes = () => {
     <div className="flex flex-col min-h-screen">
       <Header />
       <Breadcrumb breadcrumb={[
-        { label: 'Home', link: '/departments' },
         { label: 'Degree Programs', link: `/departments` },
         { label: 'Intakes', link: `/departments/${departmentId}/intakes` }
       ]} />
 
-      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins">
+      <div className="flex-grow px-4 sm:px-6 lg:px-20 font-poppins mr-[20%] ml-[10%]">
         <div className="py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <input
             type="text"
@@ -129,7 +128,7 @@ const Intakes = () => {
                 onClick={openForm}
                 className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-full md:w-[144px] h-[41px]"
               >
-                Add Intake +
+                + Intake
               </button>
               {formOpen && <IntakeCreation closeForm={closeForm} addIntake={addIntake} />}
             </div>
@@ -138,16 +137,23 @@ const Intakes = () => {
 
         <div className="mt-10">
           {error && <div className="text-center text-red-500 mb-4">{error}</div>}
+
           {filteredIntakes.length > 0 ? (
             filteredIntakes.map((intake) => (
-              <div key={intake.id} className="bg-white flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2">
+          
+            <div key={intake.id} className="bg-white flex md:w-full justify-between items-center gap-2 mb-3">
+
+
                 <Link
                   to={`${intake.id}/semesters`}
                   className="w-full md:flex-1"
                   onClick={() => localStorage.setItem('intakeId', intake.id)}
                 >
                   <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border border-b-[3px] font-semibold w-full p-2 px-4 rounded-[12px] hover:shadow-lg cursor-pointer flex justify-between items-center">
-                    {intake.intakeYear} - {intake.batch}
+                    
+                    <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis w-0 flex-1">
+                      {intake.intakeYear} - {intake.batch}
+                    </span>
                   </div>
                 </Link>
                 {userRole === 'ROLE_AR' && (

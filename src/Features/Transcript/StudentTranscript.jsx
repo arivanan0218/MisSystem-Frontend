@@ -24,7 +24,12 @@ const StudentTranscript = () => {
     setLoading(true);
     
     // Use direct axios call to access public endpoint without auth
-    axios.get(`http://localhost:8081/public/transcripts/student/${studentId}`)
+    axios.get(`http://localhost:8081/public/transcripts/student/reg`, {
+  params: {
+    studentRegNo: studentId
+  }
+})
+
       .then(response => {
         if (response.data) {
           setStudentExists(true);

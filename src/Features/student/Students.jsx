@@ -3,8 +3,8 @@ import Header from "../../Components/Header";
 import Breadcrumb from "../../Components/Breadcrumb";
 import Footer from "../../Components/Footer";
 import axios from "../../axiosConfig";
-import UploadStudents from "./UploadStudent";
-import DataTable from "./StudentDataTable"; 
+import UploadStudents from "./Component/UploadStudent";
+import DataTable from "./Component/StudentDataTable"; 
 
 const Students = () => {
   const [students, setStudents] = useState([]);
@@ -68,11 +68,12 @@ const Students = () => {
     <div>
       <Header />
       <Breadcrumb breadcrumb={[
-          { label: 'Home', link: '/departments' },
-          { label: 'Student Departments', link: '/studentdepartments' },
-          { label: 'Intakes', link: '/studentdepartments/${departmentId}/intakes' },
-          { label: 'Students', link: '/students' },
-        ]} />
+        { label: 'Student Departments', link: `/studentdepartment` },
+        { label: 'Student Intakes', link: `/studentdepartments/${departmentId}/sintakes` },
+        { label: 'Students', link: '/students' },
+      ]} 
+      />
+      
       <div className="mr-[20%] ml-[10%] px-8 font-poppins">
         <div className="py-8 flex items-center justify-between">
           <button
