@@ -217,11 +217,7 @@ const formattedDate = today.toISOString().slice(0, 10); // "2025-05-22"
       dataIndex: "name",
       key: "name"
     },
-    {
-      title: "Type",
-      dataIndex: "type",
-      key: "type"
-    },
+    
     {
       title: "Modules Taken",
       dataIndex: "status",
@@ -355,9 +351,6 @@ const formattedDate = today.toISOString().slice(0, 10); // "2025-05-22"
                         </td>
                         <td className="border border-gray-400 p-2">
                           {module.name || module.moduleName}
-                        </td>
-                        <td className="border border-gray-400 p-2">
-                          {module.type || ""}
                         </td>
                         <td className="border border-gray-400 p-2 text-center">
                           {module.status === "Taken" ? "✓" : "✗"}

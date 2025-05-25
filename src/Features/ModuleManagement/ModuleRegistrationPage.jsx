@@ -27,7 +27,8 @@ export const ModuleRegistrationPage = () => {
   });
   const [error, setError] = useState(null);
   const departmentId = localStorage.getItem("departmentId");
-  const intakeId = localStorage.getItem("intakeId");  const [approvedData, setApprovedData] = useState([]);
+  const intakeId = localStorage.getItem("intakeId");  
+  const [approvedData, setApprovedData] = useState([]);
   const [showApproved, setShowApproved] = useState(false);
   const registrationTableRef = useRef(null);
   const approvedTableRef = useRef(null);
@@ -269,7 +270,7 @@ export const ModuleRegistrationPage = () => {
     setLoading(true);
     try {
       const response = await instance.get(`/module-registration/module/${moduleId}`);
-      setApprovedData(response.data);
+      setApprovedData(response.data.filter(item => item.registrationStatus === "Approved"));
       setShowApproved(true);
       setSelectedModule(moduleId);
       // Scroll to table
@@ -286,6 +287,7 @@ export const ModuleRegistrationPage = () => {
   };
 
   // Columns for the pending registrations table
+  // Columns for the pending registrations table (only for pending, not for approved)
   const pendingColumns = [
     {
       title: "Reg No",
@@ -377,6 +379,67 @@ export const ModuleRegistrationPage = () => {
     }
   ];
 
+  // Columns for the approved registrations table (no actions)
+  const approvedColumns = [
+    {
+      title: "Reg No",
+      dataIndex: "studentRegNo",
+      key: "studentRegNo"
+    },
+    {
+      title: "Student Name",
+      dataIndex: "studentName",
+      key: "studentName"
+    },
+    {
+      title: "Module Code",
+      dataIndex: "moduleCode",
+      key: "moduleCode"
+    },
+    {
+      title: "Module Name",
+      dataIndex: "moduleName",
+      key: "moduleName"
+    },
+    {
+      title: "Module Type",
+      dataIndex: "moduleType",
+      key: "moduleType",
+      render: (type) => {
+        const display = getModuleTypeDisplay(type);
+        return <Tag color={display.color}>{display.text}</Tag>;
+      }
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => status === "Taken" ? "✓ Taken" : "✗ Not Taken"
+    },
+    {
+      title: "GPA Status",
+      dataIndex: "gpaStatus",
+      key: "gpaStatus",
+      render: (status) => {
+        let text, color;
+        switch (status) {
+          case 'GPA':
+            text = 'GPA';
+            color = 'green';
+            break;
+          case 'NGPA':
+            text = 'NGPA';
+            color = 'orange';
+            break;
+          default:
+            text = status || 'N/A';
+            color = 'default';
+        }
+        return <Tag color={color}>{text}</Tag>;
+      }
+    }
+  ];
+
   // Columns for the module selection list
   const moduleColumns = [
     {
@@ -415,14 +478,14 @@ export const ModuleRegistrationPage = () => {
         onClick={() => fetchModuleRegistrations(record.id)}
         loading={loading}
       >
-        View Registration
+        Pending
       </Button>
       <Button
         size="small"
         onClick={() => fetchApprovedRegistrations(record.id)}
         loading={loading}
       >
-        View Approved
+        Approved
       </Button>
     </div>
   )
@@ -455,50 +518,7 @@ export const ModuleRegistrationPage = () => {
       />
       <h2 className="text-xl font-semibold mb-4">Module Registration Approval</h2>
 
-      <div className="flex flex-wrap gap-4 mb-4">
-        Select Department
-        <Select
-          placeholder="Select Department"
-          value={selectedFilters.departmentId}
-          onChange={(value) => handleFilterChange("departmentId", value)}
-          style={{ width: 200 }}
-        >
-          {departments.map((dept) => (
-            <Option key={dept.id} value={dept.id}>
-              {dept.name}
-            </Option>
-          ))}
-        </Select>
-        Select Intake
-        <Select
-          placeholder="Select Intake"
-          value={selectedFilters.intakeId}
-          onChange={(value) => handleFilterChange("intakeId", value)}
-          style={{ width: 200 }}
-        >
-          {intakes.map((intake) => (
-            <Option key={intake.id} value={intake.id}>
-              {intake.name}
-            </Option>
-          ))}
-        </Select>
-        Select Semester
-        <Select
-          placeholder="Select Semester"
-          value={selectedFilters.semesterId}
-          onChange={(value) => handleFilterChange("semesterId", value)}
-          style={{ width: 200 }}
-        >
-          {semesters.map((sem) => (
-            <Option key={sem.id} value={sem.id}>
-              {sem.name}
-            </Option>
-          ))}
-        </Select>
-        <Button type="primary" onClick={applyFilters}>
-          Apply Filters
-        </Button>
-      </div>
+      
 
       {error && (
         <Alert message={error} type="error" showIcon className="mb-4" />
@@ -525,7 +545,16 @@ export const ModuleRegistrationPage = () => {
               <>
                 <div ref={registrationTableRef}>
                   <h3 className="mt-6 mb-2 text-lg font-medium">
-                    Registrations for Selected Module
+                    Pending Registrations for &nbsp;
+                      {
+                        (moduleList.find(m => m.id === selectedModule)?.moduleName || "")
+                      }
+                      {" "}
+                      - (
+                      {
+                        (moduleList.find(m => m.id === selectedModule)?.moduleCode || "")
+                      }
+                      )
                   </h3>
                   <Table
                     dataSource={moduleRegistrations}
@@ -538,11 +567,20 @@ export const ModuleRegistrationPage = () => {
                 {showApproved && (
                   <div ref={approvedTableRef} className="mt-6">
                     <h3 className="mb-2 text-lg font-medium">
-                      Approved Registrations for Module {selectedModule}
+                      Approved Registrations for&nbsp;
+                      {
+                        (moduleList.find(m => m.id === selectedModule)?.moduleName || "")
+                      }
+                      {" "}
+                      - (
+                      {
+                        (moduleList.find(m => m.id === selectedModule)?.moduleCode || "")
+                      }
+                      )
                     </h3>
                     <Table
                       dataSource={approvedData}
-                      columns={pendingColumns}
+                      columns={approvedColumns}
                       rowKey="id"
                       pagination={{ pageSize: 8 }}
                       loading={loading}

@@ -131,17 +131,29 @@ const Sidebar = ({ children, setBreadcrumb }) => {
                 </Link>
               </li>
             )}
-            {/* Transcript icon - visible to all users */}
-            <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
-              <Link to={'/module/endExam'} onClick={() => setBreadcrumb('Transcript')}>
-                <MdGrading className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
-                {open && <span>Transcript</span>}
-              </Link>
-            </li>
+            {/* Lecturer icon - visible only to admin users */}
+            {isAdmin && (
+              <li className='mb-2 rounded py-2 cursor-pointer text-xl hover:text-blue-900'>
+                <Link to={'/module/endExam'} onClick={() => setBreadcrumb('Transcript')}>
+                  <MdGrading className='inline-block w-[27px] h-6 mr-2 -mt-2'/>
+                  {open && <span>Transcript</span>}
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
         <div className={`mb-24 flex flex-row  md:flex-col gap-x-8 `}>
-          <div className={`${open ? 'pl-7' : 'pl-4'} `}>
+          
+          <div className={`${open ? 'pl-7' : 'md:pl-4 '} `}>
+            <button
+              onClick={() => setShowResetModal(true)}
+              className="text-blue-950 hover:text-blue-700 font-semibold"
+            >
+              <IoSettingsSharp className={`${open ? 'mr-5' : ''} text-blue-950 inline-block w-7 h-7 m-2`}  />
+              {open && <span>Reset Password</span>}
+            </button>
+          </div>
+          <div className={`${open ? 'pl-7' : 'md:pl-4'} `}>
             <a href="">
                <CgProfile className={`${open ? 'mr-5' : ''} text-blue-950 inline-block w-7 h-7 m-2`} />
               {open && <span className='text-blue-950 font-semibold'>Username</span>}           
@@ -154,15 +166,6 @@ const Sidebar = ({ children, setBreadcrumb }) => {
               className={`${open ? 'text-white bg-blue-950 rounded m-2 px-8 py-3 flex items-center ml-9' : 'md:w-20'} hover:shadow-primary-2 hover:scale-105 hover:outline-5 hover:outline-blue-600`}>
               <IoLogOut className={`${open ? '-ml-3 mr-5 mt-0' : 'md:ml-2 text-blue-950'} inline-block w-7 h-7 mt-2 mr-2`} />
               {open && <span className=''>Logout</span>}
-            </button>
-          </div>
-          <div className={`${open ? 'pl-7' : 'pl-4'} `}>
-            <button
-              onClick={() => setShowResetModal(true)}
-              className="text-blue-950 hover:text-blue-700 font-semibold mt-2 flex items-center"
-            >
-              <IoSettingsSharp className={`${open ? 'mr-5' : ''} text-blue-950 inline-block w-7 h-7 m-2`}  />
-              {open && <span>Reset Password</span>}
             </button>
           </div>
 
