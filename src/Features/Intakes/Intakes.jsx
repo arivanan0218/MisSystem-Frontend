@@ -140,9 +140,7 @@ const Intakes = () => {
 
           {filteredIntakes.length > 0 ? (
             filteredIntakes.map((intake) => (
-          
-            <div key={intake.id} className="bg-white flex md:w-full justify-between items-center gap-2 mb-3">
-
+              <div key={intake.id} className="bg-white flex flex-col md:flex-row justify-between items-stretch md:items-center gap-2">
 
                 <Link
                   to={`${intake.id}/semesters`}
