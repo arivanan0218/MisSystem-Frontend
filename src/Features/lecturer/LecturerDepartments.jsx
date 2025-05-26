@@ -10,15 +10,15 @@ const LecturerDepartments = () => {
   const [editFormOpen, setEditFormOpen] = useState(false);
   const [error, setError] = useState(null);
   const [editingDepartment, setEditingDepartment] = useState(null);
-
-  
+  const [searchQuery, setSearchQuery] = useState('');
 
   const closeEditForm = () => {
     setEditingDepartment(null);
     setEditFormOpen(false);
   };
-
-
+  const filteredDepartments = departments.filter((department) =>
+    department.departmentName.toLowerCase().includes(searchQuery.toLowerCase())
+  );    
   const handleEdit = async (e) => {
     e.preventDefault();
     const { departmentName, departmentCode } = editingDepartment;
@@ -102,6 +102,8 @@ const LecturerDepartments = () => {
           <input
             type="text"
             placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="bg-gray-200 rounded-full w-full max-w-[471px] h-[41px] px-3 cursor-pointer text-md"
           />
                   
@@ -109,8 +111,8 @@ const LecturerDepartments = () => {
 
         <div className="mt-[80px]">
           {error && <div className="text-center text-red-500 mb-4">{error}</div>}
-          {departments.length > 0 ? (
-            departments.map((department) => (
+          {filteredDepartments.length > 0 ? (
+            filteredDepartments.map((department) => (
               <div key={department.id} className="bg-white flex justify-between items-center">
                 <Link
                   to={`/lecturerdepartments/${department.id}/lecturers`}

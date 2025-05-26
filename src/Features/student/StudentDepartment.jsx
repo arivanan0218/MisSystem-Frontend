@@ -8,6 +8,11 @@ import axios from '../../axiosConfig';
 const StudentDepartments = () => {
   const [departments, setDepartments] = useState([]);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredDepartments = departments.filter((department) =>
+    department.departmentName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -52,14 +57,16 @@ const StudentDepartments = () => {
           <input
             type="text"
             placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="bg-gray-200 rounded-full w-full max-w-[471px] h-[41px] px-3 cursor-pointer text-md"
           />
         </div>
 
         <div className="mt-[80px]">
           {error && <div className="text-center text-red-500 mb-4">{error}</div>}
-          {departments.length > 0 ? (
-            departments.map((department) => (
+          {filteredDepartments.length > 0 ? (
+            filteredDepartments.map((department) => (
               <div key={department.id} className="bg-white flex justify-between items-center">
                 <Link
                   to={`/studentdepartments/${department.id}/sintakes`}
