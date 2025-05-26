@@ -31,7 +31,7 @@ const ViewSemiResults = () => {
     try {
       // Fetch all students in the department/intake/semester
       const studentsResponse = await axios.get(
-        `http://localhost:8081/api/student/`,
+        `http://13.203.223.91:8084/api/student/`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -42,7 +42,7 @@ const ViewSemiResults = () => {
         const resultsPromises = studentsResponse.data.map(async (student) => {
           try {
             const response = await axios.get(
-              `http://localhost:8081/api/module-registration/student?studentId=${student.id}&semesterId=${semesterId}&intakeId=${intakeId}&departmentId=${departmentId}`,
+              `http://13.203.223.91:8084/api/module-registration/student?studentId=${student.id}&semesterId=${semesterId}&intakeId=${intakeId}&departmentId=${departmentId}`,
               {
                 headers: { Authorization: `Bearer ${token}` },
               }
@@ -92,7 +92,7 @@ const ViewSemiResults = () => {
     try {
       // Call the calculate endpoint
       const response = await axios.post(
-        `http://localhost:8081/api/semester-results/calculate/${departmentId}/${intakeId}/${semesterId}`,
+        `http://13.203.223.91:8084/api/semester-results/calculate/${departmentId}/${intakeId}/${semesterId}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },

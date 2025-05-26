@@ -28,8 +28,7 @@ const Modules = () => {
   const semesterId = localStorage.getItem("semesterId");
   const departmentId = localStorage.getItem("departmentId");
   const intakeId = localStorage.getItem("intakeId");  
-  // const studentId = localStorage.getItem("selectedStudentId");
-  const studentId = 1; // Replace with the actual student ID or fetch it from localStorage if needed
+  const studentId = localStorage.getItem("studentId");
 
   const openForm = () => setFormOpen(true);
   const closeForm = () => setFormOpen(false);
@@ -108,8 +107,7 @@ const Modules = () => {
           return;
         }
 
-        const pathVariable = "query";
-        const endpoint = `module/semester/${pathVariable}?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
+        const endpoint = `module/semester?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
         console.log("Calling API endpoint:", endpoint);
 
         const response = await axios.get(endpoint, {
@@ -173,13 +171,16 @@ const Modules = () => {
     }
 
     const registeredData = registeredResponse.data;
-    const registeredModuleIds = registeredData.modules.map((mod) => mod.id); // Adjust key if needed
-    console.log("Registered Module IDs:", registeredModuleIds);
 
+    const registeredModuleIds = registeredData.modules
+      .filter(mod => mod.registrationStatus === 'Approved')
+      .map(mod => mod.id);
+    // console.log("Registered Module IDs:", registeredModuleIds);
+    // console.log("registeredData :", registeredData);
     // STEP 2: Fetch all available modules for the semester
-    const pathVariable = "query";
-    const modulesEndpoint = `module/semester/${pathVariable}?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
-    console.log("Fetching all semester modules from:", modulesEndpoint);
+    // const pathVariable = "query";
+      const modulesEndpoint = `module/semester?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
+            console.log("Fetching all semester modules from:", modulesEndpoint);
 
     const modulesResponse = await axios.get(modulesEndpoint, {
       headers: {
@@ -211,7 +212,7 @@ const Modules = () => {
 };
 
 
-    if (userRole === "ROLE_AR") {
+    if (userRole === "ROLE_AR" || userRole === "ROLE_LECTURER") {
       fetchModulesForAR();
     } else if (userRole === "ROLE_STUDENT") {
       fetchModulesForStudent();
@@ -299,6 +300,7 @@ const Modules = () => {
                 Module Registration
               </button>
             </Link>
+            
           </div>
         )}
 
@@ -314,11 +316,19 @@ const Modules = () => {
                 key={module.id}
                 className="bg-white flex md:w-full justify-between items-center gap-2"
               >
-                <Link
-                  to={`/departments/${module.id}/intakes/semesters/modules/assignments`}
-                  className="flex-1"
-                  onClick={() => localStorage.setItem("moduleId", module.id)}
-                >
+          <Link
+            to={
+              userRole === "ROLE_AR"
+                ? `/departments/${module.id}/intakes/semesters/modules/assignments`
+                : userRole === "ROLE_STUDENT"
+                ? `/moduleMarks`
+                : userRole === "ROLE_LECTURER"
+                ? `/departments/${module.id}/intakes/semesters/modules/assignments`
+                : "#"
+            }
+            className="flex-1"
+            onClick={() => localStorage.setItem("moduleId", module.id)}
+          >
                   <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-[95%] p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
                     <div className="flex flex-col">
                       <div>
@@ -344,9 +354,10 @@ const Modules = () => {
                         )}
                       </div>
                     </div>
+                   
                   </div>
                 </Link>
-
+               
                 {userRole === "ROLE_AR" && (
                   <div className="flex space-x-2">
                     <div className="bg-white text-blue-950 border-blue-950 min-h-[77px] min-w-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">

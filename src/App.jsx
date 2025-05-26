@@ -26,6 +26,7 @@ import ViewFinalResults from "./Features/Semester/ViewFinalResults.jsx";
 import Transcript from "./Features/Transcript/Transcript.jsx";
 import StudentTranscript from "./Features/Transcript/StudentTranscript.jsx"
 import MRPforStudent from "./Features/ModuleManagement/MRPforStudent.jsx";
+import ModuleMarks from "./Features/ModuleManagement/ModuleMarks.jsx";
 
 
 function App() {
@@ -126,6 +127,10 @@ function App() {
                   <Route
                   path="/ModuleRegistrationFormViewForStudent"
                   element={<MRPforStudent />} />
+
+                  <Route
+                  path="/moduleMarks"
+                  element={<ModuleMarks />} />
                  
                   </Routes>
               </Sidebar>

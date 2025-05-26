@@ -10,8 +10,7 @@ import instance from "../../axiosConfig";
 const { Title } = Typography;
 
 export const MRPforStudent = () => {
-// const studentId = localStorage.getItem("studentId");
-const studentId = 1;
+const studentId = localStorage.getItem("studentId");
 const departmentId = localStorage.getItem('departmentId');
 const intakeId = localStorage.getItem('intakeId');
 const semesterId = localStorage.getItem('semesterId');
@@ -29,11 +28,7 @@ const fetchInitialData = async () => {
     const token = localStorage.getItem('token') || localStorage.getItem('auth-token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    const moduleResponse = await instance.get(`/module/semester/{departmentAndIntakeAndSemesterId}`, {
-      params: { departmentId, intakeId, semesterId },
-      headers
-    });
-
+    const moduleResponse = await instance.get(`module/semester?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`)
     const modules = Array.isArray(moduleResponse.data) ? moduleResponse.data : [];
 
     const selectedCMModules = modules

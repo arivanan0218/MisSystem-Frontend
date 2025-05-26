@@ -35,7 +35,7 @@ const ViewMarks = () => {
       
       // Fetch module results
       const response = await axios.get(
-        `http://localhost:8081/api/module-results/module?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}&moduleId=${moduleId}`,
+        `http://13.203.223.91:8084/api/module-results/module?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}&moduleId=${moduleId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -91,7 +91,7 @@ const ViewMarks = () => {
       
       // Call the calculate endpoint
       const response = await axios.post(
-        `http://localhost:8081/api/module-results/calculate?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}&moduleId=${moduleId}`,
+        `http://13.203.223.91:8084/api/module-results/calculate?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}&moduleId=${moduleId}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -234,7 +234,7 @@ const ViewMarks = () => {
       const newStatus = currentStatus === "PASS" ? "FAIL" : "PASS";
       
       const response = await axios.post(
-        `http://localhost:8081/api/module-results/update-status/${resultId}`,
+        `http://13.203.223.91:8084/api/module-results/update-status/${resultId}`,
         { newStatus: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );

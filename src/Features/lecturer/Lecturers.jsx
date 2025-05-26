@@ -71,7 +71,8 @@ const Lecturers = () => {
 
   const handleUploadSuccess = (newLecturers) => {
     setLecturers(prevLecturers => [...prevLecturers, ...newLecturers]);
-    closeForm();
+    closeForm();    
+    window.location.reload(); // Reload the page to reflect changes
   };
 
   return (
