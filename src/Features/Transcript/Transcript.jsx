@@ -108,7 +108,7 @@ const RuhunaTranscript = ({ previewMode, studentId: propStudentId }) => {
         }
 console.log('Attempting to fetch transcript data for ID:', studentIdToUse);
 
-const response = await axios.get('http://localhost:8081/public/transcripts/student/reg', {
+const response = await axios.get('http://13.203.223.91:8084/public/transcripts/student/reg', {
   params: {
     studentRegNo: studentIdToUse
   }

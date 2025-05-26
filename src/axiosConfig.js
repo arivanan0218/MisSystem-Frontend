@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance
 const instance = axios.create({
-  baseURL: 'http://localhost:8081/api', // Replace with your backend URL
+  baseURL: 'http://13.203.223.91:8084/api', // Replace with your backend URL
   withCredentials: true, // Send cookies with requests, if required
 });
 
