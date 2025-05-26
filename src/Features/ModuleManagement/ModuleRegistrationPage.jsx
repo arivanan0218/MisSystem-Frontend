@@ -5,6 +5,8 @@ import Header from "../../Components/Header";
 import Footer from "../../Components/Footer";
 import BreadcrumbItem from "../../Components/Breadcrumb";
 import { UpOutlined } from "@ant-design/icons";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -34,7 +36,9 @@ export const ModuleRegistrationPage = () => {
   const approvedTableRef = useRef(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-
+  const departmentName = localStorage.getItem("departmentName");
+  const intakeBatch = localStorage.getItem("intakeBatch");
+  const semesterName = localStorage.getItem("semesterName");
 
   useEffect(() => {
     // Load filter options
@@ -46,6 +50,8 @@ export const ModuleRegistrationPage = () => {
       fetchModuleList();
     }
 
+    
+  
     // Scroll event listener for scroll-to-top button
   const handleScroll = () => {
     setShowScrollTop(window.scrollY > 300);
@@ -59,7 +65,50 @@ export const ModuleRegistrationPage = () => {
   };
 
   }, []);
+  //for all module registrations
+  const exportToExcel1 = (data, fileName) => {
+    // Clean and format the data
+    const formattedData = data.map(row => ({
+      StudentName: row.studentName,
+      StudentRegNo: row.studentRegNo,
+      ModuleCode: row.moduleCode,
+      ModuleName: row.moduleName,
+      ModuleType: row.moduleType,
+      GPAStatus: row.gpaStatus,
+      RegistrationStatus: row.registrationStatus,      
+    }));
 
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(blob, `${fileName}.xlsx`);
+  };
+  //for module wise registrations
+  const exportToExcel2 = (data, fileName) => {
+    // Clean and format the data
+    const formattedData = data.map(row => ({
+      StudentName: row.studentName,
+      StudentRegNo: row.studentRegNo,
+      GPAStatus: row.gpaStatus,      
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(blob, `${fileName}.xlsx`);
+  };
   const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
@@ -155,7 +204,7 @@ export const ModuleRegistrationPage = () => {
       setLoading(false);
     }
   };
-
+/* 
   const handleFilterChange = (field, value) => {
     setSelectedFilters(prev => ({
       ...prev,
@@ -164,14 +213,15 @@ export const ModuleRegistrationPage = () => {
     
     // Save to localStorage
     localStorage.setItem(field, value);
-  };
+  }; */
 
-  const applyFilters = () => {
+  /* const applyFilters = () => {
     fetchPendingRegistrations();
     fetchModuleList();
     setSelectedModule(null);
     setModuleRegistrations([]);
   };
+ */
 
   const handleApproveRegistration = async (registrationId) => {
     setLoading(true);
@@ -287,7 +337,6 @@ export const ModuleRegistrationPage = () => {
   };
 
   // Columns for the pending registrations table
-  // Columns for the pending registrations table (only for pending, not for approved)
   const pendingColumns = [
     {
       title: "Reg No",
@@ -527,6 +576,14 @@ export const ModuleRegistrationPage = () => {
       <Spin spinning={loading}>
         <Tabs defaultActiveKey="1">
           <TabPane tab="Pending Registrations" key="1">
+            <Button 
+              type="primary" 
+              className="mb-2"
+              onClick={() => exportToExcel1(pendingRegistrations, "Pending_Registrations_for_" +departmentName+"_"+intakeBatch+"_"+semesterName)}
+            >
+              Download
+            </Button>
+
             <Table
               dataSource={pendingRegistrations}
               columns={pendingColumns}
@@ -543,7 +600,7 @@ export const ModuleRegistrationPage = () => {
             />
             {selectedModule && (
               <>
-                <div ref={registrationTableRef}>
+                <div >
                   <h3 className="mt-6 mb-2 text-lg font-medium">
                     Pending Registrations for &nbsp;
                       {
@@ -556,6 +613,13 @@ export const ModuleRegistrationPage = () => {
                       }
                       )
                   </h3>
+                  <Button 
+                    type="primary" 
+                    className="mb-2"
+                    onClick={() => exportToExcel2(moduleRegistrations, "Pending_Registrations_for_" +departmentName+"_"+intakeBatch+"_"+semesterName+"_"+ (moduleList.find(m => m.id === selectedModule)?.moduleName || "")+"_" + (moduleList.find(m => m.id === selectedModule)?.moduleCode || "")+"_"+(moduleList.find(m => m.id === selectedModule)?.moduleType || ""))}
+                  >
+                    Download
+                  </Button>
                   <Table
                     dataSource={moduleRegistrations}
                     columns={pendingColumns}
@@ -578,6 +642,15 @@ export const ModuleRegistrationPage = () => {
                       }
                       )
                     </h3>
+                    <Button 
+                    type="primary" 
+                    className="mb-2"
+                    onClick={() => exportToExcel2(
+                      approvedData, 
+                      "Approved_Registrations_for_"+departmentName+"_"+intakeBatch+"_"+semesterName+"_"+ (moduleList.find(m => m.id === selectedModule)?.moduleName || "")+"_" + (moduleList.find(m => m.id === selectedModule)?.moduleCode || "")+"_"+(moduleList.find(m => m.id === selectedModule)?.moduleType || ""))}
+                  >
+                    Download
+                  </Button>
                     <Table
                       dataSource={approvedData}
                       columns={approvedColumns}

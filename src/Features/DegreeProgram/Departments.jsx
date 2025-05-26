@@ -183,7 +183,10 @@ const Departments = () => {
                 <Link
                   to={`/departments/${department.id}/intakes`}
                   className="flex-1"
-                  onClick={() => localStorage.setItem('departmentId', department.id)}
+                  onClick={() => {
+                    localStorage.setItem('departmentId', department.id);
+                    localStorage.setItem('departmentName', department.departmentName);
+                  }}
                 >
                   <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border border-b-[3px] font-semibold w-full p-2 px-4 rounded-[12px] hover:shadow-md mb-3 cursor-pointer flex justify-between items-center">
                     <span className="truncate whitespace-nowrap overflow-hidden text-ellipsis w-0 flex-1">

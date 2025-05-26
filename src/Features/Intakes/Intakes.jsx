@@ -145,7 +145,11 @@ const Intakes = () => {
                 <Link
                   to={`${intake.id}/semesters`}
                   className="w-full md:flex-1"
-                  onClick={() => localStorage.setItem('intakeId', intake.id)}
+                  onClick={() =>{ 
+                    localStorage.setItem('intakeId', intake.id);
+                    localStorage.setItem('intakeBatch', intake.batch)
+                  }
+                }  
                 >
                   <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border border-b-[3px] font-semibold w-full p-2 px-4 rounded-[12px] hover:shadow-lg cursor-pointer flex justify-between items-center">
                     
