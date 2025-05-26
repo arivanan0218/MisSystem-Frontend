@@ -107,7 +107,7 @@ const Modules = () => {
           return;
         }
 
-        const endpoint = `module/semester?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
+        const endpoint = `/module/semester?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
         console.log("Calling API endpoint:", endpoint);
 
         const response = await axios.get(endpoint, {
