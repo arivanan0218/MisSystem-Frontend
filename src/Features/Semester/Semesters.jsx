@@ -71,43 +71,46 @@ const Semesters = () => {
 
 
   const handleEdit = async (e) => {
-    e.preventDefault();
-    const { semesterName, semesterYear, semesterDuration } = editingSemester;
+  e.preventDefault();
+  const { semesterName, semesterYear, semesterDuration } = editingSemester;
 
-    if (semesterName.trim() && semesterYear.trim() && semesterDuration.trim()) {
-      try {
-        const response = await axios.put(
-          `/semester/${editingSemester.id}`, 
-          {
-            semesterName,
-            semesterYear,
-            semesterDuration,
-            intakeId: editingSemester.intakeId,
+  if (semesterName.trim() && semesterYear.trim() && semesterDuration.trim()) {
+    try {
+      const response = await axios.put(
+        `/semester/${editingSemester.id}`,
+        {
+          semesterName,
+          semesterYear,
+          semesterDuration,
+          intakeId: editingSemester.intakeId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+        }
+      );
+
+      const updatedSemester = response.data;
+
+      setSemesters((prevSemesters) => {
+        const updatedList = prevSemesters.map((semester) =>
+          semester.id === updatedSemester.id ? updatedSemester : semester
         );
+        console.log("Updated semesters list:", updatedList);
+        return updatedList;
+      });
 
-        const updatedSemester = response.data;
-
-        setSemesters((prevSemesters) =>
-          prevSemesters.map((semester) =>
-            semester.id === updatedSemester.id ? updatedSemester : semester
-          )
-        );
-
-        closeEditForm();
-      } catch (error) {
-        console.error('Error updating semester:', error);
-        setError('Failed to update semester. Please try again.');
-      }
-    } else {
-      setError('Please fill out all fields.');
+      closeEditForm();
+    } catch (error) {
+      console.error('Error updating semester:', error);
+      setError('Failed to update semester. Please try again.');
     }
-  };
+  } else {
+    setError('Please fill out all fields.');
+  }
+};
+
 
   useEffect(() => {
     const fetchSemesters = async () => {
@@ -315,14 +318,7 @@ const Semesters = () => {
         </div>
       )}
       <Footer />
-      {editFormOpen && (
-        <SemesterCreation
-          closeForm={closeEditForm}
-          addSemester={addSemester}
-          isEditing={true}
-          currentSemester={editingSemester}
-        />
-      )}
+  
     </div>
   );
 };
