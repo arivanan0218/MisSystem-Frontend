@@ -67,7 +67,7 @@ const DataTable = ({ data = [], onRowClick = () => {}, onDelete = () => {}, onEd
     
     // Get all keys from the first item except 'id'
     const firstItem = filteredData[0];
-    const keys = Object.keys(firstItem).filter(key => key !== 'id');
+    const keys = Object.keys(firstItem).filter(key => key !== 'id' && key !== 'departmentId' && key !== 'username' && key !== 'password' );
     
     return keys.map(key => ({
       accessorKey: key,

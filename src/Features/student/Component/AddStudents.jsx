@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
-import Header from '../../Components/Header';
-import Footer from '../../Components/Footer';
+import Header from '../../../Components/Header';
+import Footer from '../../../Components/Footer';
+import axios from '../../../axiosConfig';
 
 const AddStudents = () => {
   const [excelFile, setExcelFile] = useState(null);
@@ -22,12 +23,9 @@ const AddStudents = () => {
 
   const fetchStudentData = async () => {
     try {
-      const response = await fetch('http://13.203.223.91:8084/api/Students');
-      if (response.ok) {
-        const data = await response.json();
-        setStudentData(data);
-      } else {
-        console.error('Error fetching students:', response.statusText);
+      const response = await axios.get('/Students');
+      if (response.data) {
+        setStudentData(response.data);
       }
     } catch (error) {
       console.error('Error fetching students:', error);

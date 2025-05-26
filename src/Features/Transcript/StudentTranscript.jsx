@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/img/logo.png';
 import Transcript from './Transcript.jsx';
-import axios from 'axios';
+import axios, { publicInstance } from '../../axiosConfig';
 
 const StudentTranscript = () => {
   const [studentId, setStudentId] = useState('');
@@ -23,8 +23,8 @@ const StudentTranscript = () => {
     setError('');
     setLoading(true);
     
-    // Use direct axios call to access public endpoint without auth
-    axios.get(`http://13.203.223.91:8084/public/transcripts/student/reg`, {
+    // Use publicInstance for public endpoint access
+    publicInstance.get(`/transcripts/student/reg`, {
   params: {
     studentRegNo: studentId
   }
