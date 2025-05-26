@@ -34,12 +34,12 @@ const Students = () => {
         return;
       }
 
-      const response = await axios.get(/student/sintake/${departmentId}?departmentId=${departmentId}&intakeId=${intakeId}, {
-        headers: { Authorization: Bearer ${token} },
+      const response = await axios.get(`/student/sintake/${departmentId}?departmentId=${departmentId}&intakeId=${intakeId}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.status !== 200) {
-        throw new Error(Failed to fetch students: ${response.statusText});
+        throw new Error(`Failed to fetch students: ${response.statusText}`);
       }
 
       setStudents(response.data);
@@ -70,8 +70,8 @@ const Students = () => {
     <div>
       <Header />
       <Breadcrumb breadcrumb={[
-        { label: 'Student Departments', link: /studentdepartment },
-        { label: 'Student Intakes', link: /studentdepartments/${departmentId}/sintakes },
+        { label: 'Student Departments', link: `/studentdepartment` },
+        { label: 'Student Intakes', link: `/studentdepartments/${departmentId}/sintakes` },
         { label: 'Students', link: '/students' },
       ]} 
       />
