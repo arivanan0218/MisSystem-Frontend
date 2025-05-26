@@ -107,7 +107,7 @@ const Modules = () => {
           return;
         }
 
-        const endpoint = `/module/semester?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
+        const endpoint = `module/semester?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`;
         console.log("Calling API endpoint:", endpoint);
 
         const response = await axios.get(endpoint, {
@@ -133,7 +133,7 @@ const Modules = () => {
         if (error.response?.status === 401 || error.response?.status === 403) {
           setError("Authentication failed. Please log in again.");
           setTimeout(() => {
-            window.location.href = "/login";
+            window.location.href = "/";
           }, 2000);
         } else {
           setError(error.response?.data?.message || "Could not fetch modules. Please try again later.");
@@ -151,7 +151,7 @@ const Modules = () => {
     if (!token) {
       setError("Authentication required. Please log in again.");
       setTimeout(() => {
-        window.location.href = "/login";
+        window.location.href = "/";
       }, 2000);
       return;
     }
