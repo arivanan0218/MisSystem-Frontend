@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef  } from "react";
-import { Table, Button, Select, Tag, message, Spin, Alert, Modal, Input, Tabs, Breadcrumb } from "antd";
+import { Table, Button, Select, Tag, message, Spin, Alert, Modal, Input, Tabs, Popconfirm } from "antd";
 import instance from "../../axiosConfig";
 import Header from "../../Components/Header";
 import Footer from "../../Components/Footer";
@@ -7,6 +7,8 @@ import BreadcrumbItem from "../../Components/Breadcrumb";
 import { UpOutlined } from "@ant-design/icons";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { CheckOutlined, CloseOutlined, EditOutlined, ClockCircleOutlined, CheckCircleOutlined } from "@ant-design/icons";
+
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -35,36 +37,53 @@ export const ModuleRegistrationPage = () => {
   const registrationTableRef = useRef(null);
   const approvedTableRef = useRef(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
-
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
   const departmentName = localStorage.getItem("departmentName");
   const intakeBatch = localStorage.getItem("intakeBatch");
   const semesterName = localStorage.getItem("semesterName");
-
-  useEffect(() => {
-    // Load filter options
-    fetchFilterOptions();
-    
-    // If all filters are set, load pending registrations
-    if (selectedFilters.departmentId && selectedFilters.intakeId && selectedFilters.semesterId) {
-      fetchPendingRegistrations();
-      fetchModuleList();
-    }
-
-    
   
-    // Scroll event listener for scroll-to-top button
+  const iconStyle = {
+    fontSize: isSmallScreen ? 20 : 14, // You can adjust these values
+  };
+
+
+ useEffect(() => {
+  // Load filter options
+  fetchFilterOptions();
+
+  // If all filters are set, load pending registrations and module list
+  if (
+    selectedFilters.departmentId &&
+    selectedFilters.intakeId &&
+    selectedFilters.semesterId
+  ) {
+    fetchPendingRegistrations();
+    fetchModuleList();
+  }
+
+  // Scroll event listener for scroll-to-top button
   const handleScroll = () => {
     setShowScrollTop(window.scrollY > 300);
   };
 
-  window.addEventListener("scroll", handleScroll);
-
-  // Cleanup function
-  return () => {
-    window.removeEventListener("scroll", handleScroll);
+  // Screen resize listener for small screen detection
+  const handleResize = () => {
+    setIsSmallScreen(window.innerWidth < 992);
   };
 
-  }, []);
+  // Initial check
+  handleResize();
+
+  window.addEventListener("scroll", handleScroll);
+  window.addEventListener("resize", handleResize);
+
+  // Cleanup
+  return () => {
+    window.removeEventListener("scroll", handleScroll);
+    window.removeEventListener("resize", handleResize);
+  };
+}, []);
+
   //for all module registrations
   const exportToExcel1 = (data, fileName) => {
     // Clean and format the data
@@ -343,7 +362,7 @@ export const ModuleRegistrationPage = () => {
       dataIndex: "studentRegNo",
       key: "studentRegNo"
     },
-    {
+   !isSmallScreen && {
       title: "Student Name",
       dataIndex: "studentName",
       key: "studentName"
@@ -353,12 +372,12 @@ export const ModuleRegistrationPage = () => {
       dataIndex: "moduleCode",
       key: "moduleCode"
     },
-    {
+   !isSmallScreen && {
       title: "Module Name",
       dataIndex: "moduleName",
       key: "moduleName"
     },
-    {
+    !isSmallScreen &&{
       title: "Module Type",
       dataIndex: "moduleType",
       key: "moduleType",
@@ -367,13 +386,13 @@ export const ModuleRegistrationPage = () => {
         return <Tag color={display.color}>{display.text}</Tag>;
       }
     },
-    {
+   !isSmallScreen && {
       title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status) => status === "Taken" ? "✓ Taken" : "✗ Not Taken"
     },
-    {
+    !isSmallScreen &&{
       title: "GPA Status",
       dataIndex: "gpaStatus",
       key: "gpaStatus",
@@ -400,34 +419,45 @@ export const ModuleRegistrationPage = () => {
       key: "actions",
       render: (_, record) => (
         <div className="flex space-x-2">
-          <Button 
-            type="primary" 
-            size="small" 
+          <Button
+            type="primary"
+            size="small"
+            icon={<CheckOutlined style={iconStyle} />}
             onClick={() => handleApproveRegistration(record.id)}
             loading={loading}
           >
-            Approve
+            {!isSmallScreen && "Approve"}
           </Button>
-          <Button 
-            danger 
-            size="small" 
-            onClick={() => handleRejectRegistration(record.id)}
-            loading={loading}
+
+          <Popconfirm
+            title="Are you sure you want to reject this registration?"
+            onConfirm={() => handleRejectRegistration(record.id)}
+            okText="Yes"
+            cancelText="No"
           >
-            Reject
-          </Button>
-          <Button 
-            size="small" 
+            <Button
+              danger
+              size="small"
+              icon={<CloseOutlined style={iconStyle} />}
+              loading={loading}
+            >
+              {!isSmallScreen && "Reject"}
+            </Button>
+          </Popconfirm>
+
+          <Button
+            size="small"
+            icon={<EditOutlined style={iconStyle} />}
             onClick={() => openEditModal(record)}
             loading={loading}
           >
-            Edit
+            {!isSmallScreen && "Edit"}
           </Button>
         </div>
       )
     }
-  ];
 
+  ].filter(Boolean);
   // Columns for the approved registrations table (no actions)
   const approvedColumns = [
     {
@@ -435,7 +465,7 @@ export const ModuleRegistrationPage = () => {
       dataIndex: "studentRegNo",
       key: "studentRegNo"
     },
-    {
+    !isSmallScreen &&{
       title: "Student Name",
       dataIndex: "studentName",
       key: "studentName"
@@ -445,12 +475,12 @@ export const ModuleRegistrationPage = () => {
       dataIndex: "moduleCode",
       key: "moduleCode"
     },
-    {
+    !isSmallScreen &&{
       title: "Module Name",
       dataIndex: "moduleName",
       key: "moduleName"
     },
-    {
+    !isSmallScreen &&{
       title: "Module Type",
       dataIndex: "moduleType",
       key: "moduleType",
@@ -465,7 +495,7 @@ export const ModuleRegistrationPage = () => {
       key: "status",
       render: (status) => status === "Taken" ? "✓ Taken" : "✗ Not Taken"
     },
-    {
+    !isSmallScreen &&{
       title: "GPA Status",
       dataIndex: "gpaStatus",
       key: "gpaStatus",
@@ -487,7 +517,7 @@ export const ModuleRegistrationPage = () => {
         return <Tag color={color}>{text}</Tag>;
       }
     }
-  ];
+  ].filter(Boolean);
 
   // Columns for the module selection list
   const moduleColumns = [
@@ -501,7 +531,7 @@ export const ModuleRegistrationPage = () => {
       dataIndex: "moduleName",
       key: "moduleName"
     },
-    {
+    !isSmallScreen &&{
       title: "Module Type",
       dataIndex: "moduleType",
       key: "moduleType",
@@ -510,37 +540,40 @@ export const ModuleRegistrationPage = () => {
         return <Tag color={display.color}>{display.text}</Tag>;
       }
     },
-    {
+    !isSmallScreen &&{
       title: "Credit",
       dataIndex: "credit",
       key: "credit",
       render: (credit, record) => record.moduleType === 'GE' ? 'N/A' : credit
     },
-    {
-  title: "Actions",
-  key: "actions",
-  render: (_, record) => (
-    <div className="flex space-x-2">
-      <Button
-        type="primary"
-        size="small"
-        onClick={() => fetchModuleRegistrations(record.id)}
-        loading={loading}
-      >
-        Pending
-      </Button>
-      <Button
-        size="small"
-        onClick={() => fetchApprovedRegistrations(record.id)}
-        loading={loading}
-      >
-        Approved
-      </Button>
-    </div>
-  )
-}
+   {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <div className="flex space-x-2">
+          <Button
+            type="primary"
+            size="small"
+            icon={<ClockCircleOutlined style={iconStyle}/>}
+            onClick={() => fetchModuleRegistrations(record.id)}
+            loading={loading}
+          >
+            {!isSmallScreen && "Pending"}
+          </Button>
+          <Button
+            size="small"
+            icon={<CheckCircleOutlined style={iconStyle}/>}
+            onClick={() => fetchApprovedRegistrations(record.id)}
+            loading={loading}
+          >
+            {!isSmallScreen && "Approved"}
+          </Button>
+        </div>
+      )
+    }
 
-  ];
+
+  ].filter(Boolean);
 
   return (
   <div>
@@ -600,7 +633,7 @@ export const ModuleRegistrationPage = () => {
             />
             {selectedModule && (
               <>
-                <div >
+                <div ref={registrationTableRef} >
                   <h3 className="mt-6 mb-2 text-lg font-medium">
                     Pending Registrations for &nbsp;
                       {
