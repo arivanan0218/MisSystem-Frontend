@@ -83,20 +83,7 @@ const Intakes = () => {
             type="text"
             placeholder="Search"
             className="bg-gray-200 rounded-full w-full max-w-[471px] h-[41px] px-3 cursor-pointer text-md"
-          />
-          {/* {userRole === 'ROLE_AR' && (
-            <div>
-            <button
-              onClick={openForm}
-              className="bg-white text-blue-900 border-[3px] border-blue-950 font-semibold rounded-full w-[144px] h-[41px] ml-4"
-              aria-label="Add Intake"
-            >
-              Add Intake +
-            </button>
-            {formOpen && <IntakeCreation closeForm={closeForm} addIntake={addIntake} />}
-          </div>
-          )} */}
-          
+          /> 
         </div>
 
         <div className="mt-[80px]">
@@ -112,8 +99,6 @@ const Intakes = () => {
                     {intake.intakeYear} - {intake.batch}
                   </div>
                 </Link>
-               
-                
               </div>
             ))
           ) : (
