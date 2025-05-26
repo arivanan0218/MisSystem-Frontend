@@ -171,8 +171,8 @@ const ViewSemiResults = () => {
       
       // Create module data
       const moduleData = student.modules.map(module => [
-        module.moduleName,
-        module.moduleCode,
+        module.name,
+        module.code,
         module.grade,
         module.status
       ]);
@@ -350,6 +350,7 @@ const ViewSemiResults = () => {
 
         {/* Expandable Module Details for each student */}
         {semesterResults.length > 0 && (
+          console.log("Rendering module details for students:", semesterResults),
           <div className="space-y-6 mb-8">
             {semesterResults.map((student) => (
               <div 
@@ -373,8 +374,8 @@ const ViewSemiResults = () => {
                     {student.modules.length > 0 ? (
                       student.modules.map((module, idx) => (
                         <tr key={`${student.id}-module-${idx}`} className="text-blue-950">
-                          <td className="border border-white p-2">{module.moduleName}</td>
-                          <td className="border border-white p-2">{module.moduleCode}</td>
+                          <td className="border border-white p-2">{module.name}</td>
+                          <td className="border border-white p-2">{module.code}</td>
                           <td className="border border-white p-2">{module.grade}</td>
                           <td className="border border-white p-2">
                             <span className={`px-2 py-1 rounded-full text-xs ${
