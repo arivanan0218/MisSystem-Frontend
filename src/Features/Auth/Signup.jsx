@@ -55,7 +55,7 @@ const Signup = () => {
       };
 
       const response = await axios.post(
-        "http://localhost:8081/api/auth/signup",
+        "/auth/signup",
         payload
       );
 

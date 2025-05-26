@@ -30,7 +30,7 @@ const ViewFinalResults = () => {
     try {
       // Fetch final results
       const response = await axios.get(
-        `http://localhost:8081/api/final-results/${departmentId}/${intakeId}`,
+        `/final-results/${departmentId}/${intakeId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -76,7 +76,7 @@ const ViewFinalResults = () => {
     try {
       // Call the calculate endpoint
       const response = await axios.post(
-        `http://localhost:8081/api/final-results/calculate/${departmentId}/${intakeId}`,
+        `/final-results/calculate/${departmentId}/${intakeId}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },

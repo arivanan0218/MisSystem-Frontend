@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
-import Header from '../../Components/Header';
-import Footer from '../../Components/Footer';
+import Header from '../../../Components/Header';
+import Footer from '../../../Components/Footer';
+import axios from '../../../axiosConfig';
 
 const AddStudents = () => {
   const [excelFile, setExcelFile] = useState(null);
@@ -22,12 +23,9 @@ const AddStudents = () => {
 
   const fetchStudentData = async () => {
     try {
-      const response = await fetch('https://localhost:7276/api/Students');
-      if (response.ok) {
-        const data = await response.json();
-        setStudentData(data);
-      } else {
-        console.error('Error fetching students:', response.statusText);
+      const response = await axios.get('/Students');
+      if (response.data) {
+        setStudentData(response.data);
       }
     } catch (error) {
       console.error('Error fetching students:', error);
@@ -61,7 +59,7 @@ const AddStudents = () => {
       formData.append('file', excelFile);
 
       try {
-        const response = await fetch('https://localhost:7276/api/Students/upload', {
+        const response = await fetch('http://13.203.223.91:8084/api/Students/upload', {
           method: 'POST',
           body: formData,
         });
@@ -121,7 +119,7 @@ const AddStudents = () => {
   // View student details
   const handleViewStudent = async (studentId) => {
     try {
-      const response = await fetch(`https://localhost:7276/api/Students/${studentId}`);
+      const response = await fetch(`http://13.203.223.91:8084/api/Students/${studentId}`);
       if (response.ok) {
         const student = await response.json();
         alert(`Details:\nName: ${student.studentName}\nRegister Number: ${student.studentRegisterNumber}\nEmail: ${student.studentEmail}`);
@@ -144,7 +142,7 @@ const AddStudents = () => {
     e.preventDefault();
     if (selectedStudent) {
       try {
-        const response = await fetch('https://localhost:7276/api/Students', {
+        const response = await fetch('http://13.203.223.91:8084/api/Students', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(selectedStudent),
@@ -168,7 +166,7 @@ const AddStudents = () => {
   const handleDeleteStudent = async (studentId) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
       try {
-        const response = await fetch(`https://localhost:7276/api/Students/${studentId}`, {
+        const response = await fetch(`http://13.203.223.91:8084/api/Students/${studentId}`, {
           method: 'DELETE',
         });
 

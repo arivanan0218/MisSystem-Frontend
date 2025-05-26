@@ -1,9 +1,18 @@
 import axios from 'axios';
 
-// Create an axios instance
+// Create an axios instance for API endpoints
 const instance = axios.create({
-  baseURL: 'http://localhost:8081/api', // Replace with your backend URL
+  // baseURL: 'http://13.203.219.233/api',
+  // Replace with your backend URL
+  baseURL: 'http://localhost:8081/api',
+
   withCredentials: true, // Send cookies with requests, if required
+});
+
+// Create a separate axios instance for public endpoints
+const publicInstance = axios.create({
+  baseURL: 'http://localhost:8081/public',
+  withCredentials: false, // Set to false to allow wildcard CORS response
 });
 
 // Debug function to log token info
@@ -75,4 +84,5 @@ instance.interceptors.response.use(
   }
 );
 
+export { publicInstance };
 export default instance;
