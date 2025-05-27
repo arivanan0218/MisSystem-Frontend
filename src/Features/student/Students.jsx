@@ -76,7 +76,7 @@ const Students = () => {
       ]} 
       />
       
-      <div className="mr-[20%] ml-[10%] px-8 font-poppins">
+      <div className="mr-[10%] ml-[10%] px-8 font-poppins">
         <div className="py-8 flex items-center justify-between">
           <button
             onClick={openForm}
@@ -87,7 +87,7 @@ const Students = () => {
           </button>
         </div>
 
-        <div className="mt-[80px]">
+        <div>
           {error && <div className="text-center text-red-500 mb-4">{error}</div>}
           {loading ? (
             <div className="text-center">Loading...</div>

@@ -31,7 +31,7 @@ const ViewSemiResults = () => {
     try {
       // Fetch all students in the department/intake/semester
       const studentsResponse = await axios.get(
-        `http://13.203.223.91:8084/api/student/`,
+        `/student/`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -42,7 +42,7 @@ const ViewSemiResults = () => {
         const resultsPromises = studentsResponse.data.map(async (student) => {
           try {
             const response = await axios.get(
-              `http://13.203.223.91:8084/api/module-registration/student?studentId=${student.id}&semesterId=${semesterId}&intakeId=${intakeId}&departmentId=${departmentId}`,
+              `/module-registration/student?studentId=${student.id}&semesterId=${semesterId}&intakeId=${intakeId}&departmentId=${departmentId}`,
               {
                 headers: { Authorization: `Bearer ${token}` },
               }
@@ -92,7 +92,7 @@ const ViewSemiResults = () => {
     try {
       // Call the calculate endpoint
       const response = await axios.post(
-        `http://13.203.223.91:8084/api/semester-results/calculate/${departmentId}/${intakeId}/${semesterId}`,
+        `/semester-results/calculate/${departmentId}/${intakeId}/${semesterId}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -208,15 +208,34 @@ const ViewSemiResults = () => {
     
     let totalPoints = 0;
     let totalModules = 0;
+    let totalCredits = 0;
     
     modules.forEach(module => {
-      // Only count modules with valid grades
-      if (module.grade && gradePoints[module.grade] !== undefined) {
-        totalPoints += gradePoints[module.grade];
-        totalModules++;
+      // Get the grade value - might be in different properties
+      const grade = module.grade || module.moduleGrade;
+      // Get the credits - default to 1 if not specified
+      const credits = module.credits || module.moduleCredits || 1;
+      
+      // Check if we have a valid grade
+      if (grade && gradePoints[grade] !== undefined) {
+        // If we have credits, use weighted calculation
+        if (credits) {
+          totalPoints += gradePoints[grade] * credits;
+          totalCredits += credits;
+        } else {
+          // Otherwise just sum the grade points
+          totalPoints += gradePoints[grade];
+          totalModules++;
+        }
       }
     });
     
+    // If we have credits, use them for calculation
+    if (totalCredits > 0) {
+      return (totalPoints / totalCredits).toFixed(2);
+    }
+    
+    // Otherwise use module count
     if (totalModules === 0) return "N/A";
     return (totalPoints / totalModules).toFixed(2);
   };
@@ -374,8 +393,12 @@ const ViewSemiResults = () => {
                     {student.modules.length > 0 ? (
                       student.modules.map((module, idx) => (
                         <tr key={`${student.id}-module-${idx}`} className="text-blue-950">
-                          <td className="border border-white p-2">{module.name}</td>
-                          <td className="border border-white p-2">{module.code}</td>
+
+
+                          <td className="border border-white p-2">{module.moduleName || module.name}</td>
+                          <td className="border border-white p-2">{module.moduleCode || module.code}</td>
+
+
                           <td className="border border-white p-2">{module.grade}</td>
                           <td className="border border-white p-2">
                             <span className={`px-2 py-1 rounded-full text-xs ${

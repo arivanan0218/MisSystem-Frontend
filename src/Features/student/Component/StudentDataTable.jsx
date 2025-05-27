@@ -15,12 +15,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/Components/dropdown-menu";
+import { useMediaQuery } from "@uidotdev/usehooks";
 
 const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [filteredData, setFilteredData] = useState(data);
   const [departments, setDepartments] = useState([]);
+  const isMobile = useMediaQuery("(max-width: 1536px)");
 
   useEffect(() => {
     const filtered = data.filter((item) =>
@@ -59,37 +61,32 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
   };
 
   const columns = [
-    // { accessorKey: "departmentId", header: "Department ID" },
-    // { accessorKey: "intakeId", header: "Intake ID" },
-    { accessorKey: "studentRegNo", header: "Registration No." },
-    {
-      id: "fullName",
-      header: "Full Name",
-      accessorFn: (row) => `${row.firstName || ""} ${row.lastName || ""}`,
-    },
-    // { accessorKey: "firstName", header: "First Name" },
-    // { accessorKey: "lastName", header: "Last Name" },
-    { accessorKey: "studentNIC", header: "NIC" },
-    { accessorKey: "studentMail", header: "Email" },
-    { accessorKey: "phoneNumber", header: "Phone Number" },
-    // { accessorKey: "username", header: "Username" },
-    { accessorKey: "gender", header: "Gender" },
-    { accessorKey: "dateOfBirth", header: "Date of Birth" },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => (
-        <div className="flex space-x-2">
-          <Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
-            Edit
-          </Button>
-          <Button variant="destructive" size="sm" onClick={() => handleDelete(row.original)}>
-            Delete
-          </Button>
-        </div>
-      ),
-    },
-  ];
+  { accessorKey: "studentRegNo", header: "Registration No." },
+  {
+    id: "fullName",
+    header: "Full Name",
+    accessorFn: (row) => `${row.firstName || ""} ${row.lastName || ""}`,
+  },
+  !isMobile && { accessorKey: "studentNIC", header: "NIC" },
+  !isMobile && { accessorKey: "studentMail", header: "Email" },
+  !isMobile && { accessorKey: "phoneNumber", header: "Phone Number" },
+  !isMobile && { accessorKey: "gender", header: "Gender" },
+  !isMobile && { accessorKey: "dateOfBirth", header: "Date of Birth" },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
+          Edit
+        </Button>
+        <Button variant="destructive" size="sm" onClick={() => handleDelete(row.original)}>
+          Delete
+        </Button>
+      </div>
+    ),
+  },
+].filter(Boolean); 
 
   const table = useReactTable({
     data: filteredData,
