@@ -4,14 +4,14 @@ import axios from 'axios';
 const instance = axios.create({
   // baseURL: 'http://13.203.219.233/api',
   // Replace with your backend URL
-  baseURL: 'http://localhost:8081/api',
+  baseURL: 'http://13.203.223.91:8084/api',
 
   withCredentials: true, // Send cookies with requests, if required
 });
 
 // Create a separate axios instance for public endpoints
 const publicInstance = axios.create({
-  baseURL: 'http://localhost:8081/public',
+  baseURL: 'http://13.203.223.91:8084/public',
   withCredentials: false, // Set to false to allow wildcard CORS response
 });
 
