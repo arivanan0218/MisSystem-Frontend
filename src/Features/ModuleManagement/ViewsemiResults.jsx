@@ -394,8 +394,10 @@ const ViewSemiResults = () => {
                       student.modules.map((module, idx) => (
                         <tr key={`${student.id}-module-${idx}`} className="text-blue-950">
 
+
                           <td className="border border-white p-2">{module.moduleName || module.name}</td>
                           <td className="border border-white p-2">{module.moduleCode || module.code}</td>
+
 
                           <td className="border border-white p-2">{module.grade}</td>
                           <td className="border border-white p-2">
