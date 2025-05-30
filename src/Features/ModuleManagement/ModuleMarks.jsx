@@ -43,6 +43,9 @@ const ModuleMarks = () => {
       return;
     }
     
+    // Variable to track if this is a GPA module for this student
+    let isGpaModule = true; // Default to GPA grading
+    
     // Refresh token if needed
     const currentToken = localStorage.getItem('auth-token');
     if (!currentToken) {
@@ -54,6 +57,36 @@ const ModuleMarks = () => {
     }
 
     try {
+      // First check if this student has registered this module as GPA or NGPA
+      try {
+        const semesterId = localStorage.getItem('semesterId');
+        const intakeId = localStorage.getItem('intakeId');
+        const departmentId = localStorage.getItem('departmentId');
+        
+        if (semesterId && intakeId && departmentId) {
+          // Check module registration to see if student selected GPA or NGPA
+          const registrationResponse = await axios.get(
+            `/module-registration/student?studentId=${studentId}&semesterId=${semesterId}&intakeId=${intakeId}&departmentId=${departmentId}`
+          );
+          
+          if (registrationResponse.data && registrationResponse.data.modules) {
+            // Find this module in the student's registrations
+            const moduleRegistration = registrationResponse.data.modules.find(
+              m => m.id === moduleId.toString() || m.id === parseInt(moduleId)
+            );
+            
+            if (moduleRegistration) {
+              // Check if student registered this as GPA or NGPA
+              isGpaModule = moduleRegistration.grade === 'G';
+              console.log(`Module ${moduleId} is registered as ${isGpaModule ? 'GPA' : 'NGPA'} for student ${studentId}`);
+            }
+          }
+        }
+      } catch (regError) {
+        console.error('Error checking module registration:', regError);
+        // Continue with default GPA grading if we can't determine registration status
+      }
+      
       // Fetch marks for the specific student
       const response = await axios.get(`/marks/student/${studentId}`);
 
@@ -107,13 +140,15 @@ const ModuleMarks = () => {
           // Set total marks display
           setTotalMarks(`${finalMarks.toFixed(2)}/100`);
           
-          const grade = calculateGrade(finalMarks);
+          // Use the appropriate grading scale based on GPA status
+          const grade = calculateGrade(finalMarks, isGpaModule);
           
           setFinalResults({
             finalMarks: finalMarks,
             grade: grade,
-            gradePoint: calculateGradePoint(grade),
-            status: finalMarks >= 40 ? 'PASS' : 'FAIL'
+            gradePoint: isGpaModule ? calculateGradePoint(grade) : 0, // Only GPA modules have grade points
+            status: finalMarks >= 40 ? 'PASS' : 'FAIL',
+            isGpaModule: isGpaModule // Store whether this is GPA or NGPA for display
           });
 
           setLoading(false);
@@ -150,20 +185,30 @@ const ModuleMarks = () => {
     );
   }, [continuousAssessments, searchTerm]);
   
-  // Helper function to calculate grade from marks
-  const calculateGrade = (marks) => {
-    if (marks >= 85) return "A+";
-    if (marks >= 75) return "A";
-    if (marks >= 70) return "A-";
-    if (marks >= 65) return "B+";
-    if (marks >= 60) return "B";
-    if (marks >= 55) return "B-";
-    if (marks >= 50) return "C+";
-    if (marks >= 45) return "C";
-    if (marks >= 40) return "C-";
-    if (marks >= 35) return "D+";
-    if (marks >= 30) return "D";
-    return "F";
+  // Helper function to calculate grade from marks based on GPA status
+  const calculateGrade = (marks, isGpa) => {
+    // For GPA modules, use letter grades
+    if (isGpa) {
+      if (marks >= 90) return "A+";
+      if (marks >= 80) return "A";
+      if (marks >= 75) return "A-";
+      if (marks >= 70) return "B+";
+      if (marks >= 65) return "B";
+      if (marks >= 60) return "B-";
+      if (marks >= 55) return "C+";
+      if (marks >= 50) return "C";
+      if (marks >= 45) return "C-";
+      if (marks >= 35) return "D+";
+      if (marks >= 30) return "D";
+      return "F";
+    } 
+    // For NGPA modules, use H/M/S grades
+    else {
+      if (marks >= 70) return "H";       // High
+      if (marks >= 60) return "M";       // Medium
+      if (marks >= 45) return "S";       // Satisfactory
+      return "E";                       // Fail
+    }
   };
   
   // Helper function to calculate grade point from grade
@@ -261,14 +306,11 @@ const ModuleMarks = () => {
                   </thead>
                   <tbody>
                     <tr>
-                      <td className="px-4 py-2 text-blue-950 font-medium">{moduleDetails?.code || 'N/A'}</td>
-                      <td className="px-4 py-2 text-blue-950 font-medium">{finalResults.finalMarks.toFixed(2)}</td>
-                      <td className="px-4 py-2 text-blue-950 font-medium">{finalResults.grade}</td>
-                      <td className="px-4 py-2 text-blue-950 font-medium">{finalResults.gradePoint.toFixed(1)}</td>
-                      <td className="px-4 py-2 text-blue-950 font-medium"
-                          style={{ color: finalResults.status === 'PASS' ? 'green' : 'red' }}>
-                        {finalResults.status}
-                      </td>
+                      <td className="px-4 py-2">{moduleDetails?.code || 'N/A'}</td>
+                      <td className="px-4 py-2">{totalMarks}</td>
+                      <td className="px-4 py-2">{finalResults.grade}</td>
+                      <td className="px-4 py-2">{finalResults.isGpaModule ? finalResults.gradePoint.toFixed(1) : 'N/A'}</td>
+                      <td className="px-4 py-2"><span className={`font-medium ${finalResults.status === 'PASS' ? 'text-green-600' : 'text-red-600'}`}>{finalResults.status}</span></td>
                     </tr>
                   </tbody>
                 </table>

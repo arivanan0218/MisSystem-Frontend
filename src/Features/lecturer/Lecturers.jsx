@@ -118,7 +118,7 @@ const Lecturers = () => {
       </div>
 
       {/* Lecturer Details Popup */}
-      {popupOpen && (
+      {/* {popupOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" onClick={closePopup}>
           <div
             className="w-[75%] p-8 rounded-md shadow-md bg-white border-[3px] border-blue-950"
@@ -126,9 +126,9 @@ const Lecturers = () => {
           >
             <h1 className="text-blue-950 text-2xl font-semibold">Lecturer Details</h1>
             <div className="my-4">
-              <p><strong>Name:</strong> {lecturerDetails.name || "N/A"}</p>
-              <p><strong>Email:</strong> {lecturerDetails.email || "N/A"}</p>
-              <p><strong>Phone:</strong> {lecturerDetails.phoneNumber || "N/A"}</p>
+              <p><strong>Name:</strong> {lecturerDetails.lecturerName || "N/A"}</p>
+              <p><strong>Email:</strong> {lecturerDetails.lecturerEmail || "N/A"}</p>
+              <p><strong>Phone:</strong> {lecturerDetails.lecturerPhoneNumber || "N/A"}</p>
               <p><strong>UserName:</strong> {lecturerDetails.username || "N/A"}</p>
               <p><strong>Password:</strong> {lecturerDetails.password || "N/A"}</p>
             </div>
@@ -140,7 +140,7 @@ const Lecturers = () => {
             </button>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Add Lecturer Form Popup */}
       {formOpen && (
