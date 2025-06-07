@@ -75,7 +75,7 @@ const Marks = () => {
         setAssignmentDetails({
           assignmentName: "Select an assignment",
           assignmentPercentage: "N/A",
-          // assignmentDuration: "N/A"
+          assignmentDuration: "N/A"
         });
         return;
       }
@@ -334,9 +334,9 @@ const Marks = () => {
           <p>
             <strong>Percentage:</strong> {assignmentDetails.assignmentPercentage || "N/A"}
           </p>
-          {/* <p>
+          <p>
             <strong>Duration:</strong> {assignmentDetails.assignmentDuration || "N/A"}
-          </p> */}
+          </p>
         </div>
 
         {/* Display error message if any */}

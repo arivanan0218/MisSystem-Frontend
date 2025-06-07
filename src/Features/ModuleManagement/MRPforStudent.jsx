@@ -30,7 +30,7 @@ const fetchInitialData = async () => {
 
     const moduleResponse = await instance.get(`module/semester?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}`)
     const modules = Array.isArray(moduleResponse.data) ? moduleResponse.data : [];
-    console.log('Fetched Modules:', modules);
+
     const selectedCMModules = modules
       .filter(m => m.moduleType === 'CM')
       .map((m, i) => ({
@@ -42,25 +42,17 @@ const fetchInitialData = async () => {
         moduleType: 'CM',
       }));
 
-  const eligibleModules = modules
-  .filter(m => m.moduleType !== 'CM')
-  .map((m) => {
-    const isFixedGPA = m.gpaStatus === 'GPA';
-
-    return {
-      key: m.id,
-      moduleId: m.id,
-      code: m.moduleCode,
-      name: m.moduleName,
-      gpa: isFixedGPA ? true : false,
-      ngpa: isFixedGPA ? false : true,
-      gpaType: m.gpaStatus, // include this for checkbox logic
-      moduleType: m.moduleType,
-    };
-  });
-
-
-
+    const eligibleModules = modules
+      .filter(m => m.moduleType !== 'CM') // Only GE and TE
+      .map((m, i) => ({
+        key: m.id, // use the actual moduleId
+        moduleId: m.id,
+        code: m.moduleCode,
+        name: m.moduleName,
+        gpa: false,        // for checkbox
+        ngpa: m.moduleType === 'GE' ? true : false, // GE defaults to NGPA
+        moduleType: m.moduleType,
+      }));
 
     setData(selectedCMModules);  // Selected modules
     setData2(eligibleModules);   // Eligible modules
@@ -125,13 +117,12 @@ const fetchInitialData = async () => {
   const moduleToAdd = data2.find(item => item.key === key);
   if (moduleToAdd) {
     let gpaStatus = 'NGPA';
-    if (moduleToAdd.moduleType === 'TE' || moduleToAdd.moduleType === 'GE') {
-  if (moduleToAdd.gpaType === 'GPA') {
-    gpaStatus = 'GPA'; // fixed GPA
-  } else {
-    gpaStatus = moduleToAdd.gpa ? 'GPA' : 'NGPA'; // user-selected
-  }
-}
+    if (moduleToAdd.moduleType === 'TE') {
+      gpaStatus = moduleToAdd.gpa ? 'GPA' : moduleToAdd.ngpa ? 'NGPA' : 'NGPA';
+    } else if (moduleToAdd.moduleType === 'GE') {
+      gpaStatus = 'NGPA';
+    }
+
     const alreadyAdded = data.some(item => item.code === moduleToAdd.code && item.name === moduleToAdd.name);
     if (alreadyAdded) {
       message.warning('Module already selected!');
@@ -277,33 +268,32 @@ const handleNavigate = () => {
       align: 'left',
       responsive: ['md'],
     },
-   {
-  title: 'GPA',
-  dataIndex: 'gpa',
-  key: 'gpa',
-  align: 'center',
-  render: (_, record) => (
-    <Checkbox
-      checked={record.gpa}
-      disabled={record.gpaType === 'GPA'}
-      onChange={() => handleCheckboxChange(record.key, 'gpa')}
-    />
-  ),
-},
-{
-  title: 'NGPA',
-  dataIndex: 'ngpa',
-  key: 'ngpa',
-  align: 'center',
-  render: (_, record) => (
-    <Checkbox
-      checked={record.ngpa}
-      disabled={record.gpaType === 'GPA'}
-      onChange={() => handleCheckboxChange(record.key, 'ngpa')}
-    />
-  ),
-},
-
+    {
+      title: 'GPA',
+      dataIndex: 'gpa',
+      key: 'gpa',
+      align: 'center',
+      render: (_, record) => (
+        <Checkbox
+          checked={record.gpa}
+          disabled={record.moduleType === 'GE'}
+          onChange={() => handleCheckboxChange(record.key, 'gpa')}
+        />
+      ),
+    },
+    {
+      title: 'NGPA',
+      dataIndex: 'ngpa',
+      key: 'ngpa',
+      align: 'center',
+      render: (_, record) => (
+        <Checkbox
+          checked={record.ngpa}
+          disabled={record.moduleType === 'GE'}
+          onChange={() => handleCheckboxChange(record.key, 'ngpa')}
+        />
+      ),
+    },
 
     {
       title: 'Action',

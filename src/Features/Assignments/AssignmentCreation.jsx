@@ -20,7 +20,7 @@ const AssignmentCreation = ({
     if (isEditing && currentAssignment) {
       setAssignmentName(currentAssignment.assignmentName);
       setAssignmentPercentage(currentAssignment.assignmentPercentage);
-      // setAssignmentDuration(currentAssignment.assignmentDuration);
+      setAssignmentDuration(currentAssignment.assignmentDuration);
       setSemesterId(currentAssignment.semester.id);
       setIntakeId(currentAssignment.intake.id);
       setDepartmentId(currentAssignment.department.id);
@@ -49,6 +49,7 @@ const AssignmentCreation = ({
     if (
       assignmentName.trim() &&
       assignmentPercentage &&
+      assignmentDuration.trim() &&
       moduleId
     ) {
       const newAssignment = {
@@ -119,7 +120,7 @@ const AssignmentCreation = ({
               className="border border-blue-950 p-2 rounded w-full"
             />
           </div>
-          {/* <div className="mb-6">
+          <div className="mb-6">
             <label
               htmlFor="assignmentDuration"
               className="block mb-2 text-blue-950 text-lg font-semibold"
@@ -133,7 +134,7 @@ const AssignmentCreation = ({
               onChange={(e) => setAssignmentDuration(e.target.value)}
               className="border border-blue-950 p-2 rounded w-full"
             />
-          </div> */}
+          </div>
         
           <div className="flex justify-end">
             <button

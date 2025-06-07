@@ -151,29 +151,19 @@ const ModuleMarks = () => {
   }, [continuousAssessments, searchTerm]);
   
   // Helper function to calculate grade from marks
-  const calculateGrade = (marks, isGpa) => {
-    // For GPA modules, use letter grades
-    if (isGpa) {
-      if (marks >= 90) return "A+";
-      if (marks >= 80) return "A";
-      if (marks >= 75) return "A-";
-      if (marks >= 70) return "B+";
-      if (marks >= 65) return "B";
-      if (marks >= 60) return "B-";
-      if (marks >= 55) return "C+";
-      if (marks >= 50) return "C";
-      if (marks >= 45) return "C-";
-      if (marks >= 35) return "D+";
-      if (marks >= 30) return "D";
-      return "F";
-    } 
-    // For NGPA modules, use H/M/S grades
-    else {
-      if (marks >= 70) return "H";       // High
-      if (marks >= 60) return "M";       // Medium
-      if (marks >= 45) return "S";       // Satisfactory
-      return "E";                       // Fail
-    }
+  const calculateGrade = (marks) => {
+    if (marks >= 85) return "A+";
+    if (marks >= 75) return "A";
+    if (marks >= 70) return "A-";
+    if (marks >= 65) return "B+";
+    if (marks >= 60) return "B";
+    if (marks >= 55) return "B-";
+    if (marks >= 50) return "C+";
+    if (marks >= 45) return "C";
+    if (marks >= 40) return "C-";
+    if (marks >= 35) return "D+";
+    if (marks >= 30) return "D";
+    return "F";
   };
   
   // Helper function to calculate grade point from grade

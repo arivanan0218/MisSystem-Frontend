@@ -73,12 +73,13 @@ const Assignments = () => {
 
   const handleEdit = async (e) => {
     e.preventDefault();
-    const { assignmentName, assingmentPercentage } =
+    const { assignmentName, assingmentPercentage, assignmentDuration } =
       editingAssignment;
 
     if (
       assignmentName.trim() &&
-      assingmentPercentage.trim()
+      assingmentPercentage.trim() &&
+      assignmentDuration.trim()
     ) {
       try {
         const token = localStorage.getItem("auth-token"); // Retrieve auth-token
@@ -93,6 +94,7 @@ const Assignments = () => {
           {
             assignmentName,
             assingmentPercentage,
+            assignmentDuration,
           },
           {
             headers: {
