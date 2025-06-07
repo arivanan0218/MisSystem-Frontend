@@ -15,12 +15,10 @@ const ViewFinalResults = () => {
   const [calculationMessage, setCalculationMessage] = useState("");
   const navigate = useNavigate();
 
-  // Get IDs from localStorage
   const departmentId = localStorage.getItem("departmentId") || 1;
   const intakeId = localStorage.getItem("intakeId") || 1;
-  const token = localStorage.getItem("auth-token");  
+  const token = localStorage.getItem("auth-token");
 
-  // Function to fetch final results
   const fetchFinalResults = async () => {
     if (!token) {
       navigate("/login");
@@ -28,7 +26,6 @@ const ViewFinalResults = () => {
     }
 
     try {
-      // Fetch final results
       const response = await axios.get(
         `/final-results/${departmentId}/${intakeId}`,
         {
@@ -38,21 +35,18 @@ const ViewFinalResults = () => {
 
       if (response.data && response.data.length > 0) {
         setFinalResults(response.data);
-        
-        // Extract program details from first result
         const firstResult = response.data[0];
         setProgramDetails({
           departmentName: firstResult.departmentName,
           intakeName: firstResult.intakeName,
           semesters: firstResult.semesterNames,
-          weights: firstResult.semesterWeights
+          weights: firstResult.semesterWeights,
         });
       } else {
         setError("No final results found.");
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        console.error("Unauthorized: Redirecting to login...");
         localStorage.removeItem("auth-token");
         navigate("/login");
       } else {
@@ -68,13 +62,11 @@ const ViewFinalResults = () => {
     fetchFinalResults();
   }, [departmentId, intakeId, navigate]);
 
-  // Function to calculate final results
   const calculateFinalResults = async () => {
     setCalculating(true);
     setCalculationMessage("");
-    
+
     try {
-      // Call the calculate endpoint
       const response = await axios.post(
         `/final-results/calculate/${departmentId}/${intakeId}`,
         {},
@@ -82,17 +74,15 @@ const ViewFinalResults = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      
+
       if (response.data.status) {
         setCalculationMessage(response.data.message);
-        // Refresh the results after calculation
         await fetchFinalResults();
       } else {
         setError("Calculation failed. Please try again.");
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        console.error("Unauthorized: Redirecting to login...");
         localStorage.removeItem("auth-token");
         navigate("/login");
       } else {
@@ -104,7 +94,6 @@ const ViewFinalResults = () => {
     }
   };
 
-  // Helper function to get class for GPA (color coding)
   const getGpaClass = (gpa) => {
     if (gpa >= 3.7) return "text-green-600 font-bold";
     if (gpa >= 3.0) return "text-green-500";
@@ -113,29 +102,24 @@ const ViewFinalResults = () => {
     return "text-red-500";
   };
 
-  // Function to generate and download PDF
   const downloadPDF = () => {
     const doc = new jsPDF();
 
-    // Adding the title
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
     doc.text("Final Results", 20, 20);
 
-    // Adding the program details
     doc.setFontSize(12);
     doc.text(`Department: ${programDetails.departmentName}`, 20, 30);
     doc.text(`Intake: ${programDetails.intakeName}`, 20, 35);
 
-    // Create data for the main results table
-    const tableData = finalResults.map(result => [
+    const tableData = finalResults.map((result) => [
       result.studentName,
       result.studentRegNo,
       result.overallGpa.toFixed(2),
-      result.status
+      result.status,
     ]);
 
-    // Adding the results table
     doc.autoTable({
       startY: 40,
       head: [["Student Name", "Reg No", "Final GPA", "Status"]],
@@ -145,30 +129,31 @@ const ViewFinalResults = () => {
       margin: { top: 10 },
     });
 
-    // For each student, add their detailed semester results
     let yPosition = doc.autoTable.previous.finalY + 10;
-    
-    finalResults.forEach((result, index) => {
-      // Add a page break if needed
+
+    finalResults.forEach((result) => {
       if (yPosition > 250) {
         doc.addPage();
         yPosition = 20;
       }
-      
-      // Student name as header
+
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
-      doc.text(`Student: ${result.studentName} (${result.studentRegNo})`, 20, yPosition);
-      
-      // Create semester data
+      doc.text(
+        `Student: ${result.studentName} (${result.studentRegNo})`,
+        20,
+        yPosition
+      );
+
       const semesterData = result.semesterNames.map((name, idx) => [
         name,
         result.semesterGpas[idx].toFixed(2),
         result.semesterWeights[idx].toFixed(2),
-        (result.semesterGpas[idx] * result.semesterWeights[idx]).toFixed(2)
+        (
+          result.semesterGpas[idx] * result.semesterWeights[idx]
+        ).toFixed(2),
       ]);
-      
-      // Add semester details table
+
       doc.autoTable({
         startY: yPosition + 5,
         head: [["Semester", "GPA", "Weight", "Contribution"]],
@@ -177,16 +162,21 @@ const ViewFinalResults = () => {
         headStyles: { fillColor: [100, 100, 220] },
         margin: { top: 10 },
       });
-      
-      // Add final score
-      doc.setFont("helvetica", "bold");
-      doc.text(`Final GPA: ${result.overallGpa.toFixed(2)}`, 150, doc.autoTable.previous.finalY + 10);
-      doc.text(`Status: ${result.status}`, 150, doc.autoTable.previous.finalY + 15);
-      
+
+      doc.text(
+        `Final GPA: ${result.overallGpa.toFixed(2)}`,
+        150,
+        doc.autoTable.previous.finalY + 10
+      );
+      doc.text(
+        `Status: ${result.status}`,
+        150,
+        doc.autoTable.previous.finalY + 15
+      );
+
       yPosition = doc.autoTable.previous.finalY + 25;
     });
 
-    // Saving the PDF
     doc.save("final_results.pdf");
   };
 
@@ -197,22 +187,30 @@ const ViewFinalResults = () => {
   return (
     <div>
       <Header />
-      <Breadcrumb breadcrumb={[
-         { label: 'Home', link: '/departments' },
-         { label: 'Degree Programs', link: `/departments` },
-         { label: 'Intakes', link: `/departments/${departmentId}/intakes` },
-         { label: 'Semesters', link: `/departments/${departmentId}/intakes/${intakeId}/semesters` },
-         { label: 'Final Results', link: '/viewFinalResults' },
-      ]} />
-      <div className="mr-[10%] ml-[10%] px-8 font-poppins">
+      <Breadcrumb
+        breadcrumb={[
+          { label: "Home", link: "/departments" },
+          { label: "Degree Programs", link: `/departments` },
+          { label: "Intakes", link: `/departments/${departmentId}/intakes` },
+          {
+            label: "Semesters",
+            link: `/departments/${departmentId}/intakes/${intakeId}/semesters`,
+          },
+          { label: "Final Results", link: "/viewFinalResults" },
+        ]}
+      />
+      <div className="sm:mr-[10%] sm:ml-[10%] mx-[2%] font-poppins overflow-x-hidden">
         <div className="py-8 text-center">
-          <h1 className="text-2xl font-bold text-blue-950">Final Program Results</h1>
+          <h1 className="text-2xl font-bold text-blue-950">
+            Final Program Results
+          </h1>
         </div>
 
         {error && <div className="text-red-500 mb-4">{error}</div>}
-        {calculationMessage && <div className="text-green-500 mb-4">{calculationMessage}</div>}
+        {calculationMessage && (
+          <div className="text-green-500 mb-4">{calculationMessage}</div>
+        )}
 
-        {/* Program Details Container */}
         <div className="p-6 rounded-lg mb-8 bg-gray-100 shadow-md">
           <h2 className="text-xl font-semibold text-blue-950">
             Program Details
@@ -225,47 +223,67 @@ const ViewFinalResults = () => {
               <strong>Intake:</strong> {programDetails.intakeName}
             </p>
             <p>
-              <strong>Number of Semesters:</strong> {programDetails.semesters ? programDetails.semesters.length : 0}
+              <strong>Number of Semesters:</strong>{" "}
+              {programDetails.semesters ? programDetails.semesters.length : 0}
             </p>
           </div>
         </div>
 
         {/* Final Results Table */}
-        <div className="p-6 rounded-lg mb-8 shadow-md bg-white">
-          <h2 className="font-medium text-blue-950 mb-6">Final Results Summary</h2>
-          <table className="w-full border-collapse border border-gray-300">
+        <div className="p-6 rounded-lg mb-8 shadow-md bg-white overflow-x-auto">
+          <h2 className="font-medium text-blue-950 mb-6">
+            Final Results Summary
+          </h2>
+          <table className="min-w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-200 text-blue-950 font-medium">
-                <th className="border border-gray-300 p-2 text-left">Student Name</th>
+                <th className="border border-gray-300 p-2 text-left hidden sm:table-cell">
+                  Student Name
+                </th>
                 <th className="border border-gray-300 p-2 text-left">Reg No</th>
-                <th className="border border-gray-300 p-2 text-left">Final GPA</th>
+                <th className="border border-gray-300 p-2 text-left">
+                  Final GPA
+                </th>
                 <th className="border border-gray-300 p-2 text-left">Status</th>
-                <th className="border border-gray-300 p-2 text-left">Details</th>
+                <th className="border border-gray-300 p-2 text-left">
+                  Details
+                </th>
               </tr>
             </thead>
             <tbody>
               {finalResults.length > 0 ? (
                 finalResults.map((result) => (
-                  <tr key={result.id} className="text-blue-950">
-                    <td className="border border-white p-2">{result.studentName}</td>
-                    <td className="border border-white p-2">{result.studentRegNo}</td>
-                    <td className={`border border-white p-2 ${getGpaClass(result.overallGpa)}`}>
+                  <tr key={result.id} className="text-blue-950 break-words ">
+                    <td className="border border-white p-2 break-words hidden sm:table-cell">
+                      {result.studentName}
+                    </td>
+                    <td className="border border-white p-2 break-words">
+                      {result.studentRegNo}
+                    </td>
+                    <td
+                      className={`border border-white p-2 ${getGpaClass(
+                        result.overallGpa
+                      )}`}
+                    >
                       {result.overallGpa.toFixed(2)}
                     </td>
                     <td className="border border-white p-2">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        result.status === "Pass" 
-                          ? "bg-green-100 text-green-800" 
-                          : "bg-red-100 text-red-800"
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          result.status === "Pass"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
                         {result.status}
                       </span>
                     </td>
                     <td className="border border-white p-2">
-                      <button 
+                      <button
                         onClick={() => {
-                          // Toggle the expanded view
-                          const detailRow = document.getElementById(`student-details-${result.id}`);
+                          const detailRow = document.getElementById(
+                            `student-details-${result.id}`
+                          );
                           if (detailRow) {
                             detailRow.classList.toggle("hidden");
                           }
@@ -288,58 +306,87 @@ const ViewFinalResults = () => {
           </table>
         </div>
 
-        {/* Expandable Semester Details for each student */}
+        {/* Expandable Details */}
         {finalResults.length > 0 && (
           <div className="space-y-6 mb-8">
             {finalResults.map((result) => (
-              <div 
+              <div
                 key={`student-details-${result.id}`}
                 id={`student-details-${result.id}`}
-                className="p-6 rounded-lg shadow-md bg-white hidden"
+                className="p-6 rounded-lg shadow-md bg-white hidden overflow-x-auto"
               >
                 <h3 className="font-medium text-blue-950 mb-4">
-                  {result.studentName} ({result.studentRegNo}) - Semester Results
+                  {result.studentName} ({result.studentRegNo}) - Semester
+                  Results
                 </h3>
-                <table className="w-full border-collapse border border-gray-300">
+                <table className="min-w-full border-collapse border border-gray-300">
                   <thead>
                     <tr className="bg-gray-100 text-blue-950 font-medium">
-                      <th className="border border-gray-300 p-2 text-left">Semester</th>
-                      <th className="border border-gray-300 p-2 text-left">GPA</th>
-                      <th className="border border-gray-300 p-2 text-left">Weight</th>
-                      <th className="border border-gray-300 p-2 text-left">Contribution</th>
+                      <th className="border border-gray-300 p-2 text-left">
+                        Semester
+                      </th>
+                      <th className="border border-gray-300 p-2 text-left">
+                        GPA
+                      </th>
+                      <th className="border border-gray-300 p-2 text-left">
+                        Weight
+                      </th>
+                      <th className="border border-gray-300 p-2 text-left">
+                        Contribution
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {result.semesterNames.length > 0 ? (
                       result.semesterNames.map((name, idx) => (
-                        <tr key={`${result.id}-semester-${idx}`} className="text-blue-950">
-                          <td className="border border-white p-2">{name}</td>
-                          <td className={`border border-white p-2 ${getGpaClass(result.semesterGpas[idx])}`}>
+                        <tr
+                          key={`${result.id}-semester-${idx}`}
+                          className="text-blue-950"
+                        >
+                          <td className="border border-white p-2 break-words">
+                            {name}
+                          </td>
+                          <td
+                            className={`border border-white p-2 ${getGpaClass(
+                              result.semesterGpas[idx]
+                            )}`}
+                          >
                             {result.semesterGpas[idx].toFixed(2)}
                           </td>
                           <td className="border border-white p-2">
                             {result.semesterWeights[idx].toFixed(2)}
                           </td>
                           <td className="border border-white p-2">
-                            {(result.semesterGpas[idx] * result.semesterWeights[idx]).toFixed(2)}
+                            {(
+                              result.semesterGpas[idx] *
+                              result.semesterWeights[idx]
+                            ).toFixed(2)}
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="4" className="text-center text-gray-500 p-4">
+                        <td
+                          colSpan="4"
+                          className="text-center text-gray-500 p-4"
+                        >
                           No semester results available.
                         </td>
                       </tr>
                     )}
-                    {/* Total Row */}
                     <tr className="bg-gray-50 font-semibold">
                       <td className="border border-white p-2">Final Result</td>
-                      <td className={`border border-white p-2 ${getGpaClass(result.overallGpa)}`}>
+                      <td
+                        className={`border border-white p-2 ${getGpaClass(
+                          result.overallGpa
+                        )}`}
+                      >
                         {result.overallGpa.toFixed(2)}
                       </td>
                       <td className="border border-white p-2">
-                        {result.semesterWeights.reduce((sum, weight) => sum + weight, 0).toFixed(2)}
+                        {result.semesterWeights
+                          .reduce((sum, weight) => sum + weight, 0)
+                          .toFixed(2)}
                       </td>
                       <td className="border border-white p-2">
                         {result.overallGpa.toFixed(2)}
@@ -352,12 +399,11 @@ const ViewFinalResults = () => {
           </div>
         )}
 
-        {/* Buttons for Calculate/Print/Download Actions */}
-        <div className="text-right mt-6 space-x-4">
+        <div className="flex md:justify-end md:flex-row flex-col text-right mt-6 gap-2">
           <button
             onClick={calculateFinalResults}
             disabled={calculating}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 mr-4"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700"
           >
             {calculating ? "Calculating..." : "Calculate Final Results"}
           </button>

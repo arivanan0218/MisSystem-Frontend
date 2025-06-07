@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "../../../axiosConfig";
 import {
   useReactTable,
@@ -7,23 +7,24 @@ import {
   getPaginationRowModel,
   flexRender,
 } from "@tanstack/react-table";
+import { useMediaQuery } from "@uidotdev/usehooks";
 
 const DataTable = ({ data = [], onRowClick = () => {}, onDelete = () => {}, onEdit = () => {} }) => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [filteredData, setFilteredData] = useState(data);
 
+  const isMobile = useMediaQuery("(max-width: 596px)");
+  const isLargeScreen = useMediaQuery("(max-width: 1143px)");
+
+  const containerRef = useRef(null);
+
   const handleDelete = async (rowData) => {
-    const token = localStorage.getItem("auth-token"); // Retrieve stored token
-  
+    const token = localStorage.getItem("auth-token");
     try {
-      const response = await axios.delete(`/lecturer/${rowData.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+      await axios.delete(`/lecturer/${rowData.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-  
-      console.log(response.data);
       setFilteredData(prevData => prevData.filter(item => item.id !== rowData.id));
       onDelete(rowData);
     } catch (error) {
@@ -31,59 +32,58 @@ const DataTable = ({ data = [], onRowClick = () => {}, onDelete = () => {}, onEd
       alert("Failed to delete the lecturer.");
     }
   };
-  
+
   useEffect(() => {
-    console.log('DataTable received data:', data);
-    if (!Array.isArray(data)) {
-      console.error('DataTable expected array but received:', typeof data);
-      setFilteredData([]);
-      return;
-    }
-    
-    try {
-      const filtered = data.filter((item) =>
-        (selectedDepartment === "" || item.department === selectedDepartment) &&
-        Object.values(item).some((val) =>
-          val !== null && String(val).toLowerCase().includes(globalFilter.toLowerCase())
-        )
-      );
-      console.log('Filtered data:', filtered);
-      setFilteredData(filtered);
-    } catch (error) {
-      console.error('Error filtering data:', error);
-      setFilteredData([]);
-    }
+    if (!Array.isArray(data)) return setFilteredData([]);
+    const filtered = data.filter((item) =>
+      (selectedDepartment === "" || item.department === selectedDepartment) &&
+      Object.values(item).some((val) =>
+        val !== null && String(val).toLowerCase().includes(globalFilter.toLowerCase())
+      )
+    );
+    setFilteredData(filtered);
   }, [data, selectedDepartment, globalFilter]);
 
-  // Dynamically generate columns based on the first data item
   const generateColumns = () => {
-    if (filteredData.length === 0) {
-      return [
-        { accessorKey: "lecturerName", header: "Name" },
-        { accessorKey: "lecturerEmail", header: "Email" },
-        { accessorKey: "lecturerPhoneNumber", header: "Phone Number" },
-      ];
-    }
-    
-    // Get all keys from the first item except 'id'
+    if (filteredData.length === 0) return [];
     const firstItem = filteredData[0];
-    const keys = Object.keys(firstItem).filter(key => key !== 'id' && key !== 'departmentId' && key !== 'username' && key !== 'password' );
-    
-    return keys.map(key => ({
+    const keys = Object.keys(firstItem).filter(
+      (key) =>
+        !["id", "departmentId", "password"].includes(key)
+    );
+
+    // Map technical keys to user-friendly headers
+    const headerMap = {
+      lecturerName: "Name",
+      lecturerPhoneNumber: "Phone Number",
+      lecturerEmail: "Email",
+      username: "User Name",
+    };
+
+    return keys
+      .filter((key) => {
+      if (isLargeScreen && ["lecturerEmail"].includes(key)) return false;
+      if (isMobile && ["lecturerEmail", "username"].includes(key)) return false;
+      return true;
+      })
+      .map((key) => ({
       accessorKey: key,
-      header: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),
-    }));
+      header: headerMap[key] || key
+        .replace(/([A-Z])/g, " $1")
+        .replace(/^./, (str) => str.toUpperCase()),
+      }));
   };
-  
+
+  //actions column
   const columns = [
     ...generateColumns(),
     {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <div className="flex space-x-2">
+        <div className="flex flex-col md:flex-row gap-2 whitespace-nowrap">
           <button
-            className="px-3 py-1 border rounded mr-2 text-sm"
+            className="px-3 py-1 border rounded text-sm"
             onClick={(e) => {
               e.stopPropagation();
               onEdit(row.original);
@@ -115,37 +115,50 @@ const DataTable = ({ data = [], onRowClick = () => {}, onDelete = () => {}, onEd
 
   return (
     <div className="p-4">
-      <div className="flex justify-between mb-4">
+      {/* Filters */}
+      <div className="flex justify-between mb-4 flex-wrap gap-2">
         <input
           placeholder="Search..."
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
-          className="w-1/3 p-2 border rounded"
+          className="w-full md:w-1/3 p-2 border rounded"
         />
 
         <div className="relative">
-          <button 
+          <button
             className="px-4 py-2 border rounded"
-            onClick={() => document.getElementById('departmentDropdown').classList.toggle('hidden')}
+            onClick={() =>
+              document.getElementById("departmentDropdown").classList.toggle("hidden")
+            }
           >
             Filter by Department
           </button>
-          <div id="departmentDropdown" className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg hidden z-10">
+          <div
+            id="departmentDropdown"
+            className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg hidden z-10"
+          >
             <div className="py-1">
-              <button onClick={() => setSelectedDepartment("")} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">All</button>
-              <button onClick={() => setSelectedDepartment("CS")} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">CS</button>
-              <button onClick={() => setSelectedDepartment("Math")} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">Math</button>
+              <button onClick={() => setSelectedDepartment("")} className="block px-4 py-2 text-sm w-full text-left hover:bg-gray-100">
+                All
+              </button>
+              <button onClick={() => setSelectedDepartment("CS")} className="block px-4 py-2 text-sm w-full text-left hover:bg-gray-100">
+                CS
+              </button>
+              <button onClick={() => setSelectedDepartment("Math")} className="block px-4 py-2 text-sm w-full text-left hover:bg-gray-100">
+                Math
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="border rounded-lg shadow-md">
+      {/* Responsive Table Wrapper */}
+      <div ref={containerRef} className="overflow-x-auto border rounded-lg shadow-md">
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-100">
               {table.getFlatHeaders().map((header) => (
-                <th key={header.id} className="p-3 border">
+                <th key={header.id} className="p-3 border text-left whitespace-nowrap">
                   {header.column.columnDef.header}
                 </th>
               ))}
@@ -159,7 +172,14 @@ const DataTable = ({ data = [], onRowClick = () => {}, onDelete = () => {}, onEd
                 onClick={() => onRowClick(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="p-3 border">
+                  <td
+                    key={cell.id}
+                    className={`p-3 border align-top ${
+                      cell.column.id === "actions"
+                        ? "whitespace-nowrap"
+                        : "break-words max-w-[200px]"
+                    }`}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -169,22 +189,22 @@ const DataTable = ({ data = [], onRowClick = () => {}, onDelete = () => {}, onEd
         </table>
       </div>
 
-      <div className="flex justify-between mt-4">
+      {/* Pagination */}
+      <div className="flex justify-between mt-4 flex-wrap gap-2 items-center">
         <button
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
-          className={`px-4 py-2 rounded ${!table.getCanPreviousPage() ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
+          className="px-4 py-2 rounded bg-blue-500 text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           Previous
         </button>
         <span>
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
+          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
         </span>
         <button
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
-          className={`px-4 py-2 rounded ${!table.getCanNextPage() ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
+          className="px-4 py-2 rounded bg-blue-500 text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           Next
         </button>

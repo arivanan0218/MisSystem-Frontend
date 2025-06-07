@@ -153,12 +153,6 @@ const Sidebar = ({ children, setBreadcrumb }) => {
               {open && <span>Reset Password</span>}
             </button>
           </div>
-          <div className={`${open ? 'pl-7' : 'md:pl-4'} `}>
-            <a href="">
-               <CgProfile className={`${open ? 'mr-5' : ''} text-blue-950 inline-block w-7 h-7 m-2`} />
-              {open && <span className='text-blue-950 font-semibold'>Username</span>}           
-            </a>
-          </div>
 
           <div className=''>
             <button 

@@ -83,7 +83,7 @@ const Lecturers = () => {
           { label: "Lecturers", link: "/lecturers" },
         ]} 
       />
-      <div className="mr-[20%] ml-[10%] px-8 font-poppins">
+      <div className="lg:mr-[15%] lg:ml-[10%] md:px-8 px-2 font-poppins">
         <div className="py-8 flex items-center justify-between">
           <button
             onClick={openForm}
@@ -94,7 +94,7 @@ const Lecturers = () => {
           </button>
         </div>
 
-        <div className="mt-[80px]">
+        <div className="mt-[40px]">
           {error && <div className="text-center text-red-500 mb-4">{error}</div>}
           {loading ? (
             <div className="text-center">Loading...</div>
@@ -126,11 +126,10 @@ const Lecturers = () => {
           >
             <h1 className="text-blue-950 text-2xl font-semibold">Lecturer Details</h1>
             <div className="my-4">
-              <p><strong>Name:</strong> {lecturerDetails.name || "N/A"}</p>
-              <p><strong>Email:</strong> {lecturerDetails.email || "N/A"}</p>
-              <p><strong>Phone:</strong> {lecturerDetails.phoneNumber || "N/A"}</p>
+              <p><strong>Name:</strong> {lecturerDetails.lecturerName || "N/A"}</p>
+              <p><strong>Email:</strong> {lecturerDetails.lecturerEmail || "N/A"}</p>
+              <p><strong>Phone:</strong> {lecturerDetails.lecturerPhoneNumber || "N/A"}</p>
               <p><strong>UserName:</strong> {lecturerDetails.username || "N/A"}</p>
-              <p><strong>Password:</strong> {lecturerDetails.password || "N/A"}</p>
             </div>
             <button
               onClick={closePopup}

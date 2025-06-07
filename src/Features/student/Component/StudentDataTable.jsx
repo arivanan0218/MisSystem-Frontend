@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "../../../axiosConfig";
 import {
   useReactTable,
@@ -22,8 +22,17 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [filteredData, setFilteredData] = useState(data);
   const [departments, setDepartments] = useState([]);
-  const isMobile = useMediaQuery("(max-width: 1536px)");
+  
+  // Responsive media queries (optional, can still use)
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isTablet = useMediaQuery("(max-width: 1073px)");
+  const isLargeScreen = useMediaQuery("(max-width: 1243px)");
 
+  // Ref to scroll container
+  const containerRef = useRef(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
+  // Filter data when globalFilter or selectedDepartment changes
   useEffect(() => {
     const filtered = data.filter((item) =>
       (selectedDepartment === "" || item.department === selectedDepartment) &&
@@ -34,6 +43,7 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
     setFilteredData(filtered);
   }, [data, selectedDepartment, globalFilter]);
 
+  // Get unique departments
   useEffect(() => {
     const uniqueDepartments = Array.from(
       new Set(data.map((item) => item.department))
@@ -41,6 +51,21 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
     setDepartments(uniqueDepartments);
   }, [data]);
 
+  // Detect overflow of the table container
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (!containerRef.current) return;
+      const el = containerRef.current;
+      setIsOverflowing(el.scrollWidth > el.clientWidth);
+    };
+
+    checkOverflow();
+
+    window.addEventListener("resize", checkOverflow);
+    return () => window.removeEventListener("resize", checkOverflow);
+  }, [filteredData]);
+
+  // Delete handler
   const handleDelete = async (rowData) => {
     try {
       const response = await axios.delete(`/student/${rowData.id}`);
@@ -60,34 +85,48 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
     }
   };
 
+  // Define columns with dynamic visibility based on overflow and screen size
   const columns = [
-  { accessorKey: "studentRegNo", header: "Registration No." },
-  {
-    id: "fullName",
-    header: "Full Name",
-    accessorFn: (row) => `${row.firstName || ""} ${row.lastName || ""}`,
-  },
-  !isMobile && { accessorKey: "studentNIC", header: "NIC" },
-  !isMobile && { accessorKey: "studentMail", header: "Email" },
-  !isMobile && { accessorKey: "phoneNumber", header: "Phone Number" },
-  !isMobile && { accessorKey: "gender", header: "Gender" },
-  !isMobile && { accessorKey: "dateOfBirth", header: "Date of Birth" },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <Button variant="outline" size="sm" onClick={() => onEdit(row.original)}>
-          Edit
-        </Button>
-        <Button variant="destructive" size="sm" onClick={() => handleDelete(row.original)}>
-          Delete
-        </Button>
-      </div>
-    ),
-  },
-].filter(Boolean); 
+    { accessorKey: "studentRegNo", header: "Registration No." },
+    {
+      id: "fullName",
+      header: "Full Name",
+      accessorFn: (row) => `${row.firstName || ""} ${row.lastName || ""}`,
+    },
+     !isTablet && { accessorKey: "studentNIC", header: "NIC" },
+     !isTablet && { accessorKey: "studentMail", header: "Email" },
+     !isMobile && { accessorKey: "phoneNumber", header: "Phone Number" },
+    !isLargeScreen && { accessorKey: "gender", header: "Gender" },
+    !isLargeScreen &&  { accessorKey: "dateOfBirth", header: "Date of Birth" },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex flex-col lg:flex-row gap-2 lg:space-x-2 whitespace-nowrap">
+          <Button
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(row.original);
+            }}
+          >
+            Edit
+          </Button>
+          <Button
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(row.original);
+            }}
+          >
+            Delete
+          </Button>
+        </div>
+      ),
+    },
+  ].filter(Boolean);
 
+  // Create react-table instance
   const table = useReactTable({
     data: filteredData,
     columns,
@@ -99,12 +138,12 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
   return (
     <div className="p-4">
       {/* Search and Filter */}
-      <div className="flex justify-between mb-4">
+      <div className="flex justify-between mb-4 flex-wrap gap-2">
         <Input
           placeholder="Search..."
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
-          className="w-1/3"
+          className="w-full md:w-1/3"
         />
 
         <DropdownMenu>
@@ -124,13 +163,15 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
         </DropdownMenu>
       </div>
 
-      {/* Data Table */}
-      <div className="border rounded-lg shadow-md">
+      {/* Table */}
+      <div 
+        ref={containerRef}
+      >
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-100">
               {table.getFlatHeaders().map((header) => (
-                <th key={header.id} className="p-3 border">
+                <th key={header.id} className="p-3 border text-left">
                   {header.column.columnDef.header}
                 </th>
               ))}
@@ -144,7 +185,14 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
                 onClick={() => onRowClick(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="p-3 border">
+                  <td
+                    key={cell.id}
+                    className={`p-3 border align-top ${
+                      cell.column.id === "actions"
+                        ? "whitespace-nowrap"
+                        : "break-words max-w-[200px]"
+                    }`}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -155,7 +203,7 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-between mt-4 flex-wrap gap-2 items-center">
         <Button
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
@@ -163,7 +211,8 @@ const StudentDataTable = ({ data, onRowClick, onDelete, onEdit }) => {
           Previous
         </Button>
         <span>
-          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          Page {table.getState().pagination.pageIndex + 1} of{" "}
+          {table.getPageCount()}
         </span>
         <Button
           onClick={() => table.nextPage()}

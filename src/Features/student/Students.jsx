@@ -76,7 +76,7 @@ const Students = () => {
       ]} 
       />
       
-      <div className="mr-[10%] ml-[10%] px-8 font-poppins">
+      <div className="md:mr-[4%] md:ml-[4%] px-8 font-poppins">
         <div className="py-8 flex items-center justify-between">
           <button
             onClick={openForm}
