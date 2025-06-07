@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../../axiosConfig";
 import Header from "../../Components/Header";
 import Footer from "../../Components/Footer";
 import Breadcrumb from "../../Components/Breadcrumb";
 import { jsPDF } from "jspdf";
+import { FaArrowUp } from "react-icons/fa";
 
 const ViewSemiResults = () => {
   const [semesterResults, setSemesterResults] = useState([]);
@@ -20,6 +21,43 @@ const ViewSemiResults = () => {
   const intakeId = localStorage.getItem("intakeId") || 1;
   const semesterId = localStorage.getItem("semesterId") || 1;
   const token = localStorage.getItem("auth-token");
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const detailsRefs = useRef({});
+
+  // useEffect for scroll detection
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.pageYOffset > 300) {
+        setShowScrollButton(true);
+      } else {
+        setShowScrollButton(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  //  scroll function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  // function to handle view button click
+  const handleViewClick = (studentId) => {
+    const detailRow = document.getElementById(`student-details-${studentId}`);
+    if (detailRow) {
+      detailRow.classList.toggle("hidden");
+      if (!detailRow.classList.contains("hidden")) {
+        // Scroll to the expanded details
+        setTimeout(() => {
+          detailRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+      }
+    }
+  };
 
   // Function to fetch all student results for the semester
   const fetchAllStudentResults = async () => {
@@ -63,6 +101,7 @@ const ViewSemiResults = () => {
           intakeName: localStorage.getItem("intakeName") || "Unknown",
           semesterName: localStorage.getItem("semesterName") || `Semester ${semesterId}`,
         });
+        console.log("Semester Results:", results);
       } else {
         setError("No students found for this semester.");
       }
@@ -132,7 +171,7 @@ const ViewSemiResults = () => {
     // Adding the semester details
     doc.setFontSize(12);
     doc.text(`Department: ${semesterDetails.departmentName}`, 20, 30);
-    doc.text(`Intake: ${semesterDetails.intakeName}`, 20, 35);
+    doc.text(`Intake: ${localStorage.getItem("intakeBatch") || "Unknown"}`, 20, 35);
     doc.text(`Semester: ${semesterDetails.semesterName}`, 20, 40);
 
     // Create data for the main student table
@@ -252,6 +291,17 @@ const ViewSemiResults = () => {
     return failedModules.length > 0 ? "FAIL" : "PASS";
   };
 
+  // Helper function to get color class based on GPA
+  const getGpaClass = (gpa) => {
+    if (gpa === "N/A") return "text-gray-500";
+    const numGpa = parseFloat(gpa);
+    if (numGpa >= 3.7) return "text-green-600 font-bold";
+    if (numGpa >= 3.0) return "text-green-500";
+    if (numGpa >= 2.3) return "text-yellow-600";
+    if (numGpa >= 2.0) return "text-yellow-500";
+    return "text-red-500";
+  };
+
   if (loading) {
     return <div className="text-center py-8">Loading...</div>;
   }
@@ -278,7 +328,7 @@ const ViewSemiResults = () => {
           },
         ]}
       />
-      <div className="mr-[10%] ml-[10%] px-8 font-poppins">
+      <div className="sm:mr-[10%] sm:ml-[10%] mx-[2%] font-poppins overflow-x-hidden">
         <div className="py-8 text-center">
           <h1 className="text-2xl font-bold text-blue-950">Semester Results</h1>
         </div>
@@ -296,7 +346,7 @@ const ViewSemiResults = () => {
               <strong>Department:</strong> {semesterDetails.departmentName}
             </p>
             <p>
-              <strong>Intake:</strong> {semesterDetails.intakeName}
+              <strong>Intake:</strong> {localStorage.getItem("intakeBatch") || "Unknown"}
             </p>
             <p>
               <strong>Semester:</strong> {semesterDetails.semesterName}
@@ -305,14 +355,14 @@ const ViewSemiResults = () => {
         </div>
 
         {/* Students Results Summary Table */}
-        <div className="p-6 rounded-lg mb-8 shadow-md bg-white">
+        <div className="p-6 rounded-lg mb-8 shadow-md bg-white overflow-x-auto">
           <h2 className="font-medium text-blue-950 mb-6">Students Summary</h2>
-          <table className="w-full border-collapse border border-gray-300">
+          <table className="min-w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-200 text-blue-950 font-medium">
-                <th className="border border-gray-300 p-2 text-left">Student Name</th>
+                <th className="border border-gray-300 p-2 text-left hidden sm:table-cell">Student Name</th>
                 <th className="border border-gray-300 p-2 text-left">Reg No</th>
-                <th className="border border-gray-300 p-2 text-left">Modules</th>
+                <th className="border border-gray-300 p-2 text-left">No. of Modules</th>
                 <th className="border border-gray-300 p-2 text-left">GPA</th>
                 <th className="border border-gray-300 p-2 text-left">Status</th>
                 <th className="border border-gray-300 p-2 text-left">Details</th>
@@ -321,11 +371,13 @@ const ViewSemiResults = () => {
             <tbody>
               {semesterResults.length > 0 ? (
                 semesterResults.map((student) => (
-                  <tr key={student.id} className="text-blue-950">
-                    <td className="border border-white p-2">{student.studentName}</td>
-                    <td className="border border-white p-2">{student.studentRegNo}</td>
+                  <tr key={student.id} className="text-blue-950 break-words">
+                    <td className="border border-white p-2 break-words hidden sm:table-cell">{student.studentName}</td>
+                    <td className="border border-white p-2 break-words">{student.studentRegNo}</td>
                     <td className="border border-white p-2">{student.modules.length}</td>
-                    <td className="border border-white p-2">{calculateGPA(student.modules)}</td>
+                    <td className={`border border-white p-2 ${getGpaClass(calculateGPA(student.modules))}`}>
+                      {calculateGPA(student.modules)}
+                    </td>
                     <td className="border border-white p-2">
                       <span className={`px-2 py-1 rounded-full text-xs ${
                         getOverallStatus(student.modules) === "PASS" 
@@ -337,18 +389,13 @@ const ViewSemiResults = () => {
                     </td>
                     <td className="border border-white p-2">
                       <button 
-                        onClick={() => {
-                          // Store student ID for the detail view if needed
-                          localStorage.setItem("selectedStudentId", student.id);
-                          // Navigate to student detail view or expand in-place
-                          // navigate(`/student/${student.id}/semester-results`);
-                          
-                          // For now, just toggle the expanded view
+                        /* onClick={() => {
                           const detailRow = document.getElementById(`student-details-${student.id}`);
                           if (detailRow) {
                             detailRow.classList.toggle("hidden");
                           }
-                        }}
+                        }} */
+                        onClick={() => handleViewClick(student.id)}
                         className="bg-blue-100 text-blue-800 px-3 py-1 rounded-md text-xs hover:bg-blue-200"
                       >
                         View
@@ -367,20 +414,29 @@ const ViewSemiResults = () => {
           </table>
         </div>
 
+      {/* Scroll to Top button just before the Footer */}
+      {showScrollButton && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-8 right-8 bg-blue-950 text-white p-3 rounded-full shadow-lg hover:bg-blue-900 transition-all duration-300 z-50"
+          aria-label="Scroll to top"
+        >
+          <FaArrowUp />
+        </button>
+      )}
         {/* Expandable Module Details for each student */}
         {semesterResults.length > 0 && (
-          console.log("Rendering module details for students:", semesterResults),
           <div className="space-y-6 mb-8">
             {semesterResults.map((student) => (
               <div 
                 key={`student-details-${student.id}`}
                 id={`student-details-${student.id}`}
-                className="p-6 rounded-lg shadow-md bg-white hidden"
+                className="p-6 rounded-lg shadow-md bg-white hidden overflow-x-auto"
               >
                 <h3 className="font-medium text-blue-950 mb-4">
                   {student.studentName} ({student.studentRegNo}) - Module Details
                 </h3>
-                <table className="w-full border-collapse border border-gray-300">
+                <table className="min-w-full border-collapse border border-gray-300">
                   <thead>
                     <tr className="bg-gray-100 text-blue-950 font-medium">
                       <th className="border border-gray-300 p-2 text-left">Module Name</th>
@@ -393,12 +449,8 @@ const ViewSemiResults = () => {
                     {student.modules.length > 0 ? (
                       student.modules.map((module, idx) => (
                         <tr key={`${student.id}-module-${idx}`} className="text-blue-950">
-
-
-                          <td className="border border-white p-2">{module.moduleName || module.name}</td>
-                          <td className="border border-white p-2">{module.moduleCode || module.code}</td>
-
-
+                          <td className="border border-white p-2 break-words">{module.moduleName || module.name}</td>
+                          <td className="border border-white p-2 break-words">{module.moduleCode || module.code}</td>
                           <td className="border border-white p-2">{module.grade}</td>
                           <td className="border border-white p-2">
                             <span className={`px-2 py-1 rounded-full text-xs ${
@@ -426,11 +478,11 @@ const ViewSemiResults = () => {
         )}
 
         {/* Buttons for Calculate/Print/Download Actions */}
-        <div className="text-right mt-6 space-x-4">
+        <div className="flex md:justify-end md:flex-row flex-col text-right mt-6 gap-2">
           <button
             onClick={calculateSemesterResults}
             disabled={calculating}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 mr-4"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700"
           >
             {calculating ? "Calculating..." : "Calculate Semester Results"}
           </button>

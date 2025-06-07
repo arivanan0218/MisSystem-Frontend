@@ -6,6 +6,121 @@ import Footer from "../../Components/Footer";
 import Breadcrumb from "../../Components/Breadcrumb";
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
+import Modal from 'react-modal';
+
+// Set app element for accessibility
+Modal.setAppElement('#root');
+
+// Create a separate component for the table row with modal
+const StudentRowWithModal = ({ result, allAssignments, handleStatusUpdate }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  return (
+    <React.Fragment>
+      <tr 
+        className="text-blue-950 hover:bg-gray-50 cursor-pointer"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <td className="border border-gray-300 p-2 sticky left-0 bg-white z-10">{result.studentRegNo}</td>
+        <td className="border border-gray-300 p-2 sticky left-[100px] bg-white z-10 hidden md:table-cell">{result.studentName}</td>
+        
+        {/* Assignments - hidden on small screens */}
+        {allAssignments.map((assignment) => {
+          const studentAssignment = result.assignmentDetails.find(a => a.id === assignment.id);
+          return (
+            <React.Fragment key={assignment.id}>
+              <td className="border border-gray-300 p-2 hidden md:table-cell">
+                {studentAssignment ? studentAssignment.marksObtained.toFixed(2) : "N/A"}
+              </td>
+              <td className="border border-gray-300 p-2 bg-gray-50 hidden md:table-cell">
+                {studentAssignment ? studentAssignment.weightedMarks.toFixed(2) : "N/A"}
+              </td>
+            </React.Fragment>
+          );
+        })}
+        
+        <td className="border border-gray-300 p-2 hidden sm:table-cell">{result.finalMarks.toFixed(2)}</td>
+        <td className="border border-gray-300 p-2 ">{result.grade}</td>
+        <td className="border border-gray-300 p-2 hidden sm:table-cell">{result.gradePoint.toFixed(2)}</td>
+        <td className="border border-gray-300 p-2">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              handleStatusUpdate(result.id, result.status);
+            }}
+            className={`px-2 py-1 rounded-full text-xs ${
+              result.status === "PASS" ? "bg-green-100 text-green-800 hover:bg-green-200" : "bg-red-100 text-red-800 hover:bg-red-200"
+            }`}
+          >
+            {result.status}
+          </button>
+        </td>
+      </tr>
+
+      {/* Details Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        contentLabel="Student Marks Details"
+        className="modal-content"
+        overlayClassName="modal-overlay"
+      >
+        <div className="p-4 max-w-2xl mx-auto bg-white rounded-lg">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-bold text-blue-950">
+              {result.studentName} ({result.studentRegNo})
+            </h3>
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className="mb-4">
+            <h4 className="font-semibold mb-2">Assignments:</h4>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="p-2 text-left">Assignment</th>
+                  <th className="p-2 text-left">Marks</th>
+                  <th className="p-2 text-left">Weighted</th>
+                </tr>
+              </thead>
+              <tbody>
+                {result.assignmentDetails.map((assignment) => (
+                  <tr key={assignment.id} className="border-b">
+                    <td className="p-2">{assignment.assignmentName}</td>
+                    <td className="p-2">{assignment.marksObtained.toFixed(2)}</td>
+                    <td className="p-2">{assignment.weightedMarks.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p><strong>Final Marks:</strong> {result.finalMarks.toFixed(2)}</p>
+              <p><strong>Grade:</strong> {result.grade}</p>
+            </div>
+            <div>
+              <p><strong>GPA:</strong> {result.gradePoint.toFixed(2)}</p>
+              <p><strong>Status:</strong> 
+                <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                  result.status === "PASS" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                }`}>
+                  {result.status}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </Modal>
+    </React.Fragment>
+  );
+};
 
 const ViewMarks = () => {
   const [moduleResults, setModuleResults] = useState([]);
@@ -17,23 +132,18 @@ const ViewMarks = () => {
   const navigate = useNavigate();
 
   const moduleId = localStorage.getItem("moduleId");
-  // Get departmentId, intakeId, and semesterId from localStorage
-      const departmentId = localStorage.getItem("departmentId") || 1;
-      const intakeId = localStorage.getItem("intakeId") || 1;
-      const semesterId = localStorage.getItem("semesterId") || 1;
+  const departmentId = localStorage.getItem("departmentId") || 1;
+  const intakeId = localStorage.getItem("intakeId") || 1;
+  const semesterId = localStorage.getItem("semesterId") || 1;
   const token = localStorage.getItem("auth-token");
 
-  // Function to fetch module results
   const fetchData = async () => {
-    const token = localStorage.getItem("auth-token");
     if (!token) {
       navigate("/login");
       return;
     }
 
     try {
-      
-      // Fetch module results
       const response = await axios.get(
         `/module-results/module?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}&moduleId=${moduleId}`,
         {
@@ -43,12 +153,10 @@ const ViewMarks = () => {
 
       if (response.data && response.data.length > 0) {
         setModuleResults(response.data);
-        
-        // Extract module details from first result
         const firstResult = response.data[0];
         setModuleDetails({
           name: firstResult.moduleName,
-          code: `MOD-${firstResult.moduleId}`,
+          code: localStorage.getItem("moduleCode") || "N/A",
           departmentName: firstResult.departmentName,
           semesterName: firstResult.semesterName,
           intakeName: firstResult.intakeName,
@@ -59,12 +167,10 @@ const ViewMarks = () => {
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        console.error("Unauthorized: Redirecting to login...");
         localStorage.removeItem("auth-token");
         navigate("/login");
       } else {
         setError("Failed to fetch data. Please try again later.");
-        console.error(error);
       }
     } finally {
       setLoading(false);
@@ -75,21 +181,11 @@ const ViewMarks = () => {
     fetchData();
   }, [moduleId, navigate]);
 
-  // Function to calculate module marks
   const calculateMarks = async () => {
     setCalculating(true);
     setCalculationMessage("");
     
     try {
-      // Get required IDs from localStorage
-      const departmentId = localStorage.getItem("departmentId") || 
-        (moduleResults.length > 0 ? moduleResults[0].departmentId : 1);
-      const intakeId = localStorage.getItem("intakeId") || 
-        (moduleResults.length > 0 ? moduleResults[0].intakeId : 1);
-      const semesterId = localStorage.getItem("semesterId") || 
-        (moduleResults.length > 0 ? moduleResults[0].semesterId : 1);
-      
-      // Call the calculate endpoint
       const response = await axios.post(
         `/module-results/calculate?departmentId=${departmentId}&intakeId=${intakeId}&semesterId=${semesterId}&moduleId=${moduleId}`,
         {},
@@ -100,26 +196,22 @@ const ViewMarks = () => {
       
       if (response.data.status) {
         setCalculationMessage(response.data.message);
-        // Refresh the marks data after calculation
         await fetchData();
       } else {
         setError("Calculation failed. Please try again.");
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        console.error("Unauthorized: Redirecting to login...");
         localStorage.removeItem("auth-token");
         navigate("/login");
       } else {
         setError("Failed to calculate marks. Please try again later.");
-        console.error(error);
       }
     } finally {
       setCalculating(false);
     }
   };
 
-  // Function to get all unique assignments
   const getAllUniqueAssignments = () => {
     const allAssignments = [];
     moduleResults.forEach(result => {
@@ -129,22 +221,17 @@ const ViewMarks = () => {
         }
       });
     });
-    
-    // Sort assignments by ID or name
     return allAssignments.sort((a, b) => a.id - b.id);
   };
 
-  // Function to generate and download PDF
   const downloadPDF = () => {
     const doc = new jsPDF('landscape');
     const allAssignments = getAllUniqueAssignments();
 
-    // Adding the title
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
     doc.text("Module Marks", 20, 20);
 
-    // Adding the module details
     doc.setFontSize(12);
     doc.text(`Module Name: ${moduleDetails.name}`, 20, 30);
     doc.text(`Module Code: ${moduleDetails.code}`, 20, 35);
@@ -153,29 +240,15 @@ const ViewMarks = () => {
     doc.text(`Semester: ${moduleDetails.semesterName}`, 120, 35);
     doc.text(`Date: ${new Date().toLocaleDateString()}`, 120, 40);
 
-    // Create table headers - student info + all assignments (obtained and weighted separately) + final marks
-    const headers = [
-      "Reg No", 
-      "Student Name"
-    ];
-    
-    // Add assignment columns - now split into obtained and weighted
+    const headers = ["Reg No", "Student Name"];
     allAssignments.forEach(assignment => {
       headers.push(`${assignment.assignmentName} (${assignment.assignmentPercentage}%)`);
       headers.push('Weighted');
     });
-    
-    // Add final columns
     headers.push("Final Marks", "Grade", "GPA", "Status");
 
-    // Create data rows
     const rows = moduleResults.map(result => {
-      const row = [
-        result.studentRegNo,
-        result.studentName
-      ];
-      
-      // Add each assignment mark and weighted mark as separate columns
+      const row = [result.studentRegNo, result.studentName];
       allAssignments.forEach(assignment => {
         const studentAssignment = result.assignmentDetails.find(a => a.id === assignment.id);
         if (studentAssignment) {
@@ -186,17 +259,13 @@ const ViewMarks = () => {
           row.push("N/A");
         }
       });
-      
-      // Add final marks, grade and status
       row.push(result.finalMarks.toFixed(2));
       row.push(result.grade);
       row.push(result.gradePoint.toFixed(2));
       row.push(result.status);
-      
       return row;
     });
 
-    // Create the table with optimized styling
     doc.autoTable({
       startY: 45,
       head: [headers],
@@ -212,27 +281,22 @@ const ViewMarks = () => {
         cellPadding: 2
       },
       columnStyles: {
-        0: { cellWidth: 20 }, // Reg No
-        1: { cellWidth: 25 }, // Student Name
+        0: { cellWidth: 20 },
+        1: { cellWidth: 25 },
       },
       margin: { top: 10 },
       didDrawPage: function(data) {
-        // Add page number
         doc.setFontSize(8);
         doc.text(`Page ${doc.internal.getNumberOfPages()}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
       }
     });
 
-    // Saving the PDF
     doc.save(`module_marks_${moduleDetails.code}.pdf`);
   };
 
-  // Function to handle student status update
   const handleStatusUpdate = async (resultId, currentStatus) => {
     try {
-      // In a real implementation, you would have an API endpoint to update the status
       const newStatus = currentStatus === "PASS" ? "FAIL" : "PASS";
-      
       const response = await axios.post(
         `/module-results/update-status/${resultId}`,
         { newStatus: newStatus }
@@ -240,30 +304,19 @@ const ViewMarks = () => {
       
       if (response.data.status) {
         setCalculationMessage(`Status updated successfully to ${newStatus}`);
-        // Refresh data after update
         await fetchData();
       } else {
         setError("Failed to update status. Please try again.");
       }
     } catch (error) {
-      console.error("Failed to update status:", error);
       setError("Failed to update status. Please try again.");
     }
-  };
-
-  // Function to view detailed assignment breakdown
-  const viewAssignmentDetails = (studentId) => {
-    // Store the student ID in localStorage
-    localStorage.setItem("studentId", studentId);
-    // Navigate to a student detail page
-    navigate("/student-assignment-details");
   };
 
   if (loading) {
     return <div className="text-center py-8">Loading...</div>;
   }
 
-  // Get all unique assignments for the table view
   const allAssignments = getAllUniqueAssignments();
 
   return (
@@ -273,25 +326,13 @@ const ViewMarks = () => {
         breadcrumb={[
           { label: "Degree Programs", link: `/departments` },
           { label: "Intakes", link: `/departments/${departmentId}/intakes` },
-          {
-            label: "Semesters",
-            link: `/departments/${departmentId}/intakes/${intakeId}/semesters`,
-          },
-          {
-            label: "Modules",
-            link: `/departments/${departmentId}/intakes/semesters/modules`,
-          },
-          {
-            label: "Module Assessments",
-            link: `/departments/${moduleId}/intakes/semesters/modules/assignments`,
-          },
-          {
-            label: "Module Marks",
-            link: `/viewMarks`,
-          },
+          { label: "Semesters", link: `/departments/${departmentId}/intakes/${intakeId}/semesters` },
+          { label: "Modules", link: `/departments/${departmentId}/intakes/semesters/modules` },
+          { label: "Module Assessments", link: `/departments/${moduleId}/intakes/semesters/modules/assignments` },
+          { label: "Module Marks", link: `/viewMarks` },
         ]}
       />
-      <div className="mr-[10%] ml-[10%] px-8 font-poppins">
+      <div className="md:mr-[10%] md:ml-[10%] px-8 font-poppins">
         <div className="py-8 text-center">
           <h1 className="text-2xl font-bold text-blue-950">Module Marks</h1>
         </div>
@@ -299,113 +340,72 @@ const ViewMarks = () => {
         {error && <div className="text-red-500 mb-4">{error}</div>}
         {calculationMessage && <div className="text-green-500 mb-4">{calculationMessage}</div>}
 
-        {/* Detailing Container */}
         <div className="p-6 rounded-lg mb-8 bg-gray-100 shadow-md">
-          <h2 className="text-xl font-semibold text-blue-950">
-            Module Details
-          </h2>
+          <h2 className="text-xl font-semibold text-blue-950">Module Details</h2>
           <div className="mt-4">
-            <p>
-              <strong>Module Name:</strong> {moduleDetails.name}
-            </p>
-            <p>
-              <strong>Module Code:</strong> {moduleDetails.code}
-            </p>
-            <p>
-              <strong>Department:</strong> {moduleDetails.departmentName}
-            </p>
-            <p>
-              <strong>Intake:</strong> {moduleDetails.intakeName}
-            </p>
-            <p>
-              <strong>Semester:</strong> {moduleDetails.semesterName}
-            </p>
+            <p><strong>Module Name:</strong> {moduleDetails.name}</p>
+            <p><strong>Module Code:</strong> {moduleDetails.code}</p>
+            <p><strong>Department:</strong> {moduleDetails.departmentName}</p>
+            <p><strong>Intake:</strong> {moduleDetails.intakeName}</p>
+            <p><strong>Semester:</strong> {moduleDetails.semesterName}</p>
           </div>
         </div>
 
-        {/* Marks Table - Updated to match PDF format */}
         <div className="p-6 rounded-lg mb-8 shadow-md bg-white">
           <h2 className="font-medium text-blue-950 mb-6">Student Marks</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-200 text-blue-950 font-medium">
-                  <th className="border border-gray-300 p-2 text-left">Student Reg No</th>
-                  <th className="border border-gray-300 p-2 text-left">Student Name</th>
-                  
-                  {/* Assignment Headers - now with separate columns for obtained and weighted marks */}
-                  {allAssignments.map((assignment) => (
-                    <React.Fragment key={assignment.id}>
-                      <th className="border border-gray-300 p-2 text-left">
-                        {assignment.assignmentName} ({assignment.assignmentPercentage}%)
-                      </th>
-                      <th className="border border-gray-300 p-2 text-left bg-gray-100">
-                        Weighted
-                      </th>
-                    </React.Fragment>
-                  ))}
-                  
-                  <th className="border border-gray-300 p-2 text-left">Final Marks</th>
-                  <th className="border border-gray-300 p-2 text-left">Grade</th>
-                  <th className="border border-gray-300 p-2 text-left">GPA</th>
-                  <th className="border border-gray-300 p-2 text-left">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {moduleResults.length > 0 ? (
-                  moduleResults.map((result) => (
-                    <tr key={result.id} className="text-blue-950">
-                      <td className="border border-gray-300 p-2">{result.studentRegNo}</td>
-                      <td className="border border-gray-300 p-2">{result.studentName}</td>
-                      
-                      {/* Assignments - with separate columns for obtained and weighted marks */}
-                      {allAssignments.map((assignment) => {
-                        const studentAssignment = result.assignmentDetails.find(a => a.id === assignment.id);
-                        return (
-                          <React.Fragment key={assignment.id}>
-                            <td className="border border-gray-300 p-2">
-                              {studentAssignment ? studentAssignment.marksObtained.toFixed(2) : "N/A"}
-                            </td>
-                            <td className="border border-gray-300 p-2 bg-gray-50">
-                              {studentAssignment ? studentAssignment.weightedMarks.toFixed(2) : "N/A"}
-                            </td>
-                          </React.Fragment>
-                        );
-                      })}
-                      
-                      <td className="border border-gray-300 p-2">{result.finalMarks.toFixed(2)}</td>
-                      <td className="border border-gray-300 p-2">{result.grade}</td>
-                      <td className="border border-gray-300 p-2">{result.gradePoint.toFixed(2)}</td>
-                      <td className="border border-gray-300 p-2">
-                        <button 
-                          onClick={() => handleStatusUpdate(result.id, result.status)}
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            result.status === "PASS" ? "bg-green-100 text-green-800 hover:bg-green-200" : "bg-red-100 text-red-800 hover:bg-red-200"
-                          }`}
-                        >
-                          {result.status}
-                        </button>
-                      </td>
+          <div className="relative">
+            <div className="overflow-x-auto">
+              <div className="inline-block min-w-full align-middle">
+                <table className="min-w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-200 text-blue-950 font-medium">
+                      <th className="border border-gray-300 p-2 text-left sticky left-0 bg-gray-200 z-10">Reg No</th>
+                      <th className="border border-gray-300 p-2 text-left sticky left-[100px] bg-gray-200 z-10 hidden md:table-cell">Name</th>
+                      {allAssignments.map((assignment) => (
+                        <React.Fragment key={assignment.id}>
+                          <th className="border border-gray-300 p-2 text-left hidden md:table-cell">
+                            <span className="hidden sm:inline">{assignment.assignmentName}</span> ({assignment.assignmentPercentage}%)
+                          </th>
+                          <th className="border border-gray-300 p-2 text-left bg-gray-100 hidden md:table-cell">
+                            Weighted
+                          </th>
+                        </React.Fragment>
+                      ))}
+                      <th className="border border-gray-300 p-2 text-left hidden sm:table-cell">Final</th>
+                      <th className="border border-gray-300 p-2 text-left ">Grade</th>
+                      <th className="border border-gray-300 p-2 text-left hidden sm:table-cell">GPA</th>
+                      <th className="border border-gray-300 p-2 text-left">Status</th>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4 + (allAssignments.length * 2)} className="text-center text-gray-500 p-4">
-                      No marks available.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {moduleResults.length > 0 ? (
+                      moduleResults.map((result) => (
+                        <StudentRowWithModal 
+                          key={result.id}
+                          result={result}
+                          allAssignments={allAssignments}
+                          handleStatusUpdate={handleStatusUpdate}
+                        />
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4 + (allAssignments.length * 2)} className="text-center text-gray-500 p-4">
+                          No marks available.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Buttons for Calculate/Print/Download Actions */}
-        <div className="text-right mt-6 space-x-4">
+        <div className="text-right mt-6 space-x-4 ">
           <button
             onClick={calculateMarks}
             disabled={calculating}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 mr-4"
+            className="bg-green-600 text-white px-4 py-2 my-2 rounded-lg font-medium hover:bg-green-700"
           >
             {calculating ? "Calculating..." : "Calculate Module Marks"}
           </button>

@@ -327,7 +327,10 @@ const Modules = () => {
                 : "#"
             }
             className="flex-1"
-            onClick={() => localStorage.setItem("moduleId", module.id)}
+            onClick={() => {
+              localStorage.setItem("moduleId", module.id);
+              localStorage.setItem("moduleCode", module.moduleCode);
+            }}
           >
                   <div className="bg-white text-blue-950 border-blue-950 min-h-[45px] border-t-[1px] border-r-[2px] border-l-[1px] border-b-[3px] font-semibold w-[95%] p-2 px-4 rounded-[12px] hover:shadow-lg mb-3 cursor-pointer flex justify-between items-center">
                     <div className="flex flex-col">
