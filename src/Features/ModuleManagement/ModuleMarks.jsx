@@ -67,6 +67,7 @@ const ModuleMarks = () => {
           // Get module name and code from localStorage or use defaults
           const moduleName = localStorage.getItem('moduleName') || `Module ${moduleId}`;
           const moduleCode = localStorage.getItem('moduleCode') || 'EE3353';
+          const isGpaModule = localStorage.getItem('moduleIsGpa') === 'true';
           
           // Set module details
           setModuleDetails({
@@ -74,7 +75,8 @@ const ModuleMarks = () => {
             code: moduleCode,
             departmentName: localStorage.getItem('departmentName') || 'Department',
             semesterName: localStorage.getItem('semesterName') || 'Semester',
-            intakeName: localStorage.getItem('intakeName') || 'Intake'
+            intakeName: localStorage.getItem('intakeName') || 'Intake',
+            isGpa: isGpaModule
           });
 
           // Format continuous assessments
@@ -107,7 +109,7 @@ const ModuleMarks = () => {
           // Set total marks display
           setTotalMarks(`${finalMarks.toFixed(2)}/100`);
           
-          const grade = calculateGrade(finalMarks);
+          const grade = calculateGrade(finalMarks, isGpaModule);
           
           setFinalResults({
             finalMarks: finalMarks,
