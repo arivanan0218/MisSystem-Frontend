@@ -67,7 +67,20 @@ const ModuleMarks = () => {
           // Get module name and code from localStorage or use defaults
           const moduleName = localStorage.getItem('moduleName') || `Module ${moduleId}`;
           const moduleCode = localStorage.getItem('moduleCode') || 'EE3353';
-          const isGpaModule = localStorage.getItem('moduleIsGpa') === 'true';
+          
+          // Get GPA status from the API response or localStorage
+          let isGpaModule = false;
+          if (moduleMarks[0] && moduleMarks[0].gpaStatus) {
+            isGpaModule = moduleMarks[0].gpaStatus === 'GPA';
+          } else {
+            // Fallback to localStorage
+            isGpaModule = localStorage.getItem('moduleIsGpa') === 'true';
+          }
+          
+          // Debug log to see what we're getting
+          console.log('Module marks first item:', moduleMarks[0]);
+          console.log('GPA Status from API:', moduleMarks[0]?.gpaStatus);
+          console.log('Is GPA Module:', isGpaModule);
           
           // Set module details
           setModuleDetails({
@@ -109,6 +122,7 @@ const ModuleMarks = () => {
           // Set total marks display
           setTotalMarks(`${finalMarks.toFixed(2)}/100`);
           
+          // Pass the GPA flag to calculateGrade function
           const grade = calculateGrade(finalMarks, isGpaModule);
           
           setFinalResults({
@@ -192,6 +206,12 @@ const ModuleMarks = () => {
       case "C-": return 1.7;
       case "D+": return 1.3;
       case "D": return 1.0;
+      case "F": return 0.0;
+      // For NGPA grades, return 0 for grade points since they don't use GPA
+      case "H": return 0.0;
+      case "M": return 0.0;
+      case "S": return 0.0;
+      case "E": return 0.0;
       default: return 0.0;
     }
   };
@@ -267,7 +287,7 @@ const ModuleMarks = () => {
                       <th className="px-4 py-2">Module Code</th>
                       <th className="px-4 py-2">Final Marks</th>
                       <th className="px-4 py-2">Grade</th>
-                      <th className="px-4 py-2">GPA</th>
+                      <th className="px-4 py-2">{moduleDetails?.isGpa ? 'GPA' : 'Grade Points'}</th>
                       <th className="px-4 py-2">Status</th>
                     </tr>
                   </thead>
@@ -276,7 +296,9 @@ const ModuleMarks = () => {
                       <td className="px-4 py-2 text-blue-950 font-medium">{moduleDetails?.code || 'N/A'}</td>
                       <td className="px-4 py-2 text-blue-950 font-medium">{finalResults.finalMarks.toFixed(2)}</td>
                       <td className="px-4 py-2 text-blue-950 font-medium">{finalResults.grade}</td>
-                      <td className="px-4 py-2 text-blue-950 font-medium">{finalResults.gradePoint.toFixed(1)}</td>
+                      <td className="px-4 py-2 text-blue-950 font-medium">
+                        {moduleDetails?.isGpa ? finalResults.gradePoint.toFixed(1) : 'N/A'}
+                      </td>
                       <td className="px-4 py-2 text-blue-950 font-medium"
                           style={{ color: finalResults.status === 'PASS' ? 'green' : 'red' }}>
                         {finalResults.status}
